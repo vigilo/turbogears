@@ -10,22 +10,23 @@ __all__ = ['populate_db']
 
 log = logging.getLogger(__name__)
 
-
 def populate_db():
     """Placez les commandes pour peupler la base de données ici."""
-
-    # Load the models
-    from vigilo import models
     from vigilo.models.session import DBSession
     from vigilo.models.vigilo_bdd_config import metadata
 
-    # Create tables
+    # Chargement du modèle.
+    from vigilo import models
+
+    # Création des tables
     print "Creating tables"
-    metadata.bind = DBSession.bind
+    # XXX Pour une raison inconnue, metadata.bind est défini
+    # à la place de DBSession.bind durant les tests unitaires.
+    if metadata.bind is None:
+        metadata.bind = DBSession.bind
     metadata.create_all()
 
-    # Create the default user for TG, must be changed
-    # for real tests and production
+    # Création d'un jeu de données par défaut.
     manager = models.User()
     manager.user_name = u'manager'
     manager.email = u'manager@somedomain.com'
