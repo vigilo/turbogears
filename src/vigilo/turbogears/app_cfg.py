@@ -5,9 +5,19 @@ Definit la classe chargée de gérer la configuration des applications
 utilisant Turbogears sur Vigilo.
 """
 
-__all__ = ('VigiloAppConfig', )
+from pkg_resources import resource_filename
+import gettext
 
-from tg.configuration import AppConfig
+from tg.configuration import AppConfig, config
+from tg.i18n import get_lang
+from tg.render import render_genshi
+
+from genshi.template import TemplateLoader
+from genshi.filters import Translator
+
+from vigilo.models import User, UserGroup, Permission
+
+__all__ = ('VigiloAppConfig', )
 
 class VigiloAppConfig(AppConfig):
     """On modifie AppConfig selon nos besoins."""
@@ -18,12 +28,32 @@ class VigiloAppConfig(AppConfig):
         self.__app_name = app_name
         self.__tpl_translator = None
 
+        # Pour gérer les thèmes, la notation "pointée" n'est pas utilisée.
+        # À la place, on indique le nom complet du template (ex: "index.html")
+        # lors de l'appel au décorateur @expose.
+        self.use_dotted_templatenames = False
+
+        # On définit cette variable à False. En réalité, le comportement
+        # est le même que si elle valait toujours True, sauf que l'on
+        # met en place les middlewares nous même pour pouvoir gérer les
+        # thèmes (cf. <module>/config/middleware.py dans une application).
+        self.serve_static = False
+
+        # what is the class you want to use to search for users in the database
+        self.sa_auth.user_class = User
+
+        # what is the class you want to use to search for groups in the database
+        self.sa_auth.group_class = UserGroup
+
+        # what is the class you want to use to search for permissions in the database
+        self.sa_auth.permission_class = Permission
+
+        # The name "groups" is already used for groups of hosts.
+        # We use "usergroups" when referering to users to avoid confusion.
+        self.sa_auth.translations.groups = 'usergroups'
+
     def __setup_template_translator(self):
         """Crée un traducteur pour les modèles (templates)."""
-        from pkg_resources import resource_filename
-        import gettext
-        from tg.i18n import get_lang
-
         if self.__tpl_translator is None:
             i18n_dir = resource_filename('vigilo.themes', 'i18n')
 
@@ -42,7 +72,6 @@ class VigiloAppConfig(AppConfig):
         va chercher les templates, afin de supporter un système de thèmes.
         """
         super(VigiloAppConfig, self).setup_paths()
-        from pkg_resources import resource_filename
 
         app_templates = resource_filename(
             'vigilo.themes.templates', self.__app_name)
@@ -55,13 +84,6 @@ class VigiloAppConfig(AppConfig):
         Surcharge pour utiliser un traducteur personnalisé dans les
         modèles (templates).
         """
-        # On reprend plusieurs éléments de "tg.configuration".
-        from genshi.template import TemplateLoader
-        from genshi.filters import Translator
-        from tg.render import render_genshi
-        from pkg_resources import resource_filename
-        from tg.configuration import config
-
         def template_loaded(template):
             """Appelé lorsqu'un modèle finit son chargement."""
             self.__setup_template_translator()
