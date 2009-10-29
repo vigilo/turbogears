@@ -57,14 +57,16 @@ class VigiloAppConfig(AppConfig):
         if self.__tpl_translator is None:
             i18n_dir = resource_filename('vigilo.themes', 'i18n')
 
-            # During unit tests, no language is defined which results
-            # in an error when get_lang() is called.
-            lang = get_lang()
-            if lang is None:
-                self.__tpl_translator = gettext.NullTranslations()
-            else:                
+            try:
+                # XXX We should make use of fallback languages.
                 self.__tpl_translator = gettext.translation(
-                    'theme', i18n_dir, lang)
+                    'theme', i18n_dir, get_lang())
+            except IOError:
+                # During unit tests, no language is defined which results
+                # in an error when get_lang() is called.
+                # Also, an IOErrpr occurrs when no catalog exists for the
+                # given language.
+                self.__tpl_translator = gettext.NullTranslations()
 
     def setup_paths(self):
         """
