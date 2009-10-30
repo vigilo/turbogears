@@ -15,6 +15,7 @@ from tg.render import render_genshi
 from genshi.template import TemplateLoader
 from genshi.filters import Translator
 
+from vigilo.common.conf import settings
 from vigilo.models import User, UserGroup, Permission
 
 __all__ = ('VigiloAppConfig', )
@@ -94,7 +95,12 @@ class VigiloAppConfig(AppConfig):
         def my_render_genshi(template_name, template_vars, **kwargs):
             """Ajoute une fonction l_ dans les modèles pour les traductions."""
             self.__setup_template_translator()
+
+            # Add custom translator to templates.
             template_vars['l_'] = self.__tpl_translator.ugettext
+            # Pass Vigilo's settings to templates.
+            template_vars['settings'] = settings
+
             return render_genshi(template_name, template_vars, **kwargs)
 
         loader = TemplateLoader(search_path=self.paths.templates,

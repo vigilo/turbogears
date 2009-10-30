@@ -26,6 +26,7 @@ setup(
         #"repoze.what-quickstart >= 1.0",
         "psycopg2",
         "vigilo-models",
+        "vigilo-common",
         #"vigilo-themes-default",
         "PasteScript >= 1.7", # setup_requires has issues
         "PasteDeploy",
