@@ -4,11 +4,10 @@
 import logging
 
 import transaction
-from tg import config
 
 __all__ = ['populate_db']
 
-log = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 def populate_db():
     """Placez les commandes pour peupler la base de données ici."""
@@ -64,7 +63,7 @@ def populate_db():
     # XXX Ajouter un identifiant de version correspondant au modèle.
 #    version = Version()
 #    version.name = u'vigicore'
-#    version.version = config['vigicore_version']
+#    version.version = 'foo'
 #    DBSession.add(version)
 
     DBSession.flush()

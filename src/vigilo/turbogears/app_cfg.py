@@ -40,13 +40,16 @@ class VigiloAppConfig(AppConfig):
         # thèmes (cf. <module>/config/middleware.py dans une application).
         self.serve_static = False
 
-        # what is the class you want to use to search for users in the database
+        # what is the class you want to use to search
+        # for users in the database
         self.sa_auth.user_class = User
 
-        # what is the class you want to use to search for groups in the database
+        # what is the class you want to use to search
+        # for groups in the database
         self.sa_auth.group_class = UserGroup
 
-        # what is the class you want to use to search for permissions in the database
+        # what is the class you want to use to search
+        # for permissions in the database
         self.sa_auth.permission_class = Permission
 
         # The name "groups" is already used for groups of hosts.
@@ -90,7 +93,8 @@ class VigiloAppConfig(AppConfig):
         def template_loaded(template):
             """Appelé lorsqu'un modèle finit son chargement."""
             self.__setup_template_translator()
-            template.filters.insert(0, Translator(self.__tpl_translator.ugettext))
+            template.filters.insert(0, Translator(
+                self.__tpl_translator.ugettext))
 
         def my_render_genshi(template_name, template_vars, **kwargs):
             """Ajoute une fonction l_ dans les modèles pour les traductions."""
