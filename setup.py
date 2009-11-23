@@ -36,7 +36,10 @@ setup(
 #        "repoze.who.plugins.vigilo.ldap", # A des fins de tests
         ],
     paster_plugins=['PasteScript', 'Pylons', 'TurboGears2', 'tg.devtools'],
-    packages=find_packages(exclude=['ez_setup']),
+    packages=[
+        'vigilo',
+        'vigilo.turbogears',
+    ],
     test_suite='nose.collector',
     tests_require=tests_require,
     extras_require={
