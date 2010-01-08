@@ -13,12 +13,20 @@ Exemple d'utilisation:
 import codecs
 
 def encode_backslash(s, errors = 'strict'):
-    return (s.replace('\\', '\\\\').replace("'", "\\'").replace('"', '\\"'), len(s))
+    """Encode les caractères spéciaux de L{s} avec des contre-obliques."""
+    return (s.replace('\\', '\\\\').replace("'", "\\'").replace('"', '\\"'),
+        len(s))
 
 def decode_backslash(s, errors = 'strict'):
-    return (s.replace('\\\\', '\\').replace("\\'", "'").replace('\\"', '"'), len(s))
+    """
+    Décode la chaine L{s} contenant des caractères spéciaux échappés
+    par des contre-obliques.
+    """
+    return (s.replace('\\\\', '\\').replace("\\'", "'").replace('\\"', '"'),
+        len(s))
 
 def backslash_search(encoding):
+    """Fonction de recherche de codecs."""
     if encoding == 'backslash':
         return (encode_backslash, decode_backslash, None, None)
     return None
