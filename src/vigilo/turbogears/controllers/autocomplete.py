@@ -2,7 +2,7 @@
 from tg import expose, request
 from sqlalchemy.sql.expression import or_
 
-from vigilo.models import Host, ServiceLowLevel, User
+from vigilo.models import Host, HostGroup, ServiceGroup, ServiceLowLevel, User
 from vigilo.models.session import DBSession
 from vigilo.models.functions import sql_escape_like
 from vigilo.models.secondary_tables import HOST_GROUP_TABLE, \
@@ -98,23 +98,41 @@ def AutoCompleteController(base_controller):
             return dict(results=[s[0] for s in services])
 
         @expose('json')
-        def hostgroup(self, value):
-    #        username = request.environ.get('repoze.who.identity'
-    #                    ).get('repoze.who.userid')
-            value = sql_escape_like(value)
+        def hostgroup(self, hostgroup):
+            hostgroup = sql_escape_like(hostgroup)
+            username = request.environ.get('repoze.who.identity'
+                        ).get('repoze.who.userid')
+
+            user = User.by_user_name(username)
+            if not user:
+                return dict(results=[])
+
+            user_groups = user.groups
             hostgroups = DBSession.query(
-                            HostGroup.name.distinct()).filter(
-                            HostGroup.name.ilike('%' + value + '%')).all()
+                    HostGroup.name
+                ).distinct(
+                ).filter(HostGroup.name.ilike('%' + hostgroup + '%')
+                ).filter(HostGroup.idgroup.in_(user_groups)
+                ).all()
             return dict(results=[h[0] for h in hostgroups])
 
         @expose('json')
-        def servicegroup(self, value):
-    #        username = request.environ.get('repoze.who.identity'
-    #                    ).get('repoze.who.userid')
-            value = sql_escape_like(value)
+        def servicegroup(self, servicegroup):
+            servicegroup = sql_escape_like(servicegroup)
+            username = request.environ.get('repoze.who.identity'
+                        ).get('repoze.who.userid')
+
+            user = User.by_user_name(username)
+            if not user:
+                return dict(results=[])
+
+            user_groups = user.groups
             servicegroups = DBSession.query(
-                            ServiceGroup.name.distinct()).filter(
-                            ServiceGroup.name.ilike('%' + value + '%')).all()
+                    ServiceGroup.name
+                ).distinct(
+                ).filter(ServiceGroup.name.ilike('%' + servicegroup + '%')
+                ).filter(ServiceGroup.idgroup.in_(user_groups)
+                ).all()
             return dict(results=[s[0] for s in servicegroups])
 
     return AutoCompleteControllerHelper()
