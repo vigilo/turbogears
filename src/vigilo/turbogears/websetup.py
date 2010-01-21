@@ -19,7 +19,7 @@ def populate_db():
 
     # Création des tables
     print "Creating tables"
-    # XXX Pour une raison inconnue, metadata.bind est défini
+    # Pour une raison inconnue, metadata.bind est défini
     # à la place de DBSession.bind durant les tests unitaires.
     if metadata.bind is None:
         metadata.bind = DBSession.bind
