@@ -2,7 +2,7 @@
 from tg import expose, request
 from sqlalchemy.sql.expression import or_
 
-from vigilo.models import Host, HostGroup, ServiceGroup, ServiceLowLevel, User
+from vigilo.models import Host, HostGroup, ServiceGroup, LowLevelService, User
 from vigilo.models.session import DBSession
 from vigilo.models.functions import sql_escape_like
 from vigilo.models.secondary_tables import HOST_GROUP_TABLE, \
@@ -40,9 +40,9 @@ def AutoCompleteController(base_controller):
                 ).distinct(
                 ).outerjoin(
                     (HOST_GROUP_TABLE, HOST_GROUP_TABLE.c.idhost == Host.idhost),
-                    (ServiceLowLevel, ServiceLowLevel.idhost == Host.idhost),
+                    (LowLevelService, LowLevelService.idhost == Host.idhost),
                     (SERVICE_GROUP_TABLE, SERVICE_GROUP_TABLE.c.idservice == \
-                        ServiceLowLevel.idservice),
+                        LowLevelService.idservice),
                 ).filter(Host.name.ilike('%' + host + '%')
                 ).filter(or_(
                     HOST_GROUP_TABLE.c.idgroup.in_(user_groups),
@@ -78,14 +78,14 @@ def AutoCompleteController(base_controller):
 
             user_groups = user.groups
             services = DBSession.query(
-                    ServiceLowLevel.servicename
+                    LowLevelService.servicename
                 ).distinct(
                 ).outerjoin(
-                    (Host, Host.idhost == ServiceLowLevel.idhost),
+                    (Host, Host.idhost == LowLevelService.idhost),
                     (HOST_GROUP_TABLE, HOST_GROUP_TABLE.c.idhost == Host.idhost),
                     (SERVICE_GROUP_TABLE, SERVICE_GROUP_TABLE.c.idservice == \
-                        ServiceLowLevel.idservice),
-                ).filter(ServiceLowLevel.servicename.ilike('%' + service + '%')
+                        LowLevelService.idservice),
+                ).filter(LowLevelService.servicename.ilike('%' + service + '%')
                 ).filter(or_(
                     HOST_GROUP_TABLE.c.idgroup.in_(user_groups),
                     SERVICE_GROUP_TABLE.c.idgroup.in_(user_groups),
