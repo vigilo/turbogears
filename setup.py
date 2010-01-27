@@ -7,7 +7,7 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-tests_require = ['WebTest', 'BeautifulSoup']
+tests_require = []
 
 setup(
     name='vigilo-turbogears',
@@ -22,18 +22,13 @@ setup(
         #can be removed iif use_toscawidgets = False
         "ToscaWidgets >= 0.9.7.1",
         "zope.sqlalchemy >= 0.4 ",
-        #"repoze.tm2 >= 1.0a4",
-        #"repoze.what-quickstart >= 1.0",
         "psycopg2",
         "vigilo-models",
         "vigilo-common",
-        #"vigilo-themes-default",
         "PasteScript >= 1.7", # setup_requires has issues
         "PasteDeploy",
         "Paste",
         "decorator != 3.1.0", # Blacklist bad version
-#        "modwsgideploy", # A des fins de tests
-#        "repoze.who.plugins.vigilo.ldap", # A des fins de tests
         ],
     paster_plugins=['PasteScript', 'Pylons', 'TurboGears2', 'tg.devtools'],
     packages=[
@@ -44,20 +39,11 @@ setup(
     tests_require=tests_require,
     extras_require={
         'tests': tests_require,
-        },
+    },
 #    message_extractors={'vigicore': [
-#            ('**.py', 'python', None),
-#        ]},
+#        ('**.py', 'python', None),
+#    ]},
     entry_points={
-#        'paste.app_factory': [
-#            'main = vigicore.config.middleware:make_app',
-#            ],
-#        'paste.app_install': [
-#            'main = pylons.util:PylonsInstaller',
-#            ],
-#        'console_scripts': [
-#            'runtests-vigicore = vigicore.tests:runtests',
-#            ],
-        },
+    },
     package_dir={'': 'src'},
 )

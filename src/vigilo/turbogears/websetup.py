@@ -60,11 +60,10 @@ def populate_db():
     permission.usergroups.append(group)
     DBSession.add(permission)
 
-    # XXX Ajouter un identifiant de version correspondant au modèle.
-#    version = Version()
-#    version.name = u'vigicore'
-#    version.version = 'foo'
-#    DBSession.add(version)
+    version = models.Version()
+    version.name = u'vigilo.models'
+    version.version = models.VIGILO_MODEL_VERSION
+    DBSession.add(version)
 
     DBSession.flush()
     transaction.commit()
