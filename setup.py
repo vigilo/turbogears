@@ -29,7 +29,7 @@ setup(
         "PasteDeploy",
         "Paste",
         "decorator != 3.1.0", # Blacklist bad version
-        ],
+    ],
     paster_plugins=['PasteScript', 'Pylons', 'TurboGears2', 'tg.devtools'],
     packages=[
         'vigilo',
