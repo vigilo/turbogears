@@ -56,7 +56,7 @@ class RRDProxy(object):
                   'indicator' : indicator}
         
         url = self._url
-        url = os.path.join(url, 'outputMetrologie')
+        url = os.path.join(url, 'getLastValue')
         
         return self._retrieve_content(url, values)
 
