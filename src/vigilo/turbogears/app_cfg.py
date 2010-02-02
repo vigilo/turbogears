@@ -18,8 +18,11 @@ from genshi.filters import Translator
 from vigilo.common.conf import settings
 from vigilo.models import User, UserGroup, Permission
 
-# Enregistre le codec d'échappement des textes pour le code JavaScript.
-import vigilo.turbogears.js_codec
+# Enregistre le codec pour l'encodage des textes dans le code JavaScript.
+import codecs
+from vigilo.turbogears.js_codec import backslash_search
+codecs.register(backslash_search)
+
 
 __all__ = ('VigiloAppConfig', )
 

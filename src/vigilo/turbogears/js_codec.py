@@ -10,7 +10,7 @@ Exemple d'utilisation:
 >>> 'ab\\\\"\\\\\\\\c'.decode('backslash')
 'ab"\\\\c'
 """
-import codecs
+
 
 def encode_backslash(s, errors = 'strict'):
     """Encode les caractères spéciaux de L{s} avec des contre-obliques."""
@@ -30,6 +30,4 @@ def backslash_search(encoding):
     if encoding == 'backslash':
         return (encode_backslash, decode_backslash, None, None)
     return None
-
-codecs.register(backslash_search)
 

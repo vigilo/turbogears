@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+Module permettant de mettre en commun le contrôleur d'auto-complétion
+entre les différentes applications de Vigilo.
+"""
 from tg import expose, request
 from sqlalchemy.sql.expression import or_
 
@@ -8,8 +12,24 @@ from vigilo.models.functions import sql_escape_like
 from vigilo.models.secondary_tables import HOST_GROUP_TABLE, \
                                             SERVICE_GROUP_TABLE
 
-def AutoCompleteController(base_controller):
+# pylint: disable-msg=R0201,W0232
+# - R0201: méthodes pouvant être écrites comme fonctions (imposé par TG2)
+# - W0232: absence de __init__ dans la classe (imposé par TG2)
+
+def make_autocomplete_controller(base_controller):
+    """
+    Renvoie une instance du contrôleur d'auto-complétion adaptée
+    à l'application qui en fait la demande.
+
+    @param base_controller: Contrôleur basic de l'application.
+    @type base_controller: C{BaseController}
+    @return: Une instance du contrôleur d'auto-complétion.
+    @rtype: L{AutoCompleteControllerHelper}
+    """
+
     class AutoCompleteControllerHelper(base_controller):
+        """Contrôleur d'auto-complétion."""
+
         @expose('json')
         def host(self, host):
             """
@@ -22,9 +42,10 @@ def AutoCompleteController(base_controller):
                 ou une chaîne de caractères, respectivement.
                 Ex: 'ho?t*' permet de récupérer 'host', 'honte' et 'hostile',
                 mais pas 'hote' ou 'hopital'.
-            @return: Liste des noms d'hôtes configurés correspondant au
-                motif donné en entrée.
-            @rtype: C{list} of C{unicode}
+            @return: Un dictionnaire dont la clé 'results' contient la liste
+                des noms d'hôtes correspondant au motif donné en entrée
+                et auxquels l'utilisateur a accès.
+            @rtype: C{dict}
             """
             host = sql_escape_like(host)
 
@@ -39,7 +60,8 @@ def AutoCompleteController(base_controller):
                     Host.name
                 ).distinct(
                 ).outerjoin(
-                    (HOST_GROUP_TABLE, HOST_GROUP_TABLE.c.idhost == Host.idhost),
+                    (HOST_GROUP_TABLE, HOST_GROUP_TABLE.c.idhost == \
+                        Host.idhost),
                     (LowLevelService, LowLevelService.idhost == Host.idhost),
                     (SERVICE_GROUP_TABLE, SERVICE_GROUP_TABLE.c.idservice == \
                         LowLevelService.idservice),
@@ -55,7 +77,8 @@ def AutoCompleteController(base_controller):
             """
             Auto-compléteur pour les noms des services d'un hôte.
             
-            @param host: Nom d'hôte sur lequel s'applique l'autocomplétion.
+            @param host: Nom d'hôte (optionnel) sur lequel s'applique
+                l'autocomplétion.
             @type host: C{unicode}
             @param service: Motif qui doit apparaître dans le nom de service.
             @type service: C{unicode}
@@ -64,9 +87,11 @@ def AutoCompleteController(base_controller):
                 ou une chaîne de caractères, respectivement.
                 Ex: 'ho?t*' permet de récupérer 'host', 'honte' et 'hostile',
                 mais pas 'hote' ou 'hopital'.
-            @return: Liste des noms de services configurés sur cet L{host}
-                et correspondant au motif donné en entrée.
-            @rtype: C{list} of C{unicode}
+            @return: Un dictionnaire dont la clé 'results' contient la liste
+                des noms de services configurés sur L{host} (ou sur n'importe
+                quel hôte si L{host} vaut None), correspondant au motif donné
+                et auxquels l'utilisateur a accès.
+            @rtype: C{dict}
             """
             service = sql_escape_like(service)
             username = request.environ.get('repoze.who.identity'
@@ -82,7 +107,8 @@ def AutoCompleteController(base_controller):
                 ).distinct(
                 ).outerjoin(
                     (Host, Host.idhost == LowLevelService.idhost),
-                    (HOST_GROUP_TABLE, HOST_GROUP_TABLE.c.idhost == Host.idhost),
+                    (HOST_GROUP_TABLE, HOST_GROUP_TABLE.c.idhost == \
+                        Host.idhost),
                     (SERVICE_GROUP_TABLE, SERVICE_GROUP_TABLE.c.idservice == \
                         LowLevelService.idservice),
                 ).filter(LowLevelService.servicename.ilike('%' + service + '%')
@@ -99,6 +125,17 @@ def AutoCompleteController(base_controller):
 
         @expose('json')
         def hostgroup(self, hostgroup):
+            """
+            Auto-compléteur pour les noms des groupes d'hôtes.
+
+            @param hostgroup: Motif qui doit apparaître dans le nom
+                du groupe d'hôtes.
+            @type hostgroup: C{unicode}
+            @return: Un dictionnaire dont la clé 'results' contient la liste
+                des noms de groupes d'hôtes correspondant au motif donné
+                et auxquels l'utilisateur a accès.
+            @rtype: C{dict}
+            """
             hostgroup = sql_escape_like(hostgroup)
             username = request.environ.get('repoze.who.identity'
                         ).get('repoze.who.userid')
@@ -118,6 +155,17 @@ def AutoCompleteController(base_controller):
 
         @expose('json')
         def servicegroup(self, servicegroup):
+            """
+            Auto-compléteur pour les noms des groupes de services.
+
+            @param servicegroup: Motif qui doit apparaître dans le nom
+                du groupe de service.
+            @type servicegroup: C{unicode}
+            @return: Un dictionnaire dont la clé 'results' contient la liste
+                des noms de groupes de services correspondant au motif donné
+                et auxquels l'utilisateur a accès.
+            @rtype: C{dict}
+            """
             servicegroup = sql_escape_like(servicegroup)
             username = request.environ.get('repoze.who.identity'
                         ).get('repoze.who.userid')

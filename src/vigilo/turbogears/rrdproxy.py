@@ -142,7 +142,8 @@ class RRDProxy(object):
 
         return result
 
-    def get_img_with_params(self, server, graph, direct, duration, start, details):
+    def get_img_with_params(self, server, graph, direct,
+        duration, start, details):
         '''
         lecture image avec parametres
      
@@ -172,7 +173,8 @@ class RRDProxy(object):
         url = self._url
         return self._retrieve_content(url, values)
     
-    def get_img_name_with_params(self, server, graph, direct, duration, start, details):
+    def get_img_name_with_params(self, server, graph, direct,
+        duration, start, details):
         '''
         lecture nom image avec parametres
      
