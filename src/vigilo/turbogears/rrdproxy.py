@@ -20,22 +20,27 @@ class RRDProxy(object):
         '''Constructeur'''
         self._url = os.path.join(url, 'rrdgraph.py')
 
-    def _retrieve_content(self, url, values):
+    def _retrieve_content(self, *args, **kwargs):
         ''' Lecture du contenu RRD à partir d'un dictionnaire de valeurs'''
-        
+
         handle = None
         result = None
-        data = urllib.urlencode(values)
-        proxy_handler = urllib2.ProxyHandler({'http': url})
-        opener = urllib2.build_opener(proxy_handler)
-        try:
-            handle = opener.open(url, data)
-            result = handle.read()
-        except urllib2.URLError, e:
-            raise
-        finally:
-            if handle:
-                handle.close()
+
+        if kwargs is not None:
+            url = kwargs.get('url')
+            values = kwargs.get('values')
+            if url is not None and values is not None:
+                data = urllib.urlencode(values)
+                proxy_handler = urllib2.ProxyHandler({'http': url})
+                opener = urllib2.build_opener(proxy_handler)
+                try:
+                    handle = opener.open(url, data)
+                    result = handle.read()
+                except urllib2.URLError, e:
+                    raise
+                finally:
+                    if handle:
+                        handle.close()
             
         return result
 
@@ -58,7 +63,7 @@ class RRDProxy(object):
         url = self._url
         url = os.path.join(url, 'getLastValue')
         
-        return self._retrieve_content(url, values)
+        return self._retrieve_content(url=url, values=values)
 
     def get_host(self, server):
         '''
@@ -74,7 +79,7 @@ class RRDProxy(object):
         values = {'server' : server}
         url = self._url
         
-        return self._retrieve_content(url, values)
+        return self._retrieve_content(url=url, values=values)
 
     def get_img(self, server, graph):
         '''
@@ -94,7 +99,7 @@ class RRDProxy(object):
                   'direct' : 1}
         url = self._url        
 
-        return self._retrieve_content(url, values)
+        return self._retrieve_content(url=url, values=values)
 
     def get_img_url(self, server, graph, urlp):
         '''
@@ -113,7 +118,8 @@ class RRDProxy(object):
                   'graphtemplate' : graph,
                   'direct' : 1}
         url = urlp
-        return self._retrieve_content(url, values)
+
+        return self._retrieve_content(url=url, values=values)
 
     def get_img_data(self, server, graph):
         '''
@@ -134,7 +140,7 @@ class RRDProxy(object):
 
         url = self._url
         
-        result = self._retrieve_content(url, values)
+        result = self._retrieve_content(url=url, values=values)
         if result:
             imghtmlparser = ImgHTMLParser()
             result = imghtmlparser.get_src_alt(result)
@@ -171,7 +177,8 @@ class RRDProxy(object):
                   'start' : start,
                   'details' : details}
         url = self._url
-        return self._retrieve_content(url, values)
+
+        return self._retrieve_content(url=url, values=values)
     
     def get_img_name_with_params(self, server, graph, direct,
         duration, start, details):
@@ -204,6 +211,7 @@ class RRDProxy(object):
         data = urllib.urlencode(values)
         url = self._url
         img_name = url + '?' + data 
+
         return img_name
 
     def get_starttime(self, server, getstarttime):
@@ -222,7 +230,8 @@ class RRDProxy(object):
                   'getstarttime' : getstarttime
                  }
         url = self._url        
-        return self._retrieve_content(url, values)
+
+        return self._retrieve_content(url=url, values=values)
  
     def exportCSV(self, server, graph, indicator=None, start=None, end=None):
         '''
@@ -252,7 +261,7 @@ class RRDProxy(object):
         url = self._url
         url = os.path.join(url, 'exportCSV')
 
-        return self._retrieve_content(url, values)
+        return self._retrieve_content(url=url, values=values)
 
 
 class ImgHTMLParser(HTMLParser):
