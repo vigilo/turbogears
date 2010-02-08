@@ -17,23 +17,22 @@ setup(
     author_email='francois.poirotte@c-s.fr',
     #url='',
     install_requires=[
+        "repoze.tm2 >= 1.0a4",
+        "repoze.what-quickstart >= 1.0",
         "tg.devtools",
         "TurboGears2 >= 2.0b7",
-        #can be removed iif use_toscawidgets = False
         "ToscaWidgets >= 0.9.7.1",
-        "zope.sqlalchemy >= 0.4 ",
-        "psycopg2",
-        "vigilo-models",
-        "vigilo-common",
-        "PasteScript >= 1.7", # setup_requires has issues
         "PasteDeploy",
         "Paste",
         "decorator != 3.1.0", # Blacklist bad version
+        "vigilo-models",
+        "vigilo-themes-default",
     ],
     paster_plugins=['PasteScript', 'Pylons', 'TurboGears2', 'tg.devtools'],
     packages=[
         'vigilo',
         'vigilo.turbogears',
+        'vigilo.turbogears.controllers',
     ],
     test_suite='nose.collector',
     tests_require=tests_require,

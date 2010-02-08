@@ -15,7 +15,6 @@ from tg.render import render_genshi
 from genshi.template import TemplateLoader
 from genshi.filters import Translator
 
-from vigilo.common.conf import settings
 from vigilo.models import User, UserGroup, Permission
 
 # Enregistre le codec pour l'encodage des textes dans le code JavaScript.
@@ -108,8 +107,6 @@ class VigiloAppConfig(AppConfig):
 
             # Add custom translator to templates.
             template_vars['l_'] = self.__tpl_translator.ugettext
-            # Pass Vigilo's settings to templates.
-            template_vars['settings'] = settings
 
             return render_genshi(template_name, template_vars, **kwargs)
 
@@ -129,5 +126,13 @@ class VigiloAppConfig(AppConfig):
         vigilo.models.session), donc cette étape n'est pas nécessaire.
         On inhibe le comportement de Turbogears ici.
         """
-        pass
+        from pylons import config as pylons_config
+        from vigilo.models import configure
+
+        engine = configure.configure_db(pylons_config, 'sqlalchemy.')
+
+        configure.db_basename = config['db_basename']
+        config['pylons.app_globals'].sa_engine = engine
+        self.DBSession = configure.DBSession
+        self.sa_auth.dbsession = configure.DBSession
 
