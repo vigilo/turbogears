@@ -15,8 +15,6 @@ from tg.render import render_genshi
 from genshi.template import TemplateLoader
 from genshi.filters import Translator
 
-from vigilo.models import User, UserGroup, Permission
-
 # Enregistre le codec pour l'encodage des textes dans le code JavaScript.
 import codecs
 from vigilo.turbogears.js_codec import backslash_search
@@ -44,22 +42,6 @@ class VigiloAppConfig(AppConfig):
         # met en place les middlewares nous même pour pouvoir gérer les
         # thèmes (cf. <module>/config/middleware.py dans une application).
         self.serve_static = False
-
-        # what is the class you want to use to search
-        # for users in the database
-        self.sa_auth.user_class = User
-
-        # what is the class you want to use to search
-        # for groups in the database
-        self.sa_auth.group_class = UserGroup
-
-        # what is the class you want to use to search
-        # for permissions in the database
-        self.sa_auth.permission_class = Permission
-
-        # The name "groups" is already used for groups of hosts.
-        # We use "usergroups" when referering to users to avoid confusion.
-        self.sa_auth.translations.groups = 'usergroups'
 
     def __setup_template_translator(self):
         """Crée un traducteur pour les modèles (templates)."""
@@ -127,12 +109,32 @@ class VigiloAppConfig(AppConfig):
         On inhibe le comportement de Turbogears ici.
         """
         from pylons import config as pylons_config
-        from vigilo.models import configure
+        import vigilo.models.configure
 
-        engine = configure.configure_db(pylons_config, 'sqlalchemy.')
+        engine = vigilo.models.configure.configure_db( \
+            pylons_config, 'sqlalchemy.')
 
-        configure.db_basename = config['db_basename']
         config['pylons.app_globals'].sa_engine = engine
-        self.DBSession = configure.DBSession
-        self.sa_auth.dbsession = configure.DBSession
+        self.DBSession = vigilo.models.configure.DBSession
+        self.sa_auth.dbsession = self.DBSession
+
+        from vigilo import models
+
+        self.model = models
+
+        # what is the class you want to use to search
+        # for users in the database
+        self.sa_auth.user_class = models.User
+
+        # what is the class you want to use to search
+        # for groups in the database
+        self.sa_auth.group_class = models.UserGroup
+
+        # what is the class you want to use to search
+        # for permissions in the database
+        self.sa_auth.permission_class = models.Permission
+
+        # The name "groups" is already used for groups of hosts.
+        # We use "usergroups" when referering to users to avoid confusion.
+        self.sa_auth.translations.groups = 'usergroups'
 
