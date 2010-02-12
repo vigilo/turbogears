@@ -120,8 +120,6 @@ class VigiloAppConfig(AppConfig):
 
         from vigilo import models
 
-        self.model = models
-
         # what is the class you want to use to search
         # for users in the database
         self.sa_auth.user_class = models.User
