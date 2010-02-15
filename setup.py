@@ -13,13 +13,14 @@ setup(
     name='vigilo-turbogears',
     version='0.1',
     description='A package containing TurboGears modifications for Vigilo',
-    author='Francois POIROTTE',
-    author_email='francois.poirotte@c-s.fr',
-    #url='',
+    author='Vigilo Team',
+    author_email='contact@projet-vigilo.org',
+    url='http://www.projet-vigilo.org/',
+    license='http://www.gnu.org/licenses/gpl-2.0.html',
     install_requires=[
         "repoze.tm2 >= 1.0a4",
         "repoze.what-quickstart >= 1.0",
-        "tg.devtools",
+#        "tg.devtools",
         "TurboGears2 >= 2.0b7",
         "ToscaWidgets >= 0.9.7.1",
         "PasteDeploy",
@@ -28,7 +29,12 @@ setup(
         "vigilo-models",
         "vigilo-themes-default",
     ],
-    paster_plugins=['PasteScript', 'Pylons', 'TurboGears2', 'tg.devtools'],
+    paster_plugins=[
+        'PasteScript',
+        'Pylons',
+        'TurboGears2',
+#        'tg.devtools', # Provides migrate & quickstart commands.
+    ],
     packages=[
         'vigilo',
         'vigilo.turbogears',
@@ -39,7 +45,7 @@ setup(
     extras_require={
         'tests': tests_require,
     },
-#    message_extractors={'vigicore': [
+#    message_extractors={'vigilo.turbogears': [
 #        ('**.py', 'python', None),
 #    ]},
     entry_points={
