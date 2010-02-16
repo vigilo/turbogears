@@ -78,7 +78,24 @@ class RRDProxy(object):
 
         values = {'server' : server}
         url = self._url
-        
+
+        return self._retrieve_content(url=url, values=values)
+
+    def get_hostC(self, server):
+        '''
+        lecture hôte
+
+        @param server : serveur
+        @type server : C{str}
+
+        @return :
+        @rtype : 
+        '''
+
+        values = {'server' : server}
+        url = self._url
+        url = os.path.join(url, 'getHostC')
+
         return self._retrieve_content(url=url, values=values)
 
     def get_img(self, server, graph):
