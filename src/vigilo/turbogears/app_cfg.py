@@ -43,6 +43,24 @@ class VigiloAppConfig(AppConfig):
         # thèmes (cf. <module>/config/middleware.py dans une application).
         self.serve_static = False
 
+    def setup_sa_auth_backend(self):
+        """
+        Initialisation de la configuration de la base de données.
+        On se contente de contourner un bug lié à la compatibilité
+        ascendante avec TurboGears 2.0.2 et plus, ainsi qu'un bug
+        lié à la manière dont la configuration est créée par TG.
+        """
+        super(VigiloAppConfig, self).setup_sa_auth_backend()
+
+        # TG 2.0.2+ s'attend à trouver une clé "sa_auth.cookie_secret"
+        # dans la config. Mais à cause d'un autre problème inhérent à
+        # la config de TG, si on définit cette valeur dans le INI, elle
+        # n'apparait pas sous le bon nom. On corrige tout ça ici.
+        # Voir aussi : http://old.nabble.com/sa_auth-td26789660.html
+        if 'sa_auth.cookie_secret' in config:
+            config['sa_auth']['cookie_secret'] = config['sa_auth.cookie_secret']
+        self.sa_auth.cookie_secret = config['sa_auth']['cookie_secret']
+
     def __setup_template_translator(self):
         """Crée un traducteur pour les modèles (templates)."""
         if self.__tpl_translator is None:
