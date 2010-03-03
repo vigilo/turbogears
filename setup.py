@@ -20,7 +20,7 @@ setup(
     install_requires=[
         "repoze.tm2 >= 1.0a4",
         "repoze.what-quickstart >= 1.0",
-#        "tg.devtools",
+        "tg.devtools",
         "TurboGears2 >= 2.0b7",
         "ToscaWidgets >= 0.9.7.1",
         "PasteDeploy",
