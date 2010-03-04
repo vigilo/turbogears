@@ -53,8 +53,8 @@ class RRDProxy(object):
         @param indicator : indicateur
         @type indicator : C{str}
 
-        @return :
-        @rtype: liste de deux elements
+        @return : valeurs RRD
+        @rtype : liste de deux elements
         '''
 
         values = {'host' : server,
@@ -67,7 +67,7 @@ class RRDProxy(object):
 
     def get_host(self, server):
         '''
-        lecture hôte
+        liste des graphes associes à server
 
         @param server : serveur
         @type server : C{str}
@@ -83,7 +83,7 @@ class RRDProxy(object):
 
     def get_hostC(self, server):
         '''
-        lecture hôte
+        liste des graphes associes à server
 
         @param server : serveur
         @type server : C{str}
@@ -100,15 +100,15 @@ class RRDProxy(object):
 
     def get_img(self, server, graph):
         '''
-        lecture image
+        lecture image bitmap
 
         @param server : serveur
         @type server : C{str}
         @param graph : graphe
         @type graph : C{str}
 
-        @return :
-        @rtype : image
+        @return : image
+        @rtype : bitmap
         '''
 
         values = {'server' : server,
@@ -120,15 +120,17 @@ class RRDProxy(object):
 
     def get_img_url(self, server, graph, urlp):
         '''
-        lecture image
+        lecture image bitmap
 
         @param server : serveur
         @type server : C{str}
         @param graph : graphe
         @type graph : C{str}
+        @param urlp : url complete pour rrdgraph
+        @type urlp : C{str}
 
-        @return :
-        @rtype : image
+        @return : image
+        @rtype : bitmap
         '''
         
         values = {'server' : server,
@@ -168,7 +170,7 @@ class RRDProxy(object):
     def get_img_with_params(self, server, graph, direct,
         duration, start, details):
         '''
-        lecture image avec parametres
+        determination image
      
         @param server : serveur
         @type server : C{str}
@@ -184,7 +186,7 @@ class RRDProxy(object):
         @type details : int
 
         @return : image
-        @rtype :
+        @rtype : graphique
         '''
 
         values = {'server' : server,
@@ -200,7 +202,7 @@ class RRDProxy(object):
     def get_img_name_with_params(self, server, graph, direct,
         duration, start, details):
         '''
-        lecture nom image avec parametres
+        determination image
      
         @param server : serveur
         @type server : C{str}
@@ -215,8 +217,8 @@ class RRDProxy(object):
         @param details : 
         @type details : int
 
-        @return : nom image
-        @rtype: C{str}
+        @return : url complete image
+        @rtype : C{str}
         '''
 
         values = {'server' : server,
@@ -240,7 +242,8 @@ class RRDProxy(object):
         @param getstarttime : 
         @type getstarttime : int
 
-        @rtype:
+        @return : valeur temps
+        @rtype : entier
         '''
 
         values = {'server' : server,
@@ -265,8 +268,11 @@ class RRDProxy(object):
         @param end : fin plage export
         @type end : C{str}
 
-        @return : donnees RRD d apres server, indicateur et plage
-        @rtype: C{str}
+        @return : donnees RRD
+        @rtype : dictionnaire 
+            pour chaque élément du dictionnaire, 
+            - clé = timestamp
+            - valeur = liste de deux valeurs RRD
         '''
 
         values = {'server' : server,
@@ -299,8 +305,8 @@ class ImgHTMLParser(HTMLParser):
         @param text : texte a analyser
         @type text : C{str}
 
-
-        @rtype: dictionnaire
+        @return : valeurs
+        @rtype : dictionnaire
         '''
 
         self.feed(text)
@@ -316,7 +322,7 @@ class ImgHTMLParser(HTMLParser):
         @param attrs : C{str}
 
         @return:  donnees src et alt
-        @rtype:  dictionnaire
+        @rtype :  dictionnaire
         '''
 
         if tag == 'img':
@@ -406,6 +412,7 @@ class SuffixManager(object):
         @param value : valeur
         @type value : valeur numérique
 
+        @return : valeur
         @rtype : C{str}
         '''
 
@@ -485,6 +492,7 @@ class SuffixManager(object):
         @param maxvalue : valeur max
         @type value : int
 
+        @return : valeur
         @rtype : C{str}
         '''
 
