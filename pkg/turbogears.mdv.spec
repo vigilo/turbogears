@@ -1,7 +1,7 @@
 %define module  turbogears
 %define name    vigilo-%{module}
 %define version 1.0
-%define release 1
+%define release 1%{?svn}
 
 Name:       %{name}
 Summary:    Vigilo Turbogears extension library
