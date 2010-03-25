@@ -4,9 +4,9 @@
 
 import urllib
 import urllib2
-from HTMLParser import HTMLParser
 import os
-#from pylons.i18n import ugettext as _
+
+from HTMLParser import HTMLParser
 
 
 class RRDProxy(object):
@@ -31,17 +31,15 @@ class RRDProxy(object):
             values = kwargs.get('values')
             if url is not None and values is not None:
                 data = urllib.urlencode(values)
-                proxy_handler = urllib2.ProxyHandler({'http': url})
-                opener = urllib2.build_opener(proxy_handler)
                 try:
-                    handle = opener.open(url, data)
+                    handle = urllib2.urlopen(url, data)
                     result = handle.read()
                 except urllib2.URLError, e:
                     raise
                 finally:
                     if handle:
                         handle.close()
-            
+
         return result
 
     def get_last_value(self, server, indicator):
