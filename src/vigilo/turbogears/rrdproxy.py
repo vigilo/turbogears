@@ -21,7 +21,10 @@ class RRDProxy(object):
         self._url = os.path.join(url, 'rrdgraph.py')
 
     def _retrieve_content(self, *args, **kwargs):
-        ''' Lecture du contenu RRD à partir d'un dictionnaire de valeurs'''
+        '''
+        Lecture de donnees RRD à partir d une url et d un dictionnaire
+        ce dictionnaire contient les arguments pour l url
+        '''
 
         handle = None
         result = None
