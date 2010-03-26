@@ -17,7 +17,7 @@ BuildRequires:   python-setuptools
 
 Requires:   python >= 2.5
 Requires:   python-setuptools
-Requires:   vigilo-common vigilo-models vigilo-themes-default
+Requires:   vigilo-common vigilo-models vigilo-themes
 Requires:   python-repoze.tm2
 Requires:   python-repoze.what-quickstart
 Requires:   python-tg.devtools
