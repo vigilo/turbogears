@@ -10,10 +10,12 @@ from tg import config
 from vigilo.turbogears.app_cfg import VigiloAppConfig
 
 def populate_db():
-    from vigilo.models import websetup
+    from vigilo.models.configure import configure_db
+    engine = configure_db(config, 'sqlalchemy.', config['db_basename'])
 
     # Cette méthode se contente d'appeler le websetup du modèle
     # en réutilisant la configuration de l'application stockée
     # dans la configuration de pylons.
-    return websetup.populate_db(config['pylons.app_globals'].sa_engine)
+    from vigilo.models import websetup
+    return websetup.populate_db(engine)
 
