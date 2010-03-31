@@ -127,28 +127,30 @@ class VigiloAppConfig(AppConfig):
         On inhibe le comportement de Turbogears ici.
         """
         from pylons import config as pylons_config
-        import vigilo.models.configure
+        from vigilo.models.configure import configure_db
 
-        engine = vigilo.models.configure.configure_db( \
-            pylons_config, 'sqlalchemy.')
+        engine = configure_db(pylons_config, 'sqlalchemy.',
+            pylons_config['db_basename'])
 
         config['pylons.app_globals'].sa_engine = engine
-        self.DBSession = vigilo.models.configure.DBSession
+
+        from vigilo.models import session
+        self.DBSession = session.DBSession
         self.sa_auth.dbsession = self.DBSession
 
-        from vigilo import models
+        from vigilo.models import tables
 
         # what is the class you want to use to search
         # for users in the database
-        self.sa_auth.user_class = models.User
+        self.sa_auth.user_class = tables.User
 
         # what is the class you want to use to search
         # for groups in the database
-        self.sa_auth.group_class = models.UserGroup
+        self.sa_auth.group_class = tables.UserGroup
 
         # what is the class you want to use to search
         # for permissions in the database
-        self.sa_auth.permission_class = models.Permission
+        self.sa_auth.permission_class = tables.Permission
 
         # The name "groups" is already used for groups of hosts.
         # We use "usergroups" when referering to users to avoid confusion.

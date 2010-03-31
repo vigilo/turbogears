@@ -18,8 +18,8 @@ from tg import config
 from vigilo.turbogears.rrdproxy import RRDProxy
 from vigilo.turbogears.rrdproxy import SuffixManager
 
-from vigilo.models.configure import DBSession
-from vigilo.models import Host, Ventilation, VigiloServer, Application
+#from vigilo.models.configure import DBSession
+#from vigilo.models import Host, Ventilation, VigiloServer, Application
 
 #from turbogears.tests import TestController
 
@@ -342,5 +342,4 @@ class TestRRDProxy_bd(TestController):
 
 
 if __name__ == "__main__": 
-
     unittest.main()

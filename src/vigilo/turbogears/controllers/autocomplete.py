@@ -6,11 +6,12 @@ entre les différentes applications de Vigilo.
 from tg import expose, request
 from sqlalchemy.sql.expression import or_
 
-from vigilo.models import Host, HostGroup, ServiceGroup, LowLevelService, User
-from vigilo.models.configure import DBSession
+from vigilo.models.tables import Host, HostGroup, ServiceGroup, \
+                                    LowLevelService, User
+from vigilo.models.session import DBSession
 from vigilo.models.functions import sql_escape_like
-from vigilo.models.secondary_tables import HOST_GROUP_TABLE, \
-                                            SERVICE_GROUP_TABLE
+from vigilo.models.tables.secondary_tables import HOST_GROUP_TABLE, \
+                                                    SERVICE_GROUP_TABLE
 
 # pylint: disable-msg=R0201,W0232
 # - R0201: méthodes pouvant être écrites comme fonctions (imposé par TG2)
