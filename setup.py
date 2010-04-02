@@ -11,7 +11,7 @@ tests_require = []
 
 setup(
     name='vigilo-turbogears',
-    version='0.1',
+    version='2.0.0',
     description='A package containing TurboGears modifications for Vigilo',
     author='Vigilo Team',
     author_email='contact@projet-vigilo.org',
