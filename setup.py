@@ -35,6 +35,9 @@ setup(
         'TurboGears2',
 #        'tg.devtools', # Provides migrate & quickstart commands.
     ],
+    namespace_packages = [
+        'vigilo',
+        ],
     packages=[
         'vigilo',
         'vigilo.turbogears',
