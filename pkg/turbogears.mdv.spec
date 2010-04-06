@@ -54,6 +54,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc COPYING
 %{python_sitelib}/vigilo
 %{python_sitelib}/*.egg-info
+%{python_sitelib}/*-nspkg.pth
 
 
 %changelog
