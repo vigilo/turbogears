@@ -5,13 +5,12 @@ entre les différentes applications de Vigilo.
 """
 from tg import expose, request
 from sqlalchemy.sql.expression import or_
+from sqlalchemy.orm import aliased
 
-from vigilo.models.tables import Host, HostGroup, ServiceGroup, \
-                                    LowLevelService, User
+from vigilo.models.tables import Host, SupItemGroup, LowLevelService, User
 from vigilo.models.session import DBSession
 from vigilo.models.functions import sql_escape_like
-from vigilo.models.tables.secondary_tables import HOST_GROUP_TABLE, \
-                                                    SERVICE_GROUP_TABLE
+from vigilo.models.tables.secondary_tables import SUPITEM_GROUP_TABLE
 
 # pylint: disable-msg=R0201,W0232
 # - R0201: méthodes pouvant être écrites comme fonctions (imposé par TG2)
@@ -56,20 +55,21 @@ def make_autocomplete_controller(base_controller):
             if not user:
                 return dict(results=[])
 
-            user_groups = user.groups
+            user_groups = user.supitemgroups
+            hostgroup = SUPITEM_GROUP_TABLE.alias()
+            servicegroup = SUPITEM_GROUP_TABLE.alias()
             hostnames = DBSession.query(
                     Host.name
                 ).distinct(
                 ).outerjoin(
-                    (HOST_GROUP_TABLE, HOST_GROUP_TABLE.c.idhost == \
-                        Host.idhost),
+                    (hostgroup, hostgroup.c.idsupitem == Host.idhost),
                     (LowLevelService, LowLevelService.idhost == Host.idhost),
-                    (SERVICE_GROUP_TABLE, SERVICE_GROUP_TABLE.c.idservice == \
+                    (servicegroup, servicegroup.c.idsupitem == \
                         LowLevelService.idservice),
                 ).filter(Host.name.ilike('%' + host + '%')
                 ).filter(or_(
-                    HOST_GROUP_TABLE.c.idgroup.in_(user_groups),
-                    SERVICE_GROUP_TABLE.c.idgroup.in_(user_groups),
+                    hostgroup.c.idgroup.in_(user_groups),
+                    servicegroup.c.idgroup.in_(user_groups),
                 )).all()
             return dict(results=[h[0] for h in hostnames])
 
@@ -102,20 +102,21 @@ def make_autocomplete_controller(base_controller):
             if not user:
                 return dict(results=[])
 
-            user_groups = user.groups
+            user_groups = user.supitemgroups
+            hostgroup = SUPITEM_GROUP_TABLE.alias()
+            servicegroup = SUPITEM_GROUP_TABLE.alias()
             services = DBSession.query(
                     LowLevelService.servicename
                 ).distinct(
                 ).outerjoin(
                     (Host, Host.idhost == LowLevelService.idhost),
-                    (HOST_GROUP_TABLE, HOST_GROUP_TABLE.c.idhost == \
-                        Host.idhost),
-                    (SERVICE_GROUP_TABLE, SERVICE_GROUP_TABLE.c.idservice == \
+                    (hostgroup, hostgroup.c.idsupitem == Host.idhost),
+                    (servicegroup, servicegroup.c.idsupitem == \
                         LowLevelService.idservice),
                 ).filter(LowLevelService.servicename.ilike('%' + service + '%')
                 ).filter(or_(
-                    HOST_GROUP_TABLE.c.idgroup.in_(user_groups),
-                    SERVICE_GROUP_TABLE.c.idgroup.in_(user_groups),
+                    hostgroup.c.idgroup.in_(user_groups),
+                    servicegroup.c.idgroup.in_(user_groups),
                 ))
 
             if host:
@@ -125,19 +126,19 @@ def make_autocomplete_controller(base_controller):
             return dict(results=[s[0] for s in services])
 
         @expose('json')
-        def hostgroup(self, hostgroup):
+        def supitemgroup(self, supitemgroup):
             """
-            Auto-compléteur pour les noms des groupes d'hôtes.
+            Auto-compléteur pour les noms des groupes d'éléments supervisés.
 
-            @param hostgroup: Motif qui doit apparaître dans le nom
-                du groupe d'hôtes.
-            @type hostgroup: C{unicode}
+            @param supitemgroup: Motif qui doit apparaître dans le nom
+                du groupe d'éléments supervisés.
+            @type supitemgroup: C{unicode}
             @return: Un dictionnaire dont la clé 'results' contient la liste
-                des noms de groupes d'hôtes correspondant au motif donné
-                et auxquels l'utilisateur a accès.
+                des noms de groupes d'élements supervisés correspondant
+                au motif donné et auxquels l'utilisateur a accès.
             @rtype: C{dict}
             """
-            hostgroup = sql_escape_like(hostgroup)
+            supitemgroup = sql_escape_like(supitemgroup)
             username = request.environ.get('repoze.who.identity'
                         ).get('repoze.who.userid')
 
@@ -145,44 +146,14 @@ def make_autocomplete_controller(base_controller):
             if not user:
                 return dict(results=[])
 
-            user_groups = user.groups
-            hostgroups = DBSession.query(
-                    HostGroup.name
+            user_groups = user.supitemgroups
+            supitemgroups = DBSession.query(
+                    SupItemGroup.name
                 ).distinct(
-                ).filter(HostGroup.name.ilike('%' + hostgroup + '%')
-                ).filter(HostGroup.idgroup.in_(user_groups)
+                ).filter(SupItemGroup.name.ilike('%' + supitemgroup + '%')
+                ).filter(SupItemGroup.idgroup.in_(user_groups)
                 ).all()
-            return dict(results=[h[0] for h in hostgroups])
-
-        @expose('json')
-        def servicegroup(self, servicegroup):
-            """
-            Auto-compléteur pour les noms des groupes de services.
-
-            @param servicegroup: Motif qui doit apparaître dans le nom
-                du groupe de service.
-            @type servicegroup: C{unicode}
-            @return: Un dictionnaire dont la clé 'results' contient la liste
-                des noms de groupes de services correspondant au motif donné
-                et auxquels l'utilisateur a accès.
-            @rtype: C{dict}
-            """
-            servicegroup = sql_escape_like(servicegroup)
-            username = request.environ.get('repoze.who.identity'
-                        ).get('repoze.who.userid')
-
-            user = User.by_user_name(username)
-            if not user:
-                return dict(results=[])
-
-            user_groups = user.groups
-            servicegroups = DBSession.query(
-                    ServiceGroup.name
-                ).distinct(
-                ).filter(ServiceGroup.name.ilike('%' + servicegroup + '%')
-                ).filter(ServiceGroup.idgroup.in_(user_groups)
-                ).all()
-            return dict(results=[s[0] for s in servicegroups])
+            return dict(results=[s[0] for s in supitemgroups])
 
     return AutoCompleteControllerHelper()
 

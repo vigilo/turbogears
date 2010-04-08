@@ -18,7 +18,7 @@ class RRDProxy(object):
 
     def __init__(self, url):
         '''Constructeur'''
-        self._url = os.path.join(url, 'rrdgraph.py')
+        self._url = "%s/%s" % (url, 'rrdgraph.py')
 
     def _retrieve_content(self, *args, **kwargs):
         '''
@@ -62,7 +62,7 @@ class RRDProxy(object):
                   'indicator' : indicator}
         
         url = self._url
-        url = os.path.join(url, 'getLastValue')
+        url = "%s/%s" % (url, 'getLastValue')
         
         return self._retrieve_content(url=url, values=values)
 
@@ -95,7 +95,7 @@ class RRDProxy(object):
 
         values = {'server' : server}
         url = self._url
-        url = os.path.join(url, 'getHostC')
+        url = "%s/%s" % (url, 'getHostC')
 
         return self._retrieve_content(url=url, values=values)
 
@@ -231,7 +231,6 @@ class RRDProxy(object):
         data = urllib.urlencode(values)
         url = self._url
         img_name = url + '?' + data 
-
         return img_name
 
     def get_starttime(self, server, getstarttime):
@@ -282,9 +281,7 @@ class RRDProxy(object):
                   'start' : start,
                   'end' : end
                  }
-        url = self._url
-        url = os.path.join(url, 'exportCSV')
-
+        url = "%s/%s" % (self._url, 'exportCSV')
         return self._retrieve_content(url=url, values=values)
 
 
