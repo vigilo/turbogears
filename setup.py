@@ -18,6 +18,7 @@ setup(
     url='http://www.projet-vigilo.org/',
     license='http://www.gnu.org/licenses/gpl-2.0.html',
     install_requires=[
+        "setuptools",
         "repoze.tm2 >= 1.0a4",
         "repoze.what-quickstart >= 1.0",
         "tg.devtools",
