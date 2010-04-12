@@ -55,7 +55,7 @@ def make_autocomplete_controller(base_controller):
             if not user:
                 return dict(results=[])
 
-            user_groups = user.supitemgroups
+            user_groups = user.supitemgroups(False)
             hostgroup = SUPITEM_GROUP_TABLE.alias()
             servicegroup = SUPITEM_GROUP_TABLE.alias()
             hostnames = DBSession.query(
@@ -102,7 +102,7 @@ def make_autocomplete_controller(base_controller):
             if not user:
                 return dict(results=[])
 
-            user_groups = user.supitemgroups
+            user_groups = user.supitemgroups(False)
             hostgroup = SUPITEM_GROUP_TABLE.alias()
             servicegroup = SUPITEM_GROUP_TABLE.alias()
             services = DBSession.query(
@@ -146,7 +146,7 @@ def make_autocomplete_controller(base_controller):
             if not user:
                 return dict(results=[])
 
-            user_groups = user.supitemgroups
+            user_groups = user.supitemgroups(False)
             supitemgroups = DBSession.query(
                     SupItemGroup.name
                 ).distinct(
