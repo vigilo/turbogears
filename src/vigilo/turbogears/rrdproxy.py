@@ -45,25 +45,22 @@ class RRDProxy(object):
 
         return result
 
-    def get_last_value(self, server, indicator):
+    def get_last_value(self, server, ds):
         '''
-        lecture derniere valeur de metrologie associee au parametre indicator
+        lecture derniere valeur de metrologie associee au parametre ds
      
-        @param server : serveur
-        @type server : C{str}
-        @param indicator : indicateur
-        @type indicator : C{str}
+        @param server: serveur
+        @type  server: C{str}
+        @param ds: indicateur
+        @type  ds: C{str}
 
         @return : valeurs RRD
         @rtype : liste de deux elements
         '''
-
         values = {'host' : server,
-                  'indicator' : indicator}
-        
+                  'ds' : ds}
         url = self._url
         url = "%s/%s" % (url, 'getLastValue')
-        
         return self._retrieve_content(url=url, values=values)
 
     def get_host(self, server):
@@ -253,20 +250,20 @@ class RRDProxy(object):
 
         return self._retrieve_content(url=url, values=values)
  
-    def exportCSV(self, server, graph, indicator=None, start=None, end=None):
+    def exportCSV(self, server, graph, ds=None, start=None, end=None):
         '''
         export CSV
      
-        @param server : serveur
-        @type server : C{str}
-        @param graph : graphe
-        @type graph : C{str}
-        @param indicator : indicateur graphe
-        @type indicator : C{str}
-        @param start : debut plage export
-        @type start : C{str}
-        @param end : fin plage export
-        @type end : C{str}
+        @param server: serveur
+        @type  server: C{str}
+        @param graph: graphe
+        @type  graph: C{str}
+        @param ds: indicateur graphe
+        @type  ds: C{str}
+        @param start: debut plage export
+        @type  start: C{str}
+        @param end: fin plage export
+        @type  end: C{str}
 
         @return : donnees RRD
         @rtype : dictionnaire 
@@ -277,7 +274,7 @@ class RRDProxy(object):
 
         values = {'server' : server,
                   'graphtemplate': graph,
-                  'indicator' : indicator,
+                  'ds' : ds,
                   'start' : start,
                   'end' : end
                  }
