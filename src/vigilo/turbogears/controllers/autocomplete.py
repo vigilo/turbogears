@@ -5,7 +5,6 @@ entre les différentes applications de Vigilo.
 """
 from tg import expose, request
 from sqlalchemy.sql.expression import or_
-from sqlalchemy.orm import aliased
 
 from vigilo.models.tables import Host, SupItemGroup, LowLevelService, User
 from vigilo.models.session import DBSession

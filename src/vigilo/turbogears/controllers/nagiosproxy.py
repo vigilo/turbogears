@@ -23,21 +23,39 @@ class NoNagiosServerConfigured(Exception):
 # - W0232: absence de __init__ dans la classe (imposé par TG2)
 
 def make_nagios_proxy_controller(base_controller, mount_point):
+    """
+    Factory pour le contrôleur du proxy Nagios.
+    
+    @param base_controller: objet BaseController de l'application
+        qui désire monter ce contrôleur dans son arborescence.
+    @type base_controller: C{BaseController}
+    @param mount_point: URL à laquelle le contrôleur est montée
+        (par rapport au RootController de l'application).
+    @type mount_point: C{basestring}
+    @return: Instance du contrôleur agissant comme un proxy vers Nagios.
+    @rtype: C{NagiosProxyController}
+    """
+
+    # On s'assure que mount_point commence et se termine par un '/'.
     if mount_point[0] != '/':
         mount_point[:0] = '/'
     if mount_point[-1] != '/':
         mount_point = mount_point + '/'
 
-    class NagiosProxyControllerHelper(base_controller):
+    class NagiosProxyController(base_controller):
+        """
+        Contrôleur agissant comme un proxy vers Nagios..
+        """
+
         def _get_server(self, host):
             """
-            Determination Serveur Nagios pour l hote courant
-            (Server Nagios -> nom de l application associee = nagios)
+            Étant donné le nom d'un hôte du parc, cette méthode
+            renvoie l'URL du serveur Nagios qui supervise cet hôte.
 
-            @param host: hôte
+            @param host: Nom d'hôte.
             @type host: C{str}
 
-            @return: serveur Nagios qui supervise cet hôte.
+            @return: URL du serveur Nagios qui supervise cet hôte.
             @rtype: C{str}
             """
             return DBSession.query(
@@ -52,6 +70,30 @@ def make_nagios_proxy_controller(base_controller, mount_point):
 
         @expose(content_type=CUSTOM_CONTENT_TYPE)
         def default(self, host, *args, **kwargs):
+            """
+            Cette méthode capture toutes les requêtes HTTP transmises
+            au contrôleur puis les redirige vers le serveur Nagios
+            qui supervise l'hôte L{host}.
+
+            Si ce contrôleur est monté dans "/nagios/", un appel à
+            "http://localhost/nagios/example.com/cgi-bin/status.cgi?a=b"
+            affichera la page de statut de Nagios concernant l'hôte
+            "example.com".
+            
+            Les paramètres de la requête (query string) sont automatiquement
+            transmis dans la requête au serveur Nagios (en POST).
+            
+            @param host: Nom de l'hôte du parc sur lequel on souhaite
+                obtenir des informations.
+            @type host: C{unicode}
+            @param args: Chemins additionnels de la requête (par exemple,
+                ['cgi-bin', 'status.cgi'] avec la requête ci-dessus).
+            @type args: C{list}
+            @param kwargs: Paramètres additionnels de la requête
+                (le contenu de la query string).
+            @type kwargs: C{dict}
+            """
+
             vigilo_server = self._get_server(host)
             if vigilo_server is None:
                 raise NoNagiosServerConfigured()
@@ -84,5 +126,5 @@ def make_nagios_proxy_controller(base_controller, mount_point):
                                     (tg.url(mount_point), host))
             return doc
 
-    return NagiosProxyControllerHelper()
+    return NagiosProxyController()
 

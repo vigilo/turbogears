@@ -10,6 +10,11 @@ from tg import config
 from vigilo.turbogears.app_cfg import VigiloAppConfig
 
 def populate_db():
+    """
+    Configure la base de données et l'initialise.
+    L'initialisation de la base de données crée les tables et insère
+    les données nécessaires pour commencer à utiliser Vigilo.
+    """
     from vigilo.models.configure import configure_db
     engine = configure_db(config, 'sqlalchemy.', config['db_basename'])
 
