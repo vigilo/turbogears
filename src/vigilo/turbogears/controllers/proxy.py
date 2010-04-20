@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Ce module agit comme un proxy qui va interroger les interfaces de Nagios
-et renvoyer le résultat pour qu'il puisse être affiché dans Vigilo.
+Ce module agit comme un proxy qui va interroger les interfaces de
+Nagios/RRDgraph et renvoyer le résultat pour qu'il puisse être
+affiché dans Vigilo.
 """
 
 import urllib, urllib2, logging
-from tg import request, expose, config
+from tg import request, expose, config, response
 from tg.controllers import CUSTOM_CONTENT_TYPE
 import tg, pylons
 from repoze.what.predicates import not_anonymous
@@ -25,21 +26,26 @@ LOGGER = logging.getLogger(__name__)
 # - R0201: méthodes pouvant être écrites comme fonctions (imposé par TG2)
 # - W0232: absence de __init__ dans la classe (imposé par TG2)
 
-def make_nagios_proxy_controller(base_controller, mount_point):
+def make_proxy_controller(base_controller, server_type, mount_point):
     """
-    Factory pour le contrôleur du proxy Nagios.
+    Factory pour le contrôleur du proxy Nagios/RRDgraph.
     
-    @param base_controller: objet BaseController de l'application
+    @param base_controller: Objet BaseController de l'application
         qui désire monter ce contrôleur dans son arborescence.
     @type base_controller: C{BaseController}
+    @param server_type: Type d'application à "proxifier", il peut
+        s'agir de "nagios" ou "rrdgraph".
     @param mount_point: URL à laquelle le contrôleur est montée
         (par rapport au RootController de l'application).
         Ce paramètre est utilisé pour réécrire correctement les
         liens absolus générés par Nagios.
     @type mount_point: C{basestring}
-    @return: Instance du contrôleur agissant comme un proxy vers Nagios.
-    @rtype: C{NagiosProxyController}
+    @return: Instance du contrôleur agissant comme un proxy
+        vers Nagios/RRDgraph.
+    @rtype: C{ProxyController}
     """
+
+    server_type = u'' + server_type.lower()
 
     # On s'assure que mount_point commence et se termine par un '/'.
     if mount_point[0] != '/':
@@ -47,9 +53,9 @@ def make_nagios_proxy_controller(base_controller, mount_point):
     if mount_point[-1] != '/':
         mount_point = mount_point + '/'
 
-    class NagiosProxyController(base_controller):
+    class ProxyController(base_controller):
         """
-        Contrôleur agissant comme un proxy vers Nagios..
+        Contrôleur agissant comme un proxy vers Nagios ou RRDgraph.
         """
 
         # L'accès à ce contrôleur nécessite d'être identifié.
@@ -58,13 +64,14 @@ def make_nagios_proxy_controller(base_controller, mount_point):
         def _get_server(self, host):
             """
             Étant donné le nom d'un hôte du parc, cette méthode
-            renvoie l'URL du serveur Nagios qui supervise cet hôte.
+            renvoie le nom de domaine qualifié (FQDN) du serveur
+            de type C{server_type} responsable de cet hôte.
 
             @param host: Nom d'hôte.
-            @type host: C{str}
+            @type host: C{unicode}
 
-            @return: URL du serveur Nagios qui supervise cet hôte.
-            @rtype: C{str}
+            @return: FQDN du serveur du type demandé responsable de cet hôte.
+            @rtype: C{unicode}
             """
             return DBSession.query(
                         VigiloServer.name
@@ -73,15 +80,16 @@ def make_nagios_proxy_controller(base_controller, mount_point):
                     ).filter(Ventilation.idhost == Host.idhost
                     ).filter(Ventilation.idapp == Application.idapp
                     ).filter(Host.name == host
-                    ).filter(Application.name == 'nagios'
+                    ).filter(Application.name == server_type
                     ).scalar()
 
         @expose(content_type=CUSTOM_CONTENT_TYPE)
         def default(self, host, *args, **kwargs):
             """
             Cette méthode capture toutes les requêtes HTTP transmises
-            au contrôleur puis les redirige vers le serveur Nagios
-            qui supervise l'hôte L{host}.
+            au contrôleur puis les redirige vers le serveur Nagios ou
+            RRDgraph (selon le paramètre C{server_type} donné à la factory)
+            responsable de l'hôte L{host}.
 
             Si ce contrôleur est monté dans "/nagios/", un appel à
             "http://localhost/nagios/example.com/cgi-bin/status.cgi?a=b"
@@ -119,8 +127,7 @@ def make_nagios_proxy_controller(base_controller, mount_point):
             # qui se rapporte à un service particulier.
             service = kwargs.get('service')
 
-            # On regarde si l'utilisateur a accès à l'hôte
-            # et/ou au service demandé.
+            # On regarde si l'utilisateur a accès à l'hôte demandé.
             perm = DBSession.query(
                         SupItemGroup.idgroup,
                     ).join(
@@ -131,6 +138,9 @@ def make_nagios_proxy_controller(base_controller, mount_point):
                             SUPITEM_GROUP_TABLE.c.idsupitem),
                     ).filter(SUPITEM_GROUP_TABLE.c.idgroup.in_(supitemgroups))
 
+            # Si en plus on a demandé un service particulier,
+            # alors on vérifie les permissions de l'utilisateur
+            # sur ce service.
             if service is not None:
                 perm = perm.filter(
                             or_(
@@ -149,8 +159,8 @@ def make_nagios_proxy_controller(base_controller, mount_point):
                             ),
                         )
 
-            perm = perm.scalar()
-            if perm is None:
+            # On traite le cas où l'utilisateur n'a pas les droits requis.
+            if perm.scalar() is None:
                 if service is not None:
                     LOGGER.warning(l_('Access denied to host "%(host)s" and '
                                     'service "%(service)s"') % {
@@ -161,39 +171,77 @@ def make_nagios_proxy_controller(base_controller, mount_point):
                     LOGGER.warning(l_('Access denied to host "%s"') % host)
                 raise HTTPForbidden()
 
+            # On vérifie que l'hôte est effectivement pris en charge.
+            # ie: qu'un serveur du parc héberge l'application server_type
+            # responsable de cet hôte.
             vigilo_server = self._get_server(host)
             if vigilo_server is None:
-                LOGGER.warning(l_('No Nagios server configured to '
-                                'monitor "%s"') % host)
+                LOGGER.warning(l_('No %(server_type)s server configured to '
+                                'monitor "%(host)s"') % {
+                    'server_type': server_type,
+                    'host': host,
+                })
                 raise HTTPNotFound()
 
+            # Préparation des paramètres pour la requête finale.
             kwargs['host'] = host
             data = urllib.urlencode(kwargs)
-
             args = list(args)
-            if pylons.request.response_ext and args:
-                args[-1] = args[-1] +  pylons.request.response_ext
 
-            full_url = '%s/%s' % (vigilo_server, '/'.join(args))
+            # TurboGears supprime l'extension de la requête
+            # car il peut effectivement des traitements différents
+            # à partir d'une même méthode (ex: rendu HTML ou JSON).
+            # On la réintègre dans les paramètres pour que les
+            # fichier .css ou .js puissent être proxifiés correctement.
+            if pylons.request.response_ext and args:
+                args[-1] = args[-1] + pylons.request.response_ext
+
+            # Récupére les informations sur l'emplacement de l'application
+            # distante. Par défaut, on suppose que la connexion se fait en
+            # texte clair (http) sur le port standard (80).
+            app_path = config['app_path.%s' % server_type]
+            app_scheme = config.get('app_scheme.%s' % server_type, 'http')
+            app_port = config.get('app_port.%s' % server_type, 80)
+            app_port = int(app_port)
+
+            full_url = '%s://%s:%d/%s/%s' % (
+                app_scheme,
+                vigilo_server,
+                app_port,
+                app_path,
+                '/'.join(args),
+            )
+
+            # Facilite la traçabilité sur le serveur distant.
             headers = {
                 'X-Forwarded-For': request.remote_addr,
             }
 
+            # On recopie l'en-tête HTTP "Accept" du navigateur.
+            # Nagios utilise par exemple cet en-tête pour effectuer
+            # de la négociation de contenu sur certaines pages
+            # (pour afficher un graphe si Accept = "image/*" ou une
+            # page HTML avec une représentation équivalente sinon).
             if pylons.request.accept:
                 headers['Accept'] = pylons.request.accept.header_value
 
             req = urllib2.Request(full_url, data, headers)
             res = urllib2.urlopen(req)
 
+            # On recopie les en-têtes de la réponse du serveur distant
+            # dans notre propre réponse. Cette étape est particulièrement
+            # utile lorsque le type MIME du résultat n'est pas "text/html".
             info = res.info()
-            if info['Content-Type']:
-                pylons.request.content_type = info['Content-Type']
+            for k, v in info.items():
+                response.headers[k] = v
 
             doc = res.read()
+            # Pour les documents HTML, on effectue une réécriture
+            # des URLs de la page pour que tout passe par le proxy.
             if info['Content-Type'] == 'text/html':
-                doc = doc.replace(config['nagios_web_path'], '%s%s/' %
-                                    (tg.url(mount_point), host))
+                doc = doc.replace(config['app_path.%s' % server_type],
+                            '%s%s/' % (tg.url(mount_point), host))
             return doc
 
-    return NagiosProxyController()
+    return ProxyController()
 
