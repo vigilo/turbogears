@@ -239,8 +239,11 @@ def make_proxy_controller(base_controller, server_type, mount_point):
             # Pour les documents HTML, on effectue une réécriture
             # des URLs de la page pour que tout passe par le proxy.
             if info['Content-Type'] == 'text/html':
-                doc = doc.replace(config['app_path.%s' % server_type],
-                            '%s%s/' % (tg.url(mount_point), host))
+                orig_url = config['app_path.%s' % server_type]
+                # Le str() est obligatoire, sinon exception 
+                # "AttributeError: You cannot access Response.unicode_body unless charset is set"
+                dest_url = str('%s%s/' % (tg.url(mount_point), host))
+                doc = doc.replace(orig_url, dest_url)
             return doc
 
     return ProxyController()
