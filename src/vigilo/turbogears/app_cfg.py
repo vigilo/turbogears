@@ -43,6 +43,8 @@ class VigiloAppConfig(AppConfig):
         # thèmes (cf. <module>/config/middleware.py dans une application).
         self.serve_static = False
 
+        self.DBSession = None
+
     def setup_sa_auth_backend(self):
         """
         Initialisation de la configuration de la base de données.

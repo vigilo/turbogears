@@ -8,6 +8,8 @@ import unittest
 import vigilo.turbogears.js_codec
 
 class JsCodecEncodeTest(unittest.TestCase):
+    """Teste l'échappement de textes pour JavaScript."""
+
     def test_encode_single_quotes(self):
         """Échappement des apostrophes."""
         res = "I'm, you're, and so on.".encode('backslash')
@@ -24,6 +26,8 @@ class JsCodecEncodeTest(unittest.TestCase):
         self.assertEquals("\\\\o/", res)
 
 class JsCodecDecodeTest(unittest.TestCase):
+    """Teste la suppression de l'échappement pour JavaScript."""
+
     def test_decode_single_quotes(self):
         """Suppression de l'échappement sur les apostrophes."""
         res = "I\\'m, you\\'re, and so on.".decode('backslash')
