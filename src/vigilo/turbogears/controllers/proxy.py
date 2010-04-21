@@ -5,7 +5,7 @@ Nagios/RRDgraph et renvoyer le résultat pour qu'il puisse être
 affiché dans Vigilo.
 """
 
-import urllib, urllib2, logging
+import urllib, urllib2, urlparse, logging
 from tg import request, expose, config, response
 from tg.controllers import CUSTOM_CONTENT_TYPE
 import tg, pylons
@@ -204,13 +204,12 @@ def make_proxy_controller(base_controller, server_type, mount_point):
             app_port = config.get('app_port.%s' % server_type, 80)
             app_port = int(app_port)
 
-            full_url = '%s://%s:%d/%s/%s' % (
-                app_scheme,
-                vigilo_server,
-                app_port,
-                app_path,
-                '/'.join(args),
-            )
+            full_url = [app_scheme,
+                        "%s:%d" % (vigilo_server, app_port),
+                        "/%s/%s" % (app_path, '/'.join(args)),
+                        data,
+                        ""]
+            full_url = urlparse.urlunsplit(full_url)
 
             # Facilite la traçabilité sur le serveur distant.
             headers = {
@@ -225,7 +224,7 @@ def make_proxy_controller(base_controller, server_type, mount_point):
             if pylons.request.accept:
                 headers['Accept'] = pylons.request.accept.header_value
 
-            req = urllib2.Request(full_url, data, headers)
+            req = urllib2.Request(full_url, headers=headers)
             res = urllib2.urlopen(req)
 
             # On recopie les en-têtes de la réponse du serveur distant
