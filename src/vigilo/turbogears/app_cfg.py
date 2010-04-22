@@ -45,6 +45,15 @@ class VigiloAppConfig(AppConfig):
 
         self.DBSession = None
 
+        # On monkey-patch WebOb pour pouvoir récupérer facilement les
+        # messages d'erreur éventuellement saisis par le développeur.
+        # Ces messages seront ensuite réutilisés dans le contrôleur
+        # d'erreurs de vigilo, pour donner un contexte à l'erreur.
+        from webob.exc import WSGIHTTPException, Template
+        WSGIHTTPException.html_template_obj = Template('''${body}''')
+        WSGIHTTPException.body_template_obj = Template('''${detail}''')
+
+
     def setup_sa_auth_backend(self):
         """
         Initialisation de la configuration de la base de données.
