@@ -73,11 +73,13 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
                 ).filter(Application.name == server_type
                 ).scalar()
 
-    # Éventuellement, l'utilisateur demande une page
-    # qui se rapporte à un service particulier.
-    service = data.get('service')
+    service = None
+    if data is not None:
+        # Éventuellement, l'utilisateur demande une page
+        # qui se rapporte à un service particulier.
+        service = data.get('service')
 
-    data = urllib.urlencode(data)
+        data = urllib.urlencode(data)
 
     if headers is None:
         headers = {}
