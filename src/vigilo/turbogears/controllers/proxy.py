@@ -11,7 +11,7 @@ from tg.controllers import CUSTOM_CONTENT_TYPE
 import tg, pylons
 from repoze.what.predicates import not_anonymous
 from tg.exceptions import HTTPForbidden, HTTPNotFound
-from pylons.i18n import lazy_ugettext as l_
+from pylons.i18n import ugettext as _
 from sqlalchemy import or_, and_
 
 from vigilo.models.session import DBSession
@@ -59,7 +59,7 @@ def make_proxy_controller(base_controller, server_type, mount_point):
         """
 
         # L'accès à ce contrôleur nécessite d'être identifié.
-        allow_only = not_anonymous(l_("You need to be authenticated"))
+        allow_only = not_anonymous(_("You need to be authenticated"))
 
         def _get_server(self, host):
             """
@@ -120,8 +120,9 @@ def make_proxy_controller(base_controller, server_type, mount_point):
                     ).filter(Host.name == host
                     ).scalar()
             if idhost is None:
-                LOGGER.warning(l_('No such monitored host: %s') % host)
-                raise HTTPNotFound()
+                message = _('No such monitored host: %s') % host
+                LOGGER.warning(message)
+                raise HTTPNotFound(message)
 
             # Éventuellement, l'utilisateur demande une page
             # qui se rapporte à un service particulier.
@@ -161,27 +162,30 @@ def make_proxy_controller(base_controller, server_type, mount_point):
 
             # On traite le cas où l'utilisateur n'a pas les droits requis.
             if perm.scalar() is None:
+                message = None
                 if service is not None:
-                    LOGGER.warning(l_('Access denied to host "%(host)s" and '
-                                    'service "%(service)s"') % {
-                        'host': host,
-                        'service': service,
-                    })
+                    message = _('Access denied to host "%(host)s" and '
+                                'service "%(service)s"') % {
+                                    'host': host,
+                                    'service': service,
+                                }
                 else:
-                    LOGGER.warning(l_('Access denied to host "%s"') % host)
-                raise HTTPForbidden()
+                    messgage = _('Access denied to host "%s"') % host
+                LOGGER.warning(message)
+                raise HTTPForbidden(message)
 
             # On vérifie que l'hôte est effectivement pris en charge.
             # ie: qu'un serveur du parc héberge l'application server_type
             # responsable de cet hôte.
             vigilo_server = self._get_server(host)
             if vigilo_server is None:
-                LOGGER.warning(l_('No %(server_type)s server configured to '
-                                'monitor "%(host)s"') % {
-                    'server_type': server_type,
-                    'host': host,
-                })
-                raise HTTPNotFound()
+                message = _('No %(server_type)s server configured to '
+                            'monitor "%(host)s"') % {
+                                'server_type': server_type,
+                                'host': host,
+                            }
+                LOGGER.warning(message)
+                raise HTTPNotFound(message)
 
             # Préparation des paramètres pour la requête finale.
             kwargs['host'] = host
