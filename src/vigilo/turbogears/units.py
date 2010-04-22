@@ -19,7 +19,7 @@ SUFFIXES = [
        (15, "P"),
    ]
 
-def convert_with_unit(value, dec=None):
+def convert_with_unit(value, digits=3):
     '''
     Conversion valeur avec suffixe multiplication
     (cf http://fr.wikipedia.org/wiki/Kilo et autres)
@@ -33,13 +33,12 @@ def convert_with_unit(value, dec=None):
 
     power, suffix = _get_value_suffix(value)
     if power is None or suffix is None:
-        return value
+        return _get_digits(value, digits)
 
     value = value / (10 ** power)
-    if dec:
-        value = round(value, dec)
     if str(value).endswith(".0"):
-        value = str(value)[:-2]
+        value = int(value)
+    value = _get_digits(value, digits)
     return "%s%s" % (value, suffix)
 
 
@@ -66,3 +65,18 @@ def _get_value_suffix(value):
             continue
         # On prend le dernier: celui qu'on vient juste de dépasser
         return SUFFIXES[index - 1]
+
+def _get_digits(value, digits=3):
+    #print "in:", value
+    if len(str(abs(value))) <= digits:
+        return value
+    if abs(value) < 1:
+        main = str(abs(value))[:digits+2]
+    elif str(abs(value)).count(".") and str(abs(value)).index(".") < digits:
+        main = str(abs(value))[:digits+1]
+    else:
+        main = str(abs(value))[:digits]
+    if value < 0:
+        main = "-%s" % main
+    #print "out:", main
+    return main
