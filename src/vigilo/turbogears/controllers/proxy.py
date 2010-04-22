@@ -18,7 +18,9 @@ from vigilo.models.session import DBSession
 from vigilo.models.tables import VigiloServer, Host, Ventilation, Application
 from vigilo.models.tables import SupItemGroup, LowLevelService
 from vigilo.models.tables.secondary_tables import SUPITEM_GROUP_TABLE
+
 from vigilo.turbogears.helpers import get_current_user
+from vigilo.turbogears.controllers import BaseController
 
 LOGGER = logging.getLogger(__name__)
 
@@ -180,119 +182,100 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
 # - R0201: méthodes pouvant être écrites comme fonctions (imposé par TG2)
 # - W0232: absence de __init__ dans la classe (imposé par TG2)
 
-def make_proxy_controller(base_controller, server_type, mount_point):
+class ProxyController(BaseController):
     """
-    Factory pour le contrôleur du proxy Nagios/RRDgraph.
-    
-    @param base_controller: Objet BaseController de l'application
-        qui désire monter ce contrôleur dans son arborescence.
-    @type base_controller: C{BaseController}
-    @param server_type: Type d'application à "proxifier", il peut
-        s'agir de "nagios" ou "rrdgraph".
-    @type server_type: C{basestring}
-    @param mount_point: URL à laquelle le contrôleur est montée
-        (par rapport au RootController de l'application).
-        Ce paramètre est utilisé pour réécrire correctement les
-        liens absolus générés par Nagios.
-    @type mount_point: C{basestring}
-    @return: Instance du contrôleur agissant comme un proxy
-        vers Nagios/RRDgraph.
-    @rtype: C{ProxyController}
+    Contrôleur agissant comme un proxy vers Nagios ou RRDgraph.
+    Ce contrôleur utilise la méthode get_through_proxy de ce module
+    pour obtenir les documents.
     """
 
-    server_type = u'' + server_type.lower()
+    # L'accès à ce contrôleur nécessite d'être identifié.
+    allow_only = not_anonymous(_("You need to be authenticated"))
 
-    # On s'assure que mount_point commence et se termine par un '/'.
-    if mount_point[0] != '/':
-        mount_point[:0] = '/'
-    if mount_point[-1] != '/':
-        mount_point = mount_point + '/'
+    def __init__(self, server_type, mount_point):
+        super(ProxyController, self).__init__()
+        self.server_type = u'' + server_type.lower()
 
-    class ProxyController(base_controller):
+        # On s'assure que mount_point commence et se termine par un '/'.
+        if mount_point[0] != '/':
+            mount_point[:0] = '/'
+        if mount_point[-1] != '/':
+            mount_point = mount_point + '/'
+        self.mount_point = mount_point
+
+    @expose(content_type=CUSTOM_CONTENT_TYPE)
+    def default(self, *args, **kwargs):
         """
-        Contrôleur agissant comme un proxy vers Nagios ou RRDgraph.
-        Ce contrôleur utilise la méthode get_through_proxy de ce module
-        pour obtenir les documents.
+        Cette méthode capture toutes les requêtes HTTP transmises
+        au contrôleur puis les redirige vers le serveur Nagios ou
+        RRDgraph (selon le paramètre C{server_type} donné au constructeur)
+        responsable de l'hôte donné.
+
+        Si ce contrôleur est monté dans "/nagios/", un appel à
+        "http://localhost/nagios/example.com/cgi-bin/status.cgi?a=b"
+        affichera la page de statut de Nagios concernant l'hôte
+        "example.com".
+        
+        Les paramètres de la requête (query string) sont automatiquement
+        transmis dans la requête au serveur distant (en POST).
+
+        @param args: Parties du chemin. Si le dernier élément du chemin
+            de la requête possèdait une extension, elle est supprimée
+            par TurboGears et n'apparaît pas ici. Le premier élément
+            du chemin DOIT être le nom d'hôte vers lequel on proxifie.
+        @type args: C{tuple}
+        @param kwargs: Paramètres additionnels de la requête
+            (ie: la query string, sous forme de dictionnaire).
+            Ils seront passés en POST dans la requête proxifiée.
+        @type kwargs: C{dict}
         """
+        host = args[0]
+        args = list(args[1:])
 
-        # L'accès à ce contrôleur nécessite d'être identifié.
-        allow_only = not_anonymous(_("You need to be authenticated"))
-
-        @expose(content_type=CUSTOM_CONTENT_TYPE)
-        def default(self, *args, **kwargs):
-            """
-            Cette méthode capture toutes les requêtes HTTP transmises
-            au contrôleur puis les redirige vers le serveur Nagios ou
-            RRDgraph (selon le paramètre C{server_type} donné à la factory)
-            responsable de l'hôte donné.
-
-            Si ce contrôleur est monté dans "/nagios/", un appel à
-            "http://localhost/nagios/example.com/cgi-bin/status.cgi?a=b"
-            affichera la page de statut de Nagios concernant l'hôte
-            "example.com".
-            
-            Les paramètres de la requête (query string) sont automatiquement
-            transmis dans la requête au serveur distant (en POST).
-
-            @param args: Parties du chemin. Si le dernier élément du chemin
-                de la requête possèdait une extension, elle est supprimée
-                par TurboGears et n'apparaît pas ici. Le premier élément
-                du chemin DOIT être le nom d'hôte vers lequel on proxifie.
-            @type args: C{tuple}
-            @param kwargs: Paramètres additionnels de la requête
-                (ie: la query string, sous forme de dictionnaire).
-                Ils seront passés en POST dans la requête proxifiée.
-            @type kwargs: C{dict}
-            """
-            host = args[0]
-            args = list(args[1:])
-
-            # TurboGears supprime l'extension de la requête
-            # car il peut effectivement des traitements différents
-            # à partir d'une même méthode (ex: rendu HTML ou JSON).
-            # On la réintègre dans les paramètres pour que les
-            # fichier .css ou .js puissent être proxifiés correctement.
-            if pylons.request.response_ext and args:
-                args[-1] = args[-1] + pylons.request.response_ext
+        # TurboGears supprime l'extension de la requête
+        # car il peut effectivement des traitements différents
+        # à partir d'une même méthode (ex: rendu HTML ou JSON).
+        # On la réintègre dans les paramètres pour que les
+        # fichier .css ou .js puissent être proxifiés correctement.
+        if pylons.request.response_ext and args:
+            args[-1] = args[-1] + pylons.request.response_ext
 
 
-            # Facilite la traçabilité sur le serveur distant.
-            headers = {
-                'X-Forwarded-For': request.remote_addr,
-            }
+        # Facilite la traçabilité sur le serveur distant.
+        headers = {
+            'X-Forwarded-For': request.remote_addr,
+        }
 
-            # On recopie l'en-tête HTTP "Accept" du navigateur.
-            # Nagios utilise par exemple cet en-tête pour effectuer
-            # de la négociation de contenu sur certaines pages
-            # (pour afficher un graphe si Accept = "image/*" ou une
-            # page HTML avec une représentation équivalente sinon).
-            if pylons.request.accept:
-                headers['Accept'] = pylons.request.accept.header_value
+        # On recopie l'en-tête HTTP "Accept" du navigateur.
+        # Nagios utilise par exemple cet en-tête pour effectuer
+        # de la négociation de contenu sur certaines pages
+        # (pour afficher un graphe si Accept = "image/*" ou une
+        # page HTML avec une représentation équivalente sinon).
+        if pylons.request.accept:
+            headers['Accept'] = pylons.request.accept.header_value
 
-            url = '/'.join(args)
-            if pylons.request.GET:
-                url = '%s?%s' % (url, urllib.urlencode(pylons.request.GET))
-            res = get_through_proxy(server_type, host, url,
-                pylons.request.POST, headers)
+        url = '/'.join(args)
+        if pylons.request.GET:
+            url = '%s?%s' % (url, urllib.urlencode(pylons.request.GET))
+        res = get_through_proxy(self.server_type, host, url,
+            pylons.request.POST, headers)
 
-            # On recopie les en-têtes de la réponse du serveur distant
-            # dans notre propre réponse. Cette étape est particulièrement
-            # utile lorsque le type MIME du résultat n'est pas "text/html".
-            info = res.info()
-            for k, v in info.items():
-                response.headers[k] = v
+        # On recopie les en-têtes de la réponse du serveur distant
+        # dans notre propre réponse. Cette étape est particulièrement
+        # utile lorsque le type MIME du résultat n'est pas "text/html".
+        info = res.info()
+        for k, v in info.items():
+            response.headers[k] = v
 
-            doc = res.read()
-            # Pour les documents HTML, on effectue une réécriture
-            # des URLs de la page pour que tout passe par le proxy.
-            if info['Content-Type'] == 'text/html':
-                orig_url = config['app_path.%s' % server_type]
-                # Le str() est obligatoire, sinon exception 
-                # "AttributeError: You cannot access Response.unicode_body
-                #  unless charset is set"
-                dest_url = str('%s%s/' % (tg.url(mount_point), host))
-                doc = doc.replace(orig_url, dest_url)
-            return doc
-
-    return ProxyController()
+        doc = res.read()
+        # Pour les documents HTML, on effectue une réécriture
+        # des URLs de la page pour que tout passe par le proxy.
+        if info['Content-Type'] == 'text/html':
+            orig_url = config['app_path.%s' % self.server_type]
+            # Le str() est obligatoire, sinon exception 
+            # "AttributeError: You cannot access Response.unicode_body
+            #  unless charset is set"
+            dest_url = str('%s%s/' % (tg.url(self.mount_point), host))
+            doc = doc.replace(orig_url, dest_url)
+        return doc
 
