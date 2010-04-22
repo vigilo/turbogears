@@ -5,7 +5,7 @@ Definit la classe chargée de gérer la configuration des applications
 utilisant Turbogears sur Vigilo.
 """
 
-from pkg_resources import resource_filename
+from pkg_resources import resource_filename, working_set
 import gettext
 
 from tg.configuration import AppConfig, config
@@ -90,7 +90,16 @@ class VigiloAppConfig(AppConfig):
             'vigilo.themes.templates', self.__app_name)
         common_templates = resource_filename(
             'vigilo.themes.templates', 'common')
+
         self.paths['templates'] = [app_templates, common_templates]
+
+        # Spécifique projets
+        for ext in self.get("extensions", []):
+            for entry in working_set.iter_entry_points(
+                                    "vigilo.turbogears.templates", ext):
+                self.paths['templates'].insert(0, resource_filename(
+                                           entry.module_name, "templates"))
+
 
     def setup_genshi_renderer(self):
         """
