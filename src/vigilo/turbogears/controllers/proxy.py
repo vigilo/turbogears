@@ -61,25 +61,27 @@ def make_proxy_controller(base_controller, server_type, mount_point):
         # L'accès à ce contrôleur nécessite d'être identifié.
         allow_only = not_anonymous(_("You need to be authenticated"))
 
-        def _get_server(self, host):
+        def _get_server(self, hostname):
             """
             Étant donné le nom d'un hôte du parc, cette méthode
             renvoie le nom de domaine qualifié (FQDN) du serveur
             de type C{server_type} responsable de cet hôte.
 
-            @param host: Nom d'hôte.
-            @type host: C{unicode}
+            @param hostname: Nom d'hôte.
+            @type  hostname: C{unicode}
 
             @return: FQDN du serveur du type demandé responsable de cet hôte.
             @rtype: C{unicode}
             """
             return DBSession.query(
                         VigiloServer.name
-                    ).filter(VigiloServer.idvigiloserver == \
-                        Ventilation.idvigiloserver
-                    ).filter(Ventilation.idhost == Host.idhost
-                    ).filter(Ventilation.idapp == Application.idapp
-                    ).filter(Host.name == host
+                    ).join(
+                        (Ventilation, Ventilation.idvigiloserver == VigiloServer.idvigiloserver)
+                    ).join(
+                        (Host, Host.idhost == Ventilation.idhost)
+                    ).join(
+                        (Application, Application.idapp == Ventilation.idapp)
+                    ).filter(Host.name == hostname
                     ).filter(Application.name == server_type
                     ).scalar()
 
@@ -130,7 +132,7 @@ def make_proxy_controller(base_controller, server_type, mount_point):
 
             # On regarde si l'utilisateur a accès à l'hôte demandé.
             perm = DBSession.query(
-                        SupItemGroup.idgroup,
+                        SupItemGroup.idgroup
                     ).join(
                         (SUPITEM_GROUP_TABLE, SUPITEM_GROUP_TABLE.c.idgroup ==
                             SupItemGroup.idgroup),
@@ -170,7 +172,7 @@ def make_proxy_controller(base_controller, server_type, mount_point):
                                     'service': service,
                                 }
                 else:
-                    messgage = _('Access denied to host "%s"') % host
+                    message = _('Access denied to host "%s"') % host
                 LOGGER.warning(message)
                 raise HTTPForbidden(message)
 
