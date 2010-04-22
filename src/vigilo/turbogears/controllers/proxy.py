@@ -78,7 +78,6 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
         # Éventuellement, l'utilisateur demande une page
         # qui se rapporte à un service particulier.
         service = data.get('service')
-
         data = urllib.urlencode(data)
 
     if headers is None:
@@ -168,11 +167,11 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
     full_url = [app_scheme,
                 "%s:%d" % (vigilo_server, app_port),
                 "/%s/%s" % (app_path, url),
-                data,
+                "",
                 ""]
     full_url = urlparse.urlunsplit(full_url)
 
-    req = urllib2.Request(full_url, headers=headers)
+    req = urllib2.Request(full_url, data, headers=headers)
     res = urllib2.urlopen(req)
     return res
 
@@ -245,7 +244,6 @@ def make_proxy_controller(base_controller, server_type, mount_point):
                 Ils seront passés en POST dans la requête proxifiée.
             @type kwargs: C{dict}
             """
-
             host = args[0]
             args = list(args[1:])
 
@@ -272,7 +270,10 @@ def make_proxy_controller(base_controller, server_type, mount_point):
                 headers['Accept'] = pylons.request.accept.header_value
 
             url = '/'.join(args)
-            res = get_through_proxy(server_type, host, url, kwargs, headers)
+            if pylons.request.GET:
+                url = '%s?%s' % (url, urllib.urlencode(pylons.request.GET))
+            res = get_through_proxy(server_type, host, url,
+                pylons.request.POST, headers)
 
             # On recopie les en-têtes de la réponse du serveur distant
             # dans notre propre réponse. Cette étape est particulièrement
