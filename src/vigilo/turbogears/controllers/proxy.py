@@ -257,8 +257,11 @@ class ProxyController(BaseController):
         url = '/'.join(args)
         if pylons.request.GET:
             url = '%s?%s' % (url, urllib.urlencode(pylons.request.GET))
-        res = get_through_proxy(self.server_type, host, url,
-            pylons.request.POST, headers)
+        post_data = None
+        if pylons.request.POST:
+            post_data = pylons.request.POST
+        res = get_through_proxy(self.server_type,
+            host, url, post_data, headers)
 
         # On recopie les en-têtes de la réponse du serveur distant
         # dans notre propre réponse. Cette étape est particulièrement
