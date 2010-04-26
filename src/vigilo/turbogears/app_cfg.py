@@ -80,7 +80,7 @@ class VigiloAppConfig(AppConfig):
             try:
                 # XXX We should make use of fallback languages.
                 self.__tpl_translator = gettext.translation(
-                    'theme', i18n_dir, get_lang())
+                    'vigilo-themes', i18n_dir, get_lang())
             except IOError:
                 # During unit tests, no language is defined which results
                 # in an error when get_lang() is called.
