@@ -273,7 +273,7 @@ class ProxyController(BaseController):
         doc = res.read()
         # Pour les documents HTML, on effectue une réécriture
         # des URLs de la page pour que tout passe par le proxy.
-        if info['Content-Type'] == 'text/html':
+        if info['Content-Type'].startswith('text/html'):
             orig_url = config['app_path.%s' % self.server_type]
             # Le str() est obligatoire, sinon exception 
             # "AttributeError: You cannot access Response.unicode_body
