@@ -50,7 +50,7 @@ def get_readable_metro_value(host, ds):
     # doit être chargé après
     from vigilo.turbogears.controllers.proxy import get_through_proxy
 
-    usage_url = "rrdgraph.py/getLastValue?host=%s&ds=%s" % (host, ds.name)
+    usage_url = "lastvalue?host=%s&ds=%s" % (host, ds.name)
     usage_req = get_through_proxy("rrdgraph", host, usage_url)
     usage = usage_req.read()
     try:
