@@ -3,9 +3,12 @@
 Bibliothèque de fonctions outils pour les applications utilisant TurboGears.
 """
 
+import logging
+import urllib2
+
+import simplejson
 from tg import request
 from tg import url
-import logging
 from vigilo.models.tables import User
 
 from pylons.i18n import ugettext as _
@@ -14,6 +17,8 @@ from vigilo.turbogears.units import convert_with_unit
 
 
 __all__ = ('get_current_user', 'get_readable_metro_value', )
+
+LOGGER = logging.getLogger(__name__)
 
 def get_current_user():
     """
@@ -55,15 +60,19 @@ def get_readable_metro_value(host, ds):
     from vigilo.turbogears.controllers.proxy import get_through_proxy
 
     usage_url = "lastvalue?host=%s&ds=%s" % (host, ds.name)
-    usage_req = get_through_proxy("rrdgraph", host, usage_url)
-    usage = usage_req.read()
+    try:
+        usage_req = get_through_proxy("rrdgraph", host, usage_url)
+    except urllib2.HTTPError:
+        logging.warning(_("Failed to get URL: %s") % url("/rrdgraph/%s/%s"
+                                  % (host, usage_url),qualified=True))
+        raise
+    usage = simplejson.load(usage_req)['lastvalue']
     try:
         usage = float(usage)
         percent = int(usage / float(ds.max) * 100)
         usage = convert_with_unit(usage)
     except (ValueError, TypeError):
-        usage = "?"
-        percent = "?"
-        logging.warning(_("Failed to get URL: %s") % url("/rrdgraph/%s/%s"
-                                  % (host, usage_url),qualified=True))
+        LOGGER.warning(_("Failed to convert DS %s on %s: value was %s (max: %s)")
+                          % (ds.name, host, usage, ds.max))
+        usage = percent = None
     return (usage, percent)
