@@ -5,12 +5,14 @@ entre les différentes applications de Vigilo.
 """
 from tg import expose, request
 from sqlalchemy.sql.expression import or_
+from repoze.what.predicates import in_group
 
 from vigilo.models.tables import Host, SupItemGroup, LowLevelService, User
 from vigilo.models.session import DBSession
 from vigilo.models.functions import sql_escape_like
 from vigilo.models.tables.secondary_tables import SUPITEM_GROUP_TABLE
 
+from vigilo.turbogears.helpers import get_current_user
 from vigilo.turbogears.controllers import BaseController
 
 # pylint: disable-msg=R0201,W0232
@@ -38,14 +40,10 @@ class AutoCompleteController(BaseController):
         @rtype: C{dict}
         """
         host = sql_escape_like(host)
-
-        username = request.environ.get('repoze.who.identity'
-                    ).get('repoze.who.userid')
-        user = User.by_user_name(username)
+        user = get_current_user()
         if not user:
             return dict(results=[])
 
-        user_groups = user.supitemgroups(False)
         hostgroup = SUPITEM_GROUP_TABLE.alias()
         servicegroup = SUPITEM_GROUP_TABLE.alias()
         hostnames = DBSession.query(
@@ -56,11 +54,17 @@ class AutoCompleteController(BaseController):
                 (LowLevelService, LowLevelService.idhost == Host.idhost),
                 (servicegroup, servicegroup.c.idsupitem == \
                     LowLevelService.idservice),
-            ).filter(Host.name.ilike('%' + host + '%')
-            ).filter(or_(
+            ).filter(Host.name.ilike('%' + host + '%'))
+
+        is_manager = in_group('managers').is_met(request.environ)
+        if not is_manager:
+            user_groups = user.supitemgroups(False)
+            hostnames = hostnames.filter(or_(
                 hostgroup.c.idgroup.in_(user_groups),
                 servicegroup.c.idgroup.in_(user_groups),
-            )).all()
+            ))
+
+        hostnames = hostnames.all()
         return dict(results=[h[0] for h in hostnames])
 
     @expose('json')
@@ -85,14 +89,10 @@ class AutoCompleteController(BaseController):
         @rtype: C{dict}
         """
         service = sql_escape_like(service)
-        username = request.environ.get('repoze.who.identity'
-                    ).get('repoze.who.userid')
-
-        user = User.by_user_name(username)
+        user = get_current_user()
         if not user:
             return dict(results=[])
 
-        user_groups = user.supitemgroups(False)
         hostgroup = SUPITEM_GROUP_TABLE.alias()
         servicegroup = SUPITEM_GROUP_TABLE.alias()
         services = DBSession.query(
@@ -103,16 +103,20 @@ class AutoCompleteController(BaseController):
                 (hostgroup, hostgroup.c.idsupitem == Host.idhost),
                 (servicegroup, servicegroup.c.idsupitem == \
                     LowLevelService.idservice),
-            ).filter(LowLevelService.servicename.ilike('%' + service + '%')
-            ).filter(or_(
+            ).filter(LowLevelService.servicename.ilike('%' + service + '%'))
+
+        is_manager = in_group('managers').is_met(request.environ)
+        if not is_manager:
+            user_groups = user.supitemgroups(False)
+            services = services.filter(or_(
                 hostgroup.c.idgroup.in_(user_groups),
                 servicegroup.c.idgroup.in_(user_groups),
             ))
 
         if host:
             services = services.filter(Host.name == host)
-        services = services.all()
 
+        services = services.all()
         return dict(results=[s[0] for s in services])
 
     @expose('json')
@@ -129,19 +133,22 @@ class AutoCompleteController(BaseController):
         @rtype: C{dict}
         """
         supitemgroup = sql_escape_like(supitemgroup)
-        username = request.environ.get('repoze.who.identity'
-                    ).get('repoze.who.userid')
-
-        user = User.by_user_name(username)
+        user = get_current_user()
         if not user:
             return dict(results=[])
 
-        user_groups = user.supitemgroups(False)
         supitemgroups = DBSession.query(
                 SupItemGroup.name
             ).distinct(
-            ).filter(SupItemGroup.name.ilike('%' + supitemgroup + '%')
-            ).filter(SupItemGroup.idgroup.in_(user_groups)
-            ).all()
+            ).filter(SupItemGroup.name.ilike('%' + supitemgroup + '%'))
+
+        is_manager = in_group('managers').is_met(request.environ)
+        if not is_manager:
+            user_groups = user.supitemgroups(False)
+            supitemgroups = supitemgroups.filter(
+                SupItemGroup.idgroup.in_(user_groups),
+            )
+
+        supitemgroups = supitemgroups.all()
         return dict(results=[s[0] for s in supitemgroups])
 
