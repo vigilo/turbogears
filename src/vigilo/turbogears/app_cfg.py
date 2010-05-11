@@ -53,6 +53,13 @@ class VigiloAppConfig(AppConfig):
         WSGIHTTPException.html_template_obj = Template('''${body}''')
         WSGIHTTPException.body_template_obj = Template('''${detail}''')
 
+        self.renderers = []
+        self.default_renderer = 'genshi'
+        self.renderers.append('genshi')
+
+        #Configure the base SQLALchemy Setup
+        self.use_sqlalchemy = True
+
 
     def setup_sa_auth_backend(self):
         """
