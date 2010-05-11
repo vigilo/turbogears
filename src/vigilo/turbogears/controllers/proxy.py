@@ -6,11 +6,11 @@ affiché dans Vigilo.
 """
 
 import urllib, urllib2, urlparse, logging
+import tg, pylons
 from tg import request, expose, config, response
 from tg.controllers import CUSTOM_CONTENT_TYPE
-import tg, pylons
-from repoze.what.predicates import not_anonymous
 from tg.exceptions import HTTPForbidden, HTTPNotFound
+from repoze.what.predicates import not_anonymous, in_group
 from pylons.i18n import ugettext as _
 from sqlalchemy import or_, and_
 
@@ -86,7 +86,6 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
         headers = {}
 
     user = get_current_user()
-    supitemgroups = user.supitemgroups(False)
 
     # On vérifie qu'il existe effectivement un hôte portant ce nom
     # et configuré pour être supervisé par Vigilo.
@@ -108,7 +107,12 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
             ).outerjoin(
                 (LowLevelService, LowLevelService.idservice ==
                     SUPITEM_GROUP_TABLE.c.idsupitem),
-            ).filter(SUPITEM_GROUP_TABLE.c.idgroup.in_(supitemgroups))
+            )
+
+    is_manager = in_group('managers').is_met(request.environ)
+    if not is_manager:
+        supitemgroups = user.supitemgroups(False)
+        perm = perm.filter(SUPITEM_GROUP_TABLE.c.idgroup.in_(supitemgroups))
 
     # Si en plus on a demandé un service particulier,
     # alors on vérifie les permissions de l'utilisateur
