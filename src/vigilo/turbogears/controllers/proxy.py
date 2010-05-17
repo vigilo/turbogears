@@ -111,7 +111,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
 
     is_manager = in_group('managers').is_met(request.environ)
     if not is_manager:
-        supitemgroups = user.supitemgroups(False)
+        supitemgroups = [ug[0] for ug in user.supitemgroups() if ug[1]]
         perm = perm.filter(SUPITEM_GROUP_TABLE.c.idgroup.in_(supitemgroups))
 
     # Si en plus on a demandé un service particulier,
@@ -193,11 +193,11 @@ class ProxyController(BaseController):
     pour obtenir les documents.
     """
 
-    # L'accès à ce contrôleur nécessite d'être identifié.
-    allow_only = not_anonymous(_("You need to be authenticated"))
-
-    def __init__(self, server_type, mount_point):
+    def __init__(self, server_type, mount_point, allow_only=None):
         super(ProxyController, self).__init__()
+        if allow_only:
+            self.allow_only = allow_only
+
         self.server_type = u'' + server_type.lower()
 
         # On s'assure que mount_point commence et se termine par un '/'.

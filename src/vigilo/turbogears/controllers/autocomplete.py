@@ -22,6 +22,11 @@ from vigilo.turbogears.controllers import BaseController
 class AutoCompleteController(BaseController):
     """Contrôleur d'auto-complétion."""
 
+    def __init__(self, allow_only=None):
+        super(AutoCompleteController, self).__init__()
+        if allow_only:
+            self.allow_only = allow_only
+
     @expose('json')
     def host(self, host):
         """
@@ -58,7 +63,7 @@ class AutoCompleteController(BaseController):
 
         is_manager = in_group('managers').is_met(request.environ)
         if not is_manager:
-            user_groups = user.supitemgroups(False)
+            user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
             hostnames = hostnames.filter(or_(
                 hostgroup.c.idgroup.in_(user_groups),
                 servicegroup.c.idgroup.in_(user_groups),
@@ -107,7 +112,7 @@ class AutoCompleteController(BaseController):
 
         is_manager = in_group('managers').is_met(request.environ)
         if not is_manager:
-            user_groups = user.supitemgroups(False)
+            user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
             services = services.filter(or_(
                 hostgroup.c.idgroup.in_(user_groups),
                 servicegroup.c.idgroup.in_(user_groups),
@@ -144,7 +149,7 @@ class AutoCompleteController(BaseController):
 
         is_manager = in_group('managers').is_met(request.environ)
         if not is_manager:
-            user_groups = user.supitemgroups(False)
+            user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
             supitemgroups = supitemgroups.filter(
                 SupItemGroup.idgroup.in_(user_groups),
             )
