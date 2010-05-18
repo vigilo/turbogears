@@ -165,14 +165,15 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
     # Récupére les informations sur l'emplacement de l'application
     # distante. Par défaut, on suppose que la connexion se fait en
     # texte clair (http) sur le port standard (80).
-    app_path = config['app_path.%s' % server_type]
+    app_path = config['app_path.%s' % server_type].strip('/')
     app_scheme = config.get('app_scheme.%s' % server_type, 'http')
     app_port = config.get('app_port.%s' % server_type, 80)
     app_port = int(app_port)
+    url = url.lstrip('/')
 
     full_url = [app_scheme,
                 "%s:%d" % (vigilo_server, app_port),
-                "/%s/%s" % (app_path, url),
+                "%s/%s" % (app_path, url),
                 "",
                 ""]
     full_url = urlparse.urlunsplit(full_url)
