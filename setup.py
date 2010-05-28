@@ -24,6 +24,7 @@ setup(
         "tg.devtools",
         "TurboGears2 >= 2.0b7",
         "ToscaWidgets >= 0.9.7.1",
+        "tw.forms",
         "PasteDeploy",
         "Paste",
         "decorator != 3.1.0", # Blacklist bad version

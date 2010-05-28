@@ -17,7 +17,7 @@ BuildRequires:   python-setuptools
 
 Requires:   python >= 2.5
 Requires:   python-setuptools
-Requires:   vigilo-common vigilo-models vigilo-themes
+Requires:   vigilo-models vigilo-themes
 Requires:   python-repoze.tm2
 Requires:   python-repoze.what-quickstart
 Requires:   python-tg.devtools
@@ -25,6 +25,7 @@ Requires:   python-turbogears2
 Requires:   python-toscawidgets
 Requires:   python-paste
 Requires:   python-pastedeploy
+Requires:   python-tw.forms
 
 Buildarch:  noarch
 
