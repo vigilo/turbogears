@@ -177,6 +177,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
                 "",
                 ""]
     full_url = urlparse.urlunsplit(full_url)
+    LOGGER.info(_("Fetching '%s' through the proxy"), full_url)
 
     req = urllib2.Request(full_url, data, headers=headers)
     res = urllib2.urlopen(req)
