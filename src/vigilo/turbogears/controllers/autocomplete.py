@@ -7,7 +7,8 @@ from tg import expose, request
 from sqlalchemy.sql.expression import or_
 from repoze.what.predicates import in_group
 
-from vigilo.models.tables import Host, SupItemGroup, LowLevelService, User
+from vigilo.models.tables import User, Host, SupItemGroup, \
+                                    LowLevelService, HighLevelService
 from vigilo.models.session import DBSession
 from vigilo.models.functions import sql_escape_like
 from vigilo.models.tables.secondary_tables import SUPITEM_GROUP_TABLE
@@ -120,6 +121,44 @@ class AutoCompleteController(BaseController):
 
         if host:
             services = services.filter(Host.name == host)
+
+        services = services.all()
+        return dict(results=[s[0] for s in services])
+
+    @expose('json')
+    def hls(self, service):
+        """
+        Auto-compléteur pour les noms des services de haut niveau.
+        
+        @param service: Motif qui doit apparaître dans le nom de service.
+        @type service: C{unicode}
+        @note: Les caractères '?' et '*' peuvent être utilisés dans
+            le paramètre L{service} pour remplacer un caractère quelconque
+            ou une chaîne de caractères, respectivement.
+            Ex: 'ho?t*' permet de récupérer 'host', 'honte' et 'hostile',
+            mais pas 'hote' ou 'hopital'.
+        @return: Un dictionnaire dont la clé 'results' contient la liste
+            des noms des services de haut niveau correspondant au motif
+            donné et auxquels l'utilisateur a accès.
+        @rtype: C{dict}
+        """
+        service = sql_escape_like(service)
+        user = get_current_user()
+        if not user:
+            return dict(results=[])
+
+        services = DBSession.query(
+                HighLevelService.servicename
+            ).distinct(
+            ).filter(HighLevelService.servicename.ilike('%' + service + '%'))
+
+        is_manager = in_group('managers').is_met(request.environ)
+        if not is_manager:
+            user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
+            services = services.join(
+                    (SUPITEM_GROUP_TABLE, SUPITEM_GROUP_TABLE.c.idsupitem == \
+                                            HighLevelService.idservice),
+                ).filter(SUPITEM_GROUP_TABLE.c.idgroup.in_(user_groups))
 
         services = services.all()
         return dict(results=[s[0] for s in services])
