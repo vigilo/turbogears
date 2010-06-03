@@ -29,7 +29,7 @@ class VigiloAppConfig(AppConfig):
     def __init__(self, app_name):
         """Crée une nouvelle configuration."""
         super(VigiloAppConfig, self).__init__()
-        self.__app_name = app_name
+        self.app_name = app_name
         self.__tpl_translator = None
 
         # Pour gérer les thèmes, la notation "pointée" n'est pas utilisée.
@@ -103,7 +103,7 @@ class VigiloAppConfig(AppConfig):
         super(VigiloAppConfig, self).setup_paths()
 
         app_templates = resource_filename(
-            'vigilo.themes.templates', self.__app_name)
+            'vigilo.themes.templates', self.app_name)
         common_templates = resource_filename(
             'vigilo.themes.templates', 'common')
 
