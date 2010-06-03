@@ -30,6 +30,8 @@ setup(
         "decorator != 3.1.0", # Blacklist bad version
         "vigilo-models",
         "vigilo-themes-default",
+        "rum",
+        "TgRum",
     ],
     paster_plugins=[
         'PasteScript',
@@ -54,6 +56,9 @@ setup(
 #        ('**.py', 'python', None),
 #    ]},
     entry_points={
+        'rum.renderers': [
+            'vigilo = vigilo.turbogears.rum.configuration:RumGenshiRenderer',
+        ],
     },
     package_dir={'': 'src'},
 )
