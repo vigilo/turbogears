@@ -26,6 +26,10 @@ Requires:   python-toscawidgets
 Requires:   python-paste
 Requires:   python-pastedeploy
 Requires:   python-tw.forms
+Requires:   python-rum
+Requires:   python-TgRum
+Requires:   python-RumAlchemy
+Requires:   python-tw.rum
 
 Buildarch:  noarch
 
