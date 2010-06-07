@@ -42,11 +42,7 @@ setup(
     namespace_packages = [
         'vigilo',
         ],
-    packages=[
-        'vigilo',
-        'vigilo.turbogears',
-        'vigilo.turbogears.controllers',
-    ],
+    packages=find_packages("src"),
     test_suite='nose.collector',
     tests_require=tests_require,
     extras_require={
