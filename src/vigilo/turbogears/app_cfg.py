@@ -5,7 +5,7 @@ Definit la classe chargée de gérer la configuration des applications
 utilisant Turbogears sur Vigilo.
 """
 
-from pkg_resources import resource_filename, working_set
+from pkg_resources import resource_filename, working_set, get_distribution
 import gettext
 
 from tg.configuration import AppConfig, config
@@ -59,6 +59,9 @@ class VigiloAppConfig(AppConfig):
 
         #Configure the base SQLALchemy Setup
         self.use_sqlalchemy = True
+
+        # version
+        self.version = get_distribution(self.app_name).version
 
 
     def setup_sa_auth_backend(self):
