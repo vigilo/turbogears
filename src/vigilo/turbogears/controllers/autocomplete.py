@@ -71,7 +71,7 @@ class AutoCompleteController(BaseController):
             ))
 
         hostnames = hostnames.all()
-        return dict(results=[h[0] for h in hostnames])
+        return dict(results=[h.name for h in hostnames])
 
     @expose('json')
     def service(self, service, host=None):
@@ -123,7 +123,7 @@ class AutoCompleteController(BaseController):
             services = services.filter(Host.name == host)
 
         services = services.all()
-        return dict(results=[s[0] for s in services])
+        return dict(results=[s.servicename for s in services])
 
     @expose('json')
     def hls(self, service):
@@ -161,7 +161,7 @@ class AutoCompleteController(BaseController):
                 ).filter(SUPITEM_GROUP_TABLE.c.idgroup.in_(user_groups))
 
         services = services.all()
-        return dict(results=[s[0] for s in services])
+        return dict(results=[s.servicename for s in services])
 
     @expose('json')
     def supitemgroup(self, supitemgroup):
@@ -194,5 +194,44 @@ class AutoCompleteController(BaseController):
             )
 
         supitemgroups = supitemgroups.all()
-        return dict(results=[s[0] for s in supitemgroups])
+        return dict(results=[s.name for s in supitemgroups])
+
+    @expose('json')
+    def perfdatasource(self, ds, host):
+        """
+        Auto-compléteur pour les noms des indicateurs de performance.
+
+        @param ds: Motif qui doit apparaître dans le nom de l'indicateur.
+        @type ds: C{unicode}
+        @param host: Nom de l'hôte auquel l'indicateur doit être rattaché.
+        @type host: C{unicode}
+        @return: Un dictionnaire dont la clé 'results' contient la liste
+            des noms des indicateurs de supervision sur L{host} correspondant
+            au motif donné et auxquels l'utilisateur a accès.
+        @rtype: C{dict}
+        """
+        ds = sql_escape_like(ds)
+        host = sql_escape_like(host)
+        user = get_current_user()
+        if not user:
+            return dict(results=[])
+
+        perfdatasources = DBSession.query(
+                PerfDataSource.name
+            ).distinct(
+            ).join(
+                (Host, Host.idhost == PerfDataSource.idhost),
+            ).filter(PerfDataSource.name.ilike('%' + ds + '%')
+            ).filter(Host.name == host)
+
+        is_manager = in_group('managers').is_met(request.environ)
+        if not is_manager:
+            user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
+            perfdatasources = perfdatasources.join(
+                    (SUPITEM_GROUP_TABLE, SUPITEM_GROUP_TABLE.c.idsupitem == \
+                        Host.idhost),
+                ).filter(SUPITEM_GROUP_TABLE.c.idgroup.in_(user_groups))
+
+        perfdatasources = perfdatasources.all()
+        return dict(results=[ds.name for ds in perfdatasources])
 
