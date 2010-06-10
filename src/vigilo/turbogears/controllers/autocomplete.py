@@ -7,7 +7,7 @@ from tg import expose, request
 from sqlalchemy.sql.expression import or_
 from repoze.what.predicates import in_group
 
-from vigilo.models.tables import User, Host, SupItemGroup, \
+from vigilo.models.tables import User, Host, SupItemGroup, PerfDataSource, \
                                     LowLevelService, HighLevelService
 from vigilo.models.session import DBSession
 from vigilo.models.functions import sql_escape_like
