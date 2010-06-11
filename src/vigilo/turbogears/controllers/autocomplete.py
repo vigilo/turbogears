@@ -8,10 +8,11 @@ from sqlalchemy.sql.expression import or_
 from repoze.what.predicates import in_group
 
 from vigilo.models.tables import User, Host, SupItemGroup, PerfDataSource, \
-                                    LowLevelService, HighLevelService
+                                    LowLevelService, HighLevelService, Graph
 from vigilo.models.session import DBSession
 from vigilo.models.functions import sql_escape_like
-from vigilo.models.tables.secondary_tables import SUPITEM_GROUP_TABLE
+from vigilo.models.tables.secondary_tables import SUPITEM_GROUP_TABLE, \
+                                            GRAPH_PERFDATASOURCE_TABLE
 
 from vigilo.turbogears.helpers import get_current_user
 from vigilo.turbogears.controllers import BaseController
@@ -63,6 +64,7 @@ class AutoCompleteController(BaseController):
             ).filter(Host.name.ilike('%' + host + '%'))
 
         is_manager = in_group('managers').is_met(request.environ)
+        print "is_manager ? %r" % is_manager
         if not is_manager:
             user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
             hostnames = hostnames.filter(or_(
@@ -234,4 +236,47 @@ class AutoCompleteController(BaseController):
 
         perfdatasources = perfdatasources.all()
         return dict(results=[ds.name for ds in perfdatasources])
+
+    @expose('json')
+    def graph(self, graphname, host):
+        """
+        Auto-compléteur pour les noms des graphes.
+
+        @param graphname: Motif qui doit apparaître dans le nom du graphe.
+        @type graphname: C{unicode}
+        @param host: Nom de l'hôte auquel le graphe doit être rattaché.
+        @type host: C{unicode}
+        @return: Un dictionnaire dont la clé 'results' contient la liste
+            des noms des graphes portant sur L{host}, correspondant
+            au motif donné et auxquels l'utilisateur a accès.
+        @rtype: C{dict}
+        """
+        graphname = sql_escape_like(graphname)
+        host = sql_escape_like(host)
+        user = get_current_user()
+        if not user:
+            return dict(results=[])
+
+        graphs = DBSession.query(
+                Graph.name
+            ).distinct(
+            ).join(
+                (GRAPH_PERFDATASOURCE_TABLE,
+                    GRAPH_PERFDATASOURCE_TABLE.c.idgraph == Graph.idgraph),
+                (PerfDataSource, PerfDataSource.idperfdatasource ==
+                    GRAPH_PERFDATASOURCE_TABLE.c.idperfdatasource),
+                (Host, Host.idhost == PerfDataSource.idhost),
+            ).filter(Graph.name.ilike('%' + ds + '%')
+            ).filter(Host.name == host)
+
+        is_manager = in_group('managers').is_met(request.environ)
+        if not is_manager:
+            user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
+            graphs = graphs.join(
+                    (SUPITEM_GROUP_TABLE, SUPITEM_GROUP_TABLE.c.idsupitem == \
+                        Host.idhost),
+                ).filter(SUPITEM_GROUP_TABLE.c.idgroup.in_(user_groups))
+
+        graphs = graphs.all()
+        return dict(results=[g.name for g in graphs])
 

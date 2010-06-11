@@ -10,7 +10,7 @@ import tg, pylons
 from tg import request, expose, config, response
 from tg.controllers import CUSTOM_CONTENT_TYPE
 from tg.exceptions import HTTPForbidden, HTTPNotFound
-from repoze.what.predicates import not_anonymous, in_group
+from repoze.what.predicates import in_group
 from pylons.i18n import ugettext as _
 from sqlalchemy import or_, and_
 
