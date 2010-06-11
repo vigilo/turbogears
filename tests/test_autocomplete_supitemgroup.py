@@ -13,7 +13,7 @@ from vigilo.models import tables
 from vigilo.turbogears.controllers.autocomplete import AutoCompleteController
 
 
-class TestAutocompleterForHost(unittest.TestCase):
+class TestAutocompleterForSupItemGroup(unittest.TestCase):
     def setUp(self):
         print "Creating the tables"
         metadata.create_all()
