@@ -44,8 +44,17 @@ class TestAutocompleterForHost(unittest.TestCase):
             group_name=u'managers',
         )
         DBSession.add(managers)
-
         manager.usergroups.append(managers)
+
+        DBSession.add(tables.Host(
+            name=u'a.b.c',
+            checkhostcmd=u'foo',
+            hosttpl=u'bar',
+            mainip=u'127.0.0.1',
+            snmpcommunity=u'',
+            snmpport=4242,
+            weight=0,
+        ))
         DBSession.flush()
 
     def tearDown(self):
@@ -59,69 +68,28 @@ class TestAutocompleterForHost(unittest.TestCase):
         # Aucun hôte dans la base ne porte ce nom,
         # dont le résultat doit être vide.
         res = self.ctrl.host(u'no_such_host')
-        expected = {
-            'results': [],
-        }
+        expected = {'results': []}
         self.assertEqual(res, expected)
 
     def test_exact_host(self):
         """Autocomplétion avec un motif d'hôte sans jokers."""
-        DBSession.add(tables.Host(
-            name=u'a.b.c',
-            checkhostcmd=u'foo',
-            hosttpl=u'bar',
-            mainip=u'127.0.0.1',
-            snmpcommunity=u'',
-            snmpport=4242,
-            weight=0,
-        ))
-        DBSession.flush()
-
         # On doit obtenir l'hôte demandé.
         res = self.ctrl.host(u'a.b.c')
-        expected = {
-            'results': [u'a.b.c'],
-        }
+        expected = {'results': [u'a.b.c']}
         self.assertEqual(res, expected)
 
     def test_host_joker_1(self):
         """Autocomplétion sur un motif d'hôte avec point d'interrogation."""
-        DBSession.add(tables.Host(
-            name=u'a.b.c',
-            checkhostcmd=u'foo',
-            hosttpl=u'bar',
-            mainip=u'127.0.0.1',
-            snmpcommunity=u'',
-            snmpport=4242,
-            weight=0,
-        ))
-        DBSession.flush()
-
         # On doit obtenir l'hôte "a.b.c" qui correspond au motif donné.
         res = self.ctrl.host(u'a.?.c')
-        expected = {
-            'results': [u'a.b.c'],
-        }
+        expected = {'results': [u'a.b.c']}
         self.assertEqual(res, expected)
 
     def test_host_joker_n(self):
         """Autocomplétion sur un motif d'hôte avec astérisque."""
-        DBSession.add(tables.Host(
-            name=u'a.b.c',
-            checkhostcmd=u'foo',
-            hosttpl=u'bar',
-            mainip=u'127.0.0.1',
-            snmpcommunity=u'',
-            snmpport=4242,
-            weight=0,
-        ))
-        DBSession.flush()
-
         # On doit obtenir l'hôte "a.b.c" qui correspond au motif donné.
         res = self.ctrl.host(u'a*c')
-        expected = {
-            'results': [u'a.b.c'],
-        }
+        expected = {'results': [u'a.b.c']}
         self.assertEqual(res, expected)
 
     def test_exact_host_no_access(self):
@@ -138,22 +106,9 @@ class TestAutocompleterForHost(unittest.TestCase):
         }
         tg.request.environ['repoze.what.credentials']['groups'] = []
 
-        DBSession.add(tables.Host(
-            name=u'a.b.c',
-            checkhostcmd=u'foo',
-            hosttpl=u'bar',
-            mainip=u'127.0.0.1',
-            snmpcommunity=u'',
-            snmpport=4242,
-            weight=0,
-        ))
-        DBSession.flush()
-
         # On NE doit PAS obtenir l'hôte demandé car nous n'avons
         # pas les permissions dessus.
         res = self.ctrl.host(u'a*c')
-        expected = {
-            'results': [],
-        }
+        expected = {'results': []}
         self.assertEqual(res, expected)
 

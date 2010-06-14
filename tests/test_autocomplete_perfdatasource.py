@@ -12,8 +12,7 @@ from vigilo.models import tables
 
 from vigilo.turbogears.controllers.autocomplete import AutoCompleteController
 
-
-class TestAutocompleterForHLS(unittest.TestCase):
+class TestAutocompleterForPerfDataSource(unittest.TestCase):
     def setUp(self):
         print "Creating the tables"
         metadata.create_all()
@@ -46,14 +45,24 @@ class TestAutocompleterForHLS(unittest.TestCase):
         DBSession.add(managers)
         manager.usergroups.append(managers)
 
-        DBSession.add(tables.HighLevelService(
-            servicename=u'foobarbaz',
-            message=u'',
-            warning_threshold=0,
-            critical_threshold=0,
-            priority=0,
-            op_dep=u'+',
-        ))
+        self.host = tables.Host(
+            name=u'a.b.c',
+            checkhostcmd=u'foo',
+            hosttpl=u'bar',
+            mainip=u'127.0.0.1',
+            snmpcommunity=u'',
+            snmpport=4242,
+            weight=0,
+        )
+        DBSession.add(self.host)
+
+        self.ds = tables.PerfDataSource(
+            name=u'foobarbaz',
+            host=self.host,
+            type=u'',
+            factor=1.0,
+        )
+        DBSession.add(self.ds)
         DBSession.flush()
 
     def tearDown(self):
@@ -62,37 +71,41 @@ class TestAutocompleterForHLS(unittest.TestCase):
         metadata.drop_all()
         self.ctrl = None
 
-    def test_no_such_hls(self):
-        """Autocomplétion sur un nom de HLS inexistant."""
-        # Aucun HLS dans la base ne porte ce nom,
+    def test_no_such_datasource(self):
+        """Autocomplétion sur un nom de datasource inexistant."""
+        # Aucune datasource dans la base ne porte ce nom,
         # dont le résultat doit être vide.
-        res = self.ctrl.hls(u'no_such_hls')
-        expected = {'results': []}
+        res = self._query_autocompleter(u'no_such_datasource')
+        expected = {
+            'results': [],
+        }
         self.assertEqual(res, expected)
 
-    def test_exact_hls(self):
-        """Autocomplétion avec un motif de HLS sans jokers."""
-        # On doit obtenir le HLS demandé.
-        res = self.ctrl.hls(u'foobarbaz')
+    def test_exact_datasource(self):
+        """Autocomplétion avec un motif de datasource sans jokers."""
+        # On doit obtenir la datasource demandée.
+        res = self._query_autocompleter(u'foobarbaz')
         expected = {'results': [u'foobarbaz']}
         self.assertEqual(res, expected)
 
-    def test_hls_joker_1(self):
-        """Autocomplétion sur un motif de HLS avec point d'interrogation."""
-        # On doit obtenir le HLS "foobarbaz" qui correspond au motif donné.
-        res = self.ctrl.hls(u'f?ob?rb?z')
+    def test_datasource_joker_1(self):
+        """Autocomplétion sur une datasource avec point d'interrogation."""
+        # On doit obtenir la datasource "foobarbaz"
+        # qui correspond au motif donné.
+        res = self._query_autocompleter(u'f?ob?rb?z')
         expected = {'results': [u'foobarbaz']}
         self.assertEqual(res, expected)
 
-    def test_hls_joker_n(self):
-        """Autocomplétion sur un motif de HLS avec astérisque."""
-        # On doit obtenir le HLS "foobarbaz" qui correspond au motif donné.
-        res = self.ctrl.hls(u'foo*baz')
+    def test_datasource_joker_n(self):
+        """Autocomplétion sur une datasource avec astérisque."""
+        # On doit obtenir la datasource "foobarbaz"
+        # qui correspond au motif donné.
+        res = self._query_autocompleter(u'foo*baz')
         expected = {'results': [u'foobarbaz']}
         self.assertEqual(res, expected)
 
-    def test_exact_hls_no_access(self):
-        """Autocomplétion sur un nom de HLS, sans les permissions."""
+    def test_exact_datasource_no_access(self):
+        """Autocomplétion sur une datasource, sans les permissions."""
         DBSession.add(tables.User(
             user_name=u'foobar',
             fullname=u'',
@@ -105,9 +118,12 @@ class TestAutocompleterForHLS(unittest.TestCase):
         }
         tg.request.environ['repoze.what.credentials']['groups'] = []
 
-        # On NE doit PAS obtenir le HLS demandé car nous n'avons
+        # On NE doit PAS obtenir le datasource demandé car nous n'avons
         # pas les permissions dessus.
-        res = self.ctrl.hls(u'*')
+        res = self._query_autocompleter(u'*')
         expected = {'results': []}
         self.assertEqual(res, expected)
+
+    def _query_autocompleter(self, pattern):
+        return self.ctrl.perfdatasource(pattern, self.host.name)
 

@@ -43,8 +43,27 @@ class TestAutocompleterForServiceWithoutHost(unittest.TestCase):
             group_name=u'managers',
         )
         DBSession.add(managers)
-
         manager.usergroups.append(managers)
+
+        self.host = tables.Host(
+            name=u'a.b.c',
+            checkhostcmd=u'foo',
+            hosttpl=u'bar',
+            mainip=u'127.0.0.1',
+            snmpcommunity=u'',
+            snmpport=4242,
+            weight=0,
+        )
+        DBSession.add(self.host)
+
+        self.service = tables.LowLevelService(
+            servicename=u'foobarbaz',
+            host=self.host,
+            command=u'',
+            weight=42,
+            op_dep=u'+',
+        )
+        DBSession.add(self.service)
         DBSession.flush()
 
     def tearDown(self):
@@ -58,95 +77,31 @@ class TestAutocompleterForServiceWithoutHost(unittest.TestCase):
         # Aucun service dans la base ne porte ce nom,
         # dont le résultat doit être vide.
         res = self._query_autocompleter(u'no_such_service')
-        expected = {
-            'results': [],
-        }
+        expected = {'results': []}
         self.assertEqual(res, expected)
 
     def test_exact_service(self):
         """Autocomplétion avec un motif de service sans jokers."""
-        host = tables.Host(
-            name=u'a.b.c',
-            checkhostcmd=u'foo',
-            hosttpl=u'bar',
-            mainip=u'127.0.0.1',
-            snmpcommunity=u'',
-            snmpport=4242,
-            weight=0,
-        )
-        DBSession.add(host)
-        DBSession.add(tables.LowLevelService(
-            servicename=u'foobarbaz',
-            host=host,
-            command=u'',
-            weight=42,
-            op_dep=u'+',
-        ))
-        DBSession.flush()
 
         # On doit obtenir le service demandé.
         res = self._query_autocompleter(u'foobarbaz')
-        expected = {
-            'results': [u'foobarbaz'],
-        }
+        expected = {'results': [u'foobarbaz']}
         self.assertEqual(res, expected)
 
     def test_service_joker_1(self):
         """Autocomplétion sur un motif de service avec point d'interrogation."""
-        host = tables.Host(
-            name=u'a.b.c',
-            checkhostcmd=u'foo',
-            hosttpl=u'bar',
-            mainip=u'127.0.0.1',
-            snmpcommunity=u'',
-            snmpport=4242,
-            weight=0,
-        )
-        DBSession.add(host)
-        DBSession.add(tables.LowLevelService(
-            servicename=u'foobarbaz',
-            host=host,
-            command=u'',
-            weight=42,
-            op_dep=u'+',
-        ))
-        DBSession.flush()
-
         # On doit obtenir le service "foobarbaz"
         # qui correspond au motif donné.
         res = self._query_autocompleter(u'f?ob?rb?z')
-        expected = {
-            'results': [u'foobarbaz'],
-        }
+        expected = {'results': [u'foobarbaz']}
         self.assertEqual(res, expected)
 
     def test_service_joker_n(self):
         """Autocomplétion sur un motif de service avec astérisque."""
-        host = tables.Host(
-            name=u'a.b.c',
-            checkhostcmd=u'foo',
-            hosttpl=u'bar',
-            mainip=u'127.0.0.1',
-            snmpcommunity=u'',
-            snmpport=4242,
-            weight=0,
-        )
-        DBSession.add(host)
-        DBSession.add(tables.LowLevelService(
-            servicename=u'foobarbaz',
-            host=host,
-            command=u'',
-            weight=42,
-            op_dep=u'+',
-        ))
-        DBSession.flush()
-
         # On doit obtenir le service "foobarbaz"
         # qui correspond au motif donné.
         res = self._query_autocompleter(u'foo*baz')
-        expected = {
-            'results': [u'foobarbaz'],
-        }
+        expected = {'results': [u'foobarbaz']}
         self.assertEqual(res, expected)
 
     def test_exact_service_no_access(self):
@@ -163,31 +118,10 @@ class TestAutocompleterForServiceWithoutHost(unittest.TestCase):
         }
         tg.request.environ['repoze.what.credentials']['groups'] = []
 
-        host = tables.Host(
-            name=u'a.b.c',
-            checkhostcmd=u'foo',
-            hosttpl=u'bar',
-            mainip=u'127.0.0.1',
-            snmpcommunity=u'',
-            snmpport=4242,
-            weight=0,
-        )
-        DBSession.add(host)
-        DBSession.add(tables.LowLevelService(
-            servicename=u'foobarbaz',
-            host=host,
-            command=u'',
-            weight=42,
-            op_dep=u'+',
-        ))
-        DBSession.flush()
-
         # On NE doit PAS obtenir le service demandé car nous n'avons
         # pas les permissions dessus.
-        res = self._query_autocompleter(u'foo*bar')
-        expected = {
-            'results': [],
-        }
+        res = self._query_autocompleter(u'*')
+        expected = {'results': []}
         self.assertEqual(res, expected)
 
     def _query_autocompleter(self, pattern):

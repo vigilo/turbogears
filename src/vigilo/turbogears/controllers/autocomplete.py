@@ -266,7 +266,7 @@ class AutoCompleteController(BaseController):
                 (PerfDataSource, PerfDataSource.idperfdatasource ==
                     GRAPH_PERFDATASOURCE_TABLE.c.idperfdatasource),
                 (Host, Host.idhost == PerfDataSource.idhost),
-            ).filter(Graph.name.ilike('%' + ds + '%')
+            ).filter(Graph.name.ilike('%' + graphname + '%')
             ).filter(Host.name == host)
 
         is_manager = in_group('managers').is_met(request.environ)
