@@ -2,8 +2,6 @@
 """Version personnalisée du contrôleur de Rum."""
 
 from tgrum import RumAlchemyController, TGDummyPolicy
-from pylons.i18n import lazy_ugettext as l_
-from repoze.what import predicates
 from vigilo.models import session
 from vigilo.turbogears.rum.configuration import get_rum_config
 

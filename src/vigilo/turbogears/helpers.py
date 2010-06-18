@@ -72,7 +72,8 @@ def get_readable_metro_value(host, ds):
         percent = int(usage / float(ds.max) * 100)
         usage = convert_with_unit(usage)
     except (ValueError, TypeError):
-        LOGGER.warning(_("Failed to convert DS %s on %s: value was %s (max: %s)")
+        LOGGER.warning(_("Failed to convert DS %s on %s: "
+                         "value was %s (max: %s)")
                           % (ds.name, host, usage, ds.max))
         usage = percent = None
     return (usage, percent)

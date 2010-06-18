@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Gère différents aspects de la configuration de Rum."""
 
-from pylons.i18n import ugettext as _
 from tg.i18n import get_lang
 from tg import config
 
@@ -79,7 +78,7 @@ def get_rum_config(model):
 
     base_tpl_dir = resource_filename('vigilo.themes.templates', '')
 
-    # Récupère la liste des dossiers contenus dans vigiXXX/i18n,
+    # Récupère la liste des dossiers contenus dans <application>/i18n,
     # tels que ces dossiers ne sont pas cachés.
     # On élimine les langues au format xx_YY car rum ne les supporte pas.
     locales = [l for l in resource_listdir(config.app_name, 'i18n')

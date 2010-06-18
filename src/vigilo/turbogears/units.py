@@ -43,6 +43,17 @@ def convert_with_unit(value, digits=3):
 
 
 def _get_value_suffix(value):
+    """
+    Retourne le suffixe de la puissance de 10 la plus
+    adaptée pour représenter la valeur donnée.
+    Par exemple, si L{value} vaut 1000, cette fonction
+    renvoie "k" (kilo).
+
+    @param value: Valeur pour laquelle on demande le suffixe.
+    @type value: C{int}
+    @return: Suffixe le mieux adapté pour représenter L{value}.
+    @rtype: C{str}
+    """
     # determination puissance de 10
     value = abs(value)
     power = 0
