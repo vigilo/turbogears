@@ -4,7 +4,7 @@ Module fournissant des types de champs additionnels pour rum.
 """
 
 from tw import forms
-from tw.rum.viewfactory import WidgetFactory, input_actions
+from tw.rum.viewfactory import WidgetFactory, input_actions, inline_actions
 from tw.rum import widgets
 from rum import ViewFactory
 from rum.fields import Field, Relation
