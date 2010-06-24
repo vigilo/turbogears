@@ -61,10 +61,9 @@ class AutoCompleteController(BaseController):
                 (LowLevelService, LowLevelService.idhost == Host.idhost),
                 (servicegroup, servicegroup.c.idsupitem == \
                     LowLevelService.idservice),
-            ).filter(Host.name.ilike('%' + host + '%'))
+            ).filter(Host.name.ilike(host))
 
         is_manager = in_group('managers').is_met(request.environ)
-        print "is_manager ? %r" % is_manager
         if not is_manager:
             user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
             hostnames = hostnames.filter(or_(
@@ -111,7 +110,7 @@ class AutoCompleteController(BaseController):
                 (hostgroup, hostgroup.c.idsupitem == Host.idhost),
                 (servicegroup, servicegroup.c.idsupitem == \
                     LowLevelService.idservice),
-            ).filter(LowLevelService.servicename.ilike('%' + service + '%'))
+            ).filter(LowLevelService.servicename.ilike(service))
 
         is_manager = in_group('managers').is_met(request.environ)
         if not is_manager:
@@ -152,7 +151,7 @@ class AutoCompleteController(BaseController):
         services = DBSession.query(
                 HighLevelService.servicename
             ).distinct(
-            ).filter(HighLevelService.servicename.ilike('%' + service + '%'))
+            ).filter(HighLevelService.servicename.ilike(service))
 
         is_manager = in_group('managers').is_met(request.environ)
         if not is_manager:
@@ -186,7 +185,7 @@ class AutoCompleteController(BaseController):
         supitemgroups = DBSession.query(
                 SupItemGroup.name
             ).distinct(
-            ).filter(SupItemGroup.name.ilike('%' + supitemgroup + '%'))
+            ).filter(SupItemGroup.name.ilike(supitemgroup))
 
         is_manager = in_group('managers').is_met(request.environ)
         if not is_manager:
@@ -223,7 +222,7 @@ class AutoCompleteController(BaseController):
             ).distinct(
             ).join(
                 (Host, Host.idhost == PerfDataSource.idhost),
-            ).filter(PerfDataSource.name.ilike('%' + ds + '%')
+            ).filter(PerfDataSource.name.ilike(ds)
             ).filter(Host.name == host)
 
         is_manager = in_group('managers').is_met(request.environ)
@@ -266,7 +265,7 @@ class AutoCompleteController(BaseController):
                 (PerfDataSource, PerfDataSource.idperfdatasource ==
                     GRAPH_PERFDATASOURCE_TABLE.c.idperfdatasource),
                 (Host, Host.idhost == PerfDataSource.idhost),
-            ).filter(Graph.name.ilike('%' + graphname + '%')
+            ).filter(Graph.name.ilike(graphname)
             ).filter(Host.name == host)
 
         is_manager = in_group('managers').is_met(request.environ)
