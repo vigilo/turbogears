@@ -46,7 +46,7 @@ class RumGenshiRenderer(GenshiRenderer):
         # On consifigure la classe pour que les traductions
         # de vigilo.themes soient utilisées pour traduire
         # les templates utilisés par Rum.
-        i18n_dir = resource_filename('vigilo.themes', 'i18n')
+        i18n_dir = resource_filename('vigilo.themes.i18n', '')
         lang = get_lang()
 
         if lang is None:
