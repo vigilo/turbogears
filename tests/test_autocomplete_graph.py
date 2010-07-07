@@ -49,7 +49,7 @@ class TestAutocompleterForGraph(unittest.TestCase):
             name=u'a.b.c',
             checkhostcmd=u'foo',
             hosttpl=u'bar',
-            mainip=u'127.0.0.1',
+            address=u'127.0.0.1',
             snmpcommunity=u'',
             snmpport=4242,
             weight=0,
