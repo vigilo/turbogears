@@ -85,7 +85,7 @@ class VigiloAppConfig(AppConfig):
     def __setup_template_translator(self):
         """Crée un traducteur pour les modèles (templates)."""
         if self.__tpl_translator is None:
-            i18n_dir = resource_filename('vigilo.themes', 'i18n')
+            i18n_dir = resource_filename('vigilo.themes.i18n', '')
 
             try:
                 # XXX We should make use of fallback languages.
