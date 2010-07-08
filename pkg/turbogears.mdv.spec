@@ -30,6 +30,15 @@ Requires:   python-rum
 Requires:   python-TgRum
 Requires:   python-RumAlchemy
 Requires:   python-tw.rum
+Requires:   python-decorator >= 3.1.2
+Requires:   python-pylons >= 0.9.7
+Requires:   python-genshi >= 0.5.1
+Requires:   python-webflash >= 0.1a8
+Requires:   python-toscawidgets >= 0.9.4
+Requires:   python-weberror >= 0.10.1
+Requires:   python-repoze.what-pylons >= 1.0rc3
+Requires:   python-repoze.tm2 >= 1.0a4
+Requires:   python-turbojson >= 1.2.1
 
 Buildarch:  noarch
 
@@ -64,4 +73,3 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Feb 08 2010 Aurelien Bompard <aurelien.bompard@c-s.fr> - 1.0-1
-- initial package
