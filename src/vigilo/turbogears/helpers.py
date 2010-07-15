@@ -69,7 +69,10 @@ def get_readable_metro_value(host, ds):
     usage = simplejson.load(usage_req)['lastvalue']
     try:
         usage = float(usage)
-        percent = int(usage / float(ds.max) * 100)
+        if ds.max is not None:
+            percent = int(usage / float(ds.max) * 100)
+        else:
+            percent = None
         usage = convert_with_unit(usage)
     except (ValueError, TypeError):
         LOGGER.warning(_("Failed to convert DS %s on %s: "
