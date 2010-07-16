@@ -3,7 +3,7 @@
 Module permettant de mettre en commun le contrôleur d'auto-complétion
 entre les différentes applications de Vigilo.
 """
-from tg import expose, request
+from tg import expose, request, validate
 from sqlalchemy.sql.expression import or_
 from repoze.what.predicates import in_group
 
@@ -16,6 +16,8 @@ from vigilo.models.tables.secondary_tables import SUPITEM_GROUP_TABLE, \
 
 from vigilo.turbogears.helpers import get_current_user
 from vigilo.turbogears.controllers import BaseController
+from tw.forms import validators
+from formencode import schema
 
 # pylint: disable-msg=R0201,W0232
 # - R0201: méthodes pouvant être écrites comme fonctions (imposé par TG2)
@@ -29,8 +31,14 @@ class AutoCompleteController(BaseController):
         if allow_only:
             self.allow_only = allow_only
 
+    class HostSchema(schema.Schema):
+        """Schéma de validation de la méthode default."""
+        host = validators.UnicodeString()
+        partial = validators.StringBool(if_missing=False)
+
+    @validate(validators=HostSchema())
     @expose('json')
-    def host(self, host):
+    def host(self, host, partial):
         """
         Auto-compléteur pour les noms d'hôtes.
         
@@ -50,6 +58,9 @@ class AutoCompleteController(BaseController):
         user = get_current_user()
         if not user:
             return dict(results=[])
+
+        if partial:
+            host += '%'
 
         hostgroup = SUPITEM_GROUP_TABLE.alias()
         servicegroup = SUPITEM_GROUP_TABLE.alias()
@@ -74,8 +85,15 @@ class AutoCompleteController(BaseController):
         hostnames = hostnames.all()
         return dict(results=[h.name for h in hostnames])
 
+    class ServiceSchema(schema.Schema):
+        """Schéma de validation de la méthode default."""
+        service = validators.UnicodeString()
+        host = validators.UnicodeString(if_missing=None)
+        partial = validators.StringBool(if_missing=False)
+
+    @validate(validators=ServiceSchema())
     @expose('json')
-    def service(self, service, host=None):
+    def service(self, service, host, partial):
         """
         Auto-compléteur pour les noms des services d'un hôte.
         
@@ -99,6 +117,9 @@ class AutoCompleteController(BaseController):
         user = get_current_user()
         if not user:
             return dict(results=[])
+
+        if partial:
+            service += '%'
 
         hostgroup = SUPITEM_GROUP_TABLE.alias()
         servicegroup = SUPITEM_GROUP_TABLE.alias()
@@ -126,8 +147,14 @@ class AutoCompleteController(BaseController):
         services = services.all()
         return dict(results=[s.servicename for s in services])
 
+    class HlsSchema(schema.Schema):
+        """Schéma de validation de la méthode default."""
+        service = validators.UnicodeString()
+        partial = validators.StringBool(if_missing=False)
+
+    @validate(validators=HlsSchema())
     @expose('json')
-    def hls(self, service):
+    def hls(self, service, partial):
         """
         Auto-compléteur pour les noms des services de haut niveau.
         
@@ -148,6 +175,9 @@ class AutoCompleteController(BaseController):
         if not user:
             return dict(results=[])
 
+        if partial:
+            service += '%'
+
         services = DBSession.query(
                 HighLevelService.servicename
             ).distinct(
@@ -164,8 +194,14 @@ class AutoCompleteController(BaseController):
         services = services.all()
         return dict(results=[s.servicename for s in services])
 
+    class SupItemGroupSchema(schema.Schema):
+        """Schéma de validation de la méthode default."""
+        supitemgroup = validators.UnicodeString()
+        partial = validators.StringBool(if_missing=False)
+
+    @validate(validators=SupItemGroupSchema())
     @expose('json')
-    def supitemgroup(self, supitemgroup):
+    def supitemgroup(self, supitemgroup, partial):
         """
         Auto-compléteur pour les noms des groupes d'éléments supervisés.
 
@@ -182,6 +218,9 @@ class AutoCompleteController(BaseController):
         if not user:
             return dict(results=[])
 
+        if partial:
+            supitemgroup += '%'
+
         supitemgroups = DBSession.query(
                 SupItemGroup.name
             ).distinct(
@@ -197,8 +236,15 @@ class AutoCompleteController(BaseController):
         supitemgroups = supitemgroups.all()
         return dict(results=[s.name for s in supitemgroups])
 
+    class PerfDataSourceSchema(schema.Schema):
+        """Schéma de validation de la méthode default."""
+        ds = validators.UnicodeString()
+        host = validators.UnicodeString()
+        partial = validators.StringBool(if_missing=False)
+
+    @validate(validators=PerfDataSourceSchema())
     @expose('json')
-    def perfdatasource(self, ds, host):
+    def perfdatasource(self, ds, host, partial):
         """
         Auto-compléteur pour les noms des indicateurs de performance.
 
@@ -216,6 +262,9 @@ class AutoCompleteController(BaseController):
         user = get_current_user()
         if not user:
             return dict(results=[])
+
+        if partial:
+            ds += '%'
 
         perfdatasources = DBSession.query(
                 PerfDataSource.name
@@ -236,8 +285,15 @@ class AutoCompleteController(BaseController):
         perfdatasources = perfdatasources.all()
         return dict(results=[ds.name for ds in perfdatasources])
 
+    class GraphSchema(schema.Schema):
+        """Schéma de validation de la méthode default."""
+        graphname = validators.UnicodeString()
+        host = validators.UnicodeString()
+        partial = validators.StringBool(if_missing=False)
+
+    @validate(validators=GraphSchema())
     @expose('json')
-    def graph(self, graphname, host):
+    def graph(self, graphname, host, partial):
         """
         Auto-compléteur pour les noms des graphes.
 
@@ -255,6 +311,9 @@ class AutoCompleteController(BaseController):
         user = get_current_user()
         if not user:
             return dict(results=[])
+
+        if partial:
+            graphname += '%'
 
         graphs = DBSession.query(
                 Graph.name
