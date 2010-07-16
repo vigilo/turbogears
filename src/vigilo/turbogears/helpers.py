@@ -44,22 +44,21 @@ def get_current_user():
         return None
     return User.by_user_name(userid)
 
-def get_readable_metro_value(host, ds):
+def get_readable_metro_value(pds):
     """
     Récupère et retourne une valeur "lisible" de métrologie, c'est à dire avec
     trois chiffres significatifs et l'ordre de grandeur.
 
-    @param host: le nom d'hôte
-    @type  host: C{str}
-    @param ds: l'indicateur de métrologie
-    @type  ds: L{vigilo.models.tables.perfdatasource}
+    @param pds: l'indicateur de métrologie
+    @type  pds: L{vigilo.models.tables.perfdatasource.PerfDataSource}
     @return: un couple valeur entière, valeur en pourcentage 
     @rtype:  C{tuple}
     """
     # doit être chargé après
     from vigilo.turbogears.controllers.proxy import get_through_proxy
 
-    usage_url = "lastvalue?host=%s&ds=%s" % (host, ds.name)
+    host = pds.host.name
+    usage_url = "lastvalue?host=%s&ds=%s" % (host, pds.name)
     try:
         usage_req = get_through_proxy("rrdgraph", host, usage_url)
     except urllib2.HTTPError:
@@ -69,14 +68,14 @@ def get_readable_metro_value(host, ds):
     usage = simplejson.load(usage_req)['lastvalue']
     try:
         usage = float(usage)
-        if ds.max is not None:
-            percent = int(usage / float(ds.max) * 100)
+        if pds.max is not None:
+            percent = int(usage / float(pds.max) * 100)
         else:
             percent = None
         usage = convert_with_unit(usage)
     except (ValueError, TypeError):
         LOGGER.warning(_("Failed to convert DS %s on %s: "
                          "value was %s (max: %s)")
-                          % (ds.name, host, usage, ds.max))
+                          % (pds.name, host, usage, pds.max))
         usage = percent = None
     return (usage, percent)
