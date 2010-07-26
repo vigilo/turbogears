@@ -4,14 +4,16 @@ API d'interrogation des hôtes
 """
 
 import tg
-from tg import expose, request, validate
+from tg import expose, validate
 from tg.controllers import RestController
 from tg.decorators import with_trailing_slash
 from tg.exceptions import HTTPNotFound
+from sqlalchemy.sql.expression import or_
+from repoze.what.predicates import in_group
 
 from vigilo.models import tables
 from vigilo.models.session import DBSession
-
+from vigilo.turbogears.helpers import get_current_user
 from vigilo.turbogears.controllers.api import get_host
 from vigilo.turbogears.controllers.api.services import ServicesController
 from vigilo.turbogears.controllers.api.graphs import GraphsController
@@ -30,7 +32,31 @@ class HostsController(RestController):
             content_type="application/vnd.vigilo.api+xml; charset=utf-8")
     @expose("json")
     def get_all(self):
-        hosts = DBSession.query(tables.Host).all()
+        user = get_current_user()
+        if not user:
+            raise HTTPForbidden("You must be logged in")
+        hostgroup = tables.secondary_tables.SUPITEM_GROUP_TABLE.alias()
+        servicegroup = tables.secondary_tables.SUPITEM_GROUP_TABLE.alias()
+        hosts = DBSession.query(
+                tables.Host.idhost, tables.Host.name
+            ).distinct(
+            ).outerjoin(
+                (hostgroup, hostgroup.c.idsupitem == tables.Host.idhost),
+                (tables.LowLevelService,
+                    tables.LowLevelService.idhost == tables.Host.idhost),
+                (servicegroup,
+                    servicegroup.c.idsupitem == tables.LowLevelService.idservice),
+            )
+        # ACLs
+        is_manager = in_group('managers').is_met(tg.request.environ)
+        if not is_manager:
+            user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
+            hosts = hosts.filter(or_(
+                hostgroup.c.idgroup.in_(user_groups),
+                servicegroup.c.idgroup.in_(user_groups),
+            ))
+
+        hosts = hosts.all()
         result = []
         for host in hosts:
             result.append({

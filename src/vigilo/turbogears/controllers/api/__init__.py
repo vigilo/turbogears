@@ -6,10 +6,11 @@ Ce module contient des fonctions utilisées par les contrôlleurs de l'API
 import urlparse
 
 import tg
-from tg.exceptions import HTTPNotFound, HTTPBadRequest
+from tg.exceptions import HTTPNotFound, HTTPBadRequest, HTTPForbidden
 
 from vigilo.models import tables
 from vigilo.models.session import DBSession
+from vigilo.turbogears.helpers import get_current_user
 
 
 def get_parent_id(obj_type=None):
@@ -38,6 +39,12 @@ def get_host(idhost):
         host = DBSession.query(tables.Host).get(idhost)
     if host is None:
         raise HTTPNotFound("Can't find the host: %s" % idhost)
+    # ACLs
+    user = get_current_user()
+    if not user:
+        raise HTTPForbidden("You must be logged in")
+    if not host.is_allowed_for(user):
+        raise HTTPForbidden("Access to this host is forbidden")
     return host
 
 def get_service(idservice, service_type, idhost=None):
@@ -63,6 +70,12 @@ def get_service(idservice, service_type, idhost=None):
         service = DBSession.query(tables.Service).get(idservice)
     if service is None:
         raise HTTPNotFound("Can't find the service: %s" % idservice)
+    # ACLs
+    user = get_current_user()
+    if not user:
+        raise HTTPForbidden("You must be logged in")
+    if not serivce.is_allowed_for(user):
+        raise HTTPForbidden("Access to this service is forbidden")
     return service
 
 def get_pds(idpds, idhost=None):

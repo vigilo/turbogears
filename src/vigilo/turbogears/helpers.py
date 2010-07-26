@@ -37,6 +37,8 @@ def get_current_user():
             return user
 
     # Pour les autres plugins.
+    if request.identity is None:
+        return None
     userid = request.identity.get('repoze.who.userid', None)
     if userid is None:
         return None
