@@ -7,6 +7,23 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
+import os
+
+def install_i18n(i18ndir, destdir):
+    data_files = []
+    langs = []
+    for f in os.listdir(i18ndir):
+        if os.path.isdir(os.path.join(i18ndir, f)) and not f.startswith("."):
+            langs.append(f)
+    for lang in langs:
+        for f in os.listdir(os.path.join(i18ndir, lang, "LC_MESSAGES")):
+            if f.endswith(".mo"):
+                data_files.append(
+                        (os.path.join(destdir, lang, "LC_MESSAGES"),
+                         [os.path.join(i18ndir, lang, "LC_MESSAGES", f)])
+                )
+    return data_files
+
 tests_require = []
 
 setup(
@@ -48,13 +65,17 @@ setup(
     extras_require={
         'tests': tests_require,
     },
-#    message_extractors={'vigilo.turbogears': [
-#        ('**.py', 'python', None),
-#    ]},
+    message_extractors={
+        'src': [
+            ('**.py', 'python', None),
+        ],
+    },
     entry_points={
         'rum.renderers': [
             'vigilo = vigilo.turbogears.rum.configuration:RumGenshiRenderer',
         ],
     },
     package_dir={'': 'src'},
+    data_files=install_i18n("i18n", os.path.join(sys.prefix, 'share', 'locale')),
 )
+

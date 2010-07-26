@@ -1,13 +1,23 @@
 # -*- coding: utf-8 -*-
 """Contrôleurs communs à plusieurs applications."""
 
-from tg import TGController, tmpl_context
+from tg import TGController, tmpl_context, request, i18n
 from tg.render import render
-from tg import request
 from pylons.i18n import _, ungettext, N_
 from tw.api import WidgetBunch
 
 __all__ = ['Controller', 'BaseController']
+
+old_set_temp_lang = i18n.set_temporary_lang
+def set_temporary_lang(languages):
+    import pylons
+    from gettext import translation
+
+    old_set_temp_lang(languages)
+    t = translation('vigilo-turbogears', languages=languages, fallback=True)
+    pylons.c.vigilo_turbogears = t
+i18n.set_temporary_lang = set_temporary_lang
+
 
 class BaseController(TGController):
     """

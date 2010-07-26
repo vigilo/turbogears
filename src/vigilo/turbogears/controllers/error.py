@@ -2,7 +2,7 @@
 """Error controller"""
 
 from tg import request, expose
-from pylons.i18n import ugettext as _
+from vigilo.turbogears.helpers import ugettext as _
 
 __all__ = ['ErrorController']
 
@@ -23,10 +23,10 @@ class ErrorController(object):
     def document(self, *args, **kwargs):
         """Render the error document"""
         resp = request.environ.get('pylons.original_response')
-        default_message = ("<p>" + _("We're sorry but we weren't "
-                           "able to process this request.") + "</p>")
+        default_message = _("We're sorry but we weren't "
+                           "able to process this request.")
         if resp and resp.unicode_body:
-            default_message = "<p>%s</p>" % resp.unicode_body
+            default_message = resp.unicode_body
         values = dict(prefix=request.environ.get('SCRIPT_NAME', ''),
                       code=int(request.params.get('code', resp.status_int)),
                       message=request.params.get('message', default_message))
