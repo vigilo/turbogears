@@ -86,9 +86,17 @@ def get_readable_metro_value(pds):
     return (usage, percent)
 
 def ugettext(message):
+    # Lors du passage des tests unitaires,
+    # le code qui définit le traducteur n'est pas exécuté.
+    if not pylons.c.vigilo_turbogears:
+        return message
     return pylons.c.vigilo_turbogears.ugettext(message)
 
 def lazy_ugettext(message):
+    # Lors du passage des tests unitaires,
+    # le code qui définit le traducteur n'est pas exécuté.
+    if not pylons.c.vigilo_turbogears:
+        return message
     return pylons.c.vigilo_turbogears.lazy_ugettext(message)
 _ = ugettext
 
