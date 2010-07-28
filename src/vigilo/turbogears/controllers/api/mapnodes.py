@@ -3,10 +3,8 @@
 API d'interrogation des hôtes
 """
 
-import pylons
-
 import tg
-from tg import expose, request, validate
+from tg import expose
 from tg.decorators import with_trailing_slash
 from tg.controllers import RestController
 from tg.exceptions import HTTPNotFound
@@ -14,26 +12,42 @@ from tg.exceptions import HTTPNotFound
 from vigilo.models import tables
 from vigilo.models.session import DBSession
 
-from vigilo.turbogears.controllers.api import get_parent_id
+from vigilo.turbogears.controllers.api import get_parent_id, check_map_access
 
 
 class MapNodesController(RestController):
+    """
+    Controlleur d'accès aux noeuds d'une carte. Ne peut être monté qu'après une
+    carte dans l'arborescence.
+    """
+
+    # Messages PyLint qu'on supprime
+    # - R0201: method could be a function: c'est le fonctionnement du
+    #   RestController
+    # - C0111: missing docstring: les fonctions get_all et get_one sont
+    #   définies dans le RestController
+
 
     @with_trailing_slash
     @expose("api/mapnodes-all.xml",
             content_type="application/vnd.vigilo.api+xml; charset=utf-8")
     @expose("json")
     def get_all(self):
+        # pylint:disable-msg=C0111,R0201
         idmap = get_parent_id("maps")
         if idmap is not None:
-            map = DBSession.query(tables.Map).get(idmap)
+            m = DBSession.query(tables.Map).get(idmap)
         else:
-            raise HTTPNotFound("The URL seems invalid")
+            raise HTTPNotFound("The URL seems invalid (no map found)")
+        if m is None:
+            raise HTTPNotFound("The map %s does not exist" % idmap)
+        check_map_access(m)
         result = []
-        for node in map.nodes:
+        for node in m.nodes:
             result.append({
                 "id": node.idmapnode,
-                "href": tg.url("/api/maps/%s/nodes/%s" % (idmap, node.idmapnode)),
+                "href": tg.url("/api/maps/%s/nodes/%s"
+                               % (idmap, node.idmapnode)),
                 })
         return dict(mapnodes=result)
 
@@ -42,7 +56,9 @@ class MapNodesController(RestController):
             content_type="application/vnd.vigilo.api+xml; charset=utf-8")
     @expose("json")
     def get_one(self, idmapnode):
+        # pylint:disable-msg=C0111,R0201
         node = DBSession.query(tables.MapNode).get(idmapnode)
+        check_map_access(node.map)
         result = {
                 "id": node.idmapnode,
                 "label": node.label,

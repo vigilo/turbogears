@@ -3,28 +3,40 @@
 API d'interrogation des hôtes
 """
 
-import pylons
 
 import tg
-from tg import expose, request, validate
+from tg import expose
 from tg.decorators import with_trailing_slash
 from tg.controllers import RestController
 from tg.exceptions import HTTPNotFound
 
-from vigilo.models import tables
-from vigilo.models.session import DBSession
+#from vigilo.models import tables
+#from vigilo.models.session import DBSession
 
 from vigilo.turbogears.controllers.api import get_host, get_pds, get_parent_id
 
 
 class PerfDataSourcesController(RestController):
+    """
+    Controlleur d'accès aux données de performances d'un hôte. Ne peut être
+    monté qu'après un hôte dans l'arborescence. Techniquement on pourrait aussi
+    le monter à la racine, mais il faudrait alors limiter le nombre de
+    résultats pour éviter de saturer la machine. On fera s'il y a besoin.
+    """
 
+
+    # Messages PyLint qu'on supprime
+    # - R0201: method could be a function: c'est le fonctionnement du
+    #   RestController
+    # - C0111: missing docstring: les fonctions get_all et get_one sont
+    #   définies dans le RestController
 
     @with_trailing_slash
     @expose("api/pds-all.xml",
             content_type="application/vnd.vigilo.api+xml; charset=utf-8")
     @expose("json")
     def get_all(self):
+        # pylint:disable-msg=C0111,R0201
         idhost = get_parent_id("hosts")
         if idhost is None:
             raise HTTPNotFound("Can't find the host")
@@ -44,6 +56,7 @@ class PerfDataSourcesController(RestController):
             content_type="application/vnd.vigilo.api+xml; charset=utf-8")
     @expose("json")
     def get_one(self, idpds):
+        # pylint:disable-msg=C0111,R0201
         idhost = get_parent_id("hosts")
         pds = get_pds(idpds, idhost)
         result = {

@@ -4,13 +4,14 @@
 API REST d'accès aux ressources de Vigilo
 
 Une des contraintes est de permettre une sortie XML et une sortie JSON
-quasi-équivalentes. Ça oblige à pas mal de répétitions, alors qu'on pourrait
-mieux utiliser le langage de templates.
+quasi-équivalentes. Ça oblige à pas mal de répétitions, alors qu'on
+pourrait mieux utiliser le langage de templates.
 """
 
-import tg
-from tg import expose, request, validate
+from tg import expose
 from tg.decorators import with_trailing_slash
+from pylons.i18n import lazy_ugettext as l_
+from repoze.what.predicates import not_anonymous
 
 from vigilo.turbogears.controllers import BaseController
 
@@ -23,6 +24,22 @@ from vigilo.turbogears.controllers.api.graphs import GraphsController
 
 class ApiRootController(BaseController):
     """Racine de l'API"""
+
+    # Messages PyLint qu'on supprime
+    # - R0201: method could be a function: c'est le fonctionnement du
+    #   Controller TurboGears
+    # - C0111: missing docstring: la fonction index est définie dans le
+    #   Controller
+
+
+    # Prédicat pour la restriction de l'accès aux interfaces.
+    access_restriction = not_anonymous(msg=l_("You need to be authenticated"))
+    #access_restriction = All(
+    #    not_anonymous(msg=l_("You need to be authenticated")),
+    #    Any(in_group('managers'),
+    #        has_permission('vigimap-access'),
+    #        msg=l_("You don't have read access to VigiMap"))
+    #)
 
     hosts = HostsController()
     lls = ServicesController("lls")
@@ -39,6 +56,7 @@ class ApiRootController(BaseController):
             content_type="application/vnd.vigilo.api+xml; charset=utf-8")
     @expose("json")
     def index(self):
+        # pylint:disable-msg=C0111,R0201
         result = {}
         resources = ["hosts", "lls", "hls", "supitemgroups",
                      "maps", "mapgroups", "graphs", "graphgroups"]
