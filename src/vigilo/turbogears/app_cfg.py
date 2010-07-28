@@ -7,6 +7,7 @@ utilisant Turbogears sur Vigilo.
 
 from pkg_resources import resource_filename, working_set, get_distribution
 import gettext
+from paste.deploy.converters import asbool
 
 from tg.configuration import AppConfig, config
 from tg.i18n import get_lang
@@ -70,6 +71,23 @@ class VigiloAppConfig(AppConfig):
         # version
         self.version = get_distribution(self.app_name).version
 
+        # Fournisseur de variables pour les templates.
+        self.variable_provider = self._variable_provider
+
+    def _variable_provider(self):
+        """
+        Fournisseur de variables pour les templates.
+        Cette fonction est appelée à chaque fois qu'un template doit
+        être affiché. Le dictionnaire retourné par cette fonction est
+        fusionné avec les variables passées au template.
+
+        @return: Dictionnaire de variables supplémentaires qui seront
+            utilisables dans le template.
+        @rtype: C{dict}
+        """
+        return {
+            'asbool': asbool,
+        }
 
     def setup_sa_auth_backend(self):
         """
