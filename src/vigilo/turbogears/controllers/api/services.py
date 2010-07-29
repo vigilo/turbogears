@@ -21,7 +21,7 @@ from vigilo.turbogears.controllers.api import get_host, get_all_services, \
 LOGGER = logging.getLogger(__name__)
 
 
-class ServicesController(RestController):
+class ServicesV1(RestController):
     """
     Récupération des sous-classes de L{Service<tables.Service>}, c'est à dire
     L{LowLevelService<tables.LowLevelService>} et
@@ -45,13 +45,16 @@ class ServicesController(RestController):
     # - C0111: missing docstring: les fonctions get_all et get_one sont
     #   définies dans le RestController
 
+    apiver = 1
+
+
     def __init__(self, service_type):
         """
         @param service_type: type de service, passé en argument. Soit C{lls}
             soit C{hls}
         @type  service_type: C{str}
         """
-        super(ServicesController, self).__init__()
+        super(ServicesV1, self).__init__()
         self.type = service_type
         if self.type == "lls":
             self.model_class = tables.LowLevelService
@@ -87,7 +90,8 @@ class ServicesController(RestController):
             result.append({
                 "id": service.idservice,
                 "type": self.type,
-                "href": tg.url("/api/%s/%s" % (self.type, service.idservice)),
+                "href": tg.url("/api/v%s/%s/%s"
+                            % (self.apiver, self.type, service.idservice)),
                 "name": service.servicename,
                 })
         return dict(services=result)
@@ -105,7 +109,8 @@ class ServicesController(RestController):
         result = {"id": service.idservice,
                   "type": self.type,
                   "name": service.servicename,
-                  "href": tg.url("/api/%s/%s" % (self.type, service.idservice))
+                  "href": tg.url("/api/v%s/%s/%s"
+                            % (self.apiver, self.type, service.idservice))
                   }
         status = {
                 "name": service.state.name.statename,
@@ -126,7 +131,8 @@ class ServicesController(RestController):
             result["host"] = {
                     "id": service.host.idhost,
                     "name": service.host.name,
-                    "href": tg.url("/api/hosts/%s/" % service.host.idhost)
+                    "href": tg.url("/api/v%s/hosts/%s/"
+                                % (self.apiver, service.host.idhost)),
                     }
         else:
             result["host"] = None

@@ -8,6 +8,7 @@ quasi-équivalentes. Ça oblige à pas mal de répétitions, alors qu'on
 pourrait mieux utiliser le langage de templates.
 """
 
+import tg
 from tg import expose
 from tg.decorators import with_trailing_slash
 from pylons.i18n import lazy_ugettext as l_
@@ -15,11 +16,35 @@ from repoze.what.predicates import not_anonymous
 
 from vigilo.turbogears.controllers import BaseController
 
-from vigilo.turbogears.controllers.api.hosts import HostsController
-from vigilo.turbogears.controllers.api.services import ServicesController
-from vigilo.turbogears.controllers.api.groups import GroupsController
-from vigilo.turbogears.controllers.api.maps import MapsController
-from vigilo.turbogears.controllers.api.graphs import GraphsController
+from vigilo.turbogears.controllers.api.hosts import HostsV1
+from vigilo.turbogears.controllers.api.services import ServicesV1
+from vigilo.turbogears.controllers.api.groups import GroupsV1
+from vigilo.turbogears.controllers.api.maps import MapsV1
+from vigilo.turbogears.controllers.api.graphs import GraphsV1
+
+
+class ApiV1Controller(BaseController):
+
+    hosts = HostsV1()
+    lls = ServicesV1("lls")
+    hls = ServicesV1("hls")
+    supitemgroups = GroupsV1("supitem")
+    maps = MapsV1()
+    mapgroups = GroupsV1("map")
+    graphs = GraphsV1()
+    graphgroups = GroupsV1("graph")
+
+    @with_trailing_slash
+    @expose("json")
+    @expose("api/v1.xml", content_type="application/xml; charset=utf-8")
+    def index(self):
+        # pylint:disable-msg=C0111,R0201
+        result = {}
+        resources = ["hosts", "lls", "hls", "supitemgroups",
+                     "maps", "mapgroups", "graphs", "graphgroups"]
+        for resource in resources:
+            result[resource] = tg.url("/api/v1/%s" % resource)
+        return {"api": result}
 
 
 class ApiRootController(BaseController):
@@ -41,25 +66,13 @@ class ApiRootController(BaseController):
     #        msg=l_("You don't have read access to VigiMap"))
     #)
 
-    hosts = HostsController()
-    lls = ServicesController("lls")
-    hls = ServicesController("hls")
-    supitemgroups = GroupsController("supitem")
-    maps = MapsController()
-    mapgroups = GroupsController("map")
-    graphs = GraphsController()
-    graphgroups = GroupsController("graph")
-
+    v1 = ApiV1Controller()
 
     @with_trailing_slash
     @expose("json")
     @expose("api/root.xml", content_type="application/xml; charset=utf-8")
     def index(self):
         # pylint:disable-msg=C0111,R0201
-        result = {}
-        resources = ["hosts", "lls", "hls", "supitemgroups",
-                     "maps", "mapgroups", "graphs", "graphgroups"]
-        for resource in resources:
-            result[resource] = "/api/%s" % resource
-        return {"api": result}
+        result = [{"version": 1, "href": tg.url("/api/v1")}, ]
+        return {"apis": result}
 

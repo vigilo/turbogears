@@ -16,7 +16,7 @@ from tg.exceptions import HTTPNotFound
 from vigilo.turbogears.controllers.api import get_host, get_pds, get_parent_id
 
 
-class PerfDataSourcesController(RestController):
+class PerfDataSourcesV1(RestController):
     """
     Controlleur d'accès aux données de performances d'un hôte. Ne peut être
     monté qu'après un hôte dans l'arborescence. Techniquement on pourrait aussi
@@ -24,12 +24,14 @@ class PerfDataSourcesController(RestController):
     résultats pour éviter de saturer la machine. On fera s'il y a besoin.
     """
 
-
     # Messages PyLint qu'on supprime
     # - R0201: method could be a function: c'est le fonctionnement du
     #   RestController
     # - C0111: missing docstring: les fonctions get_all et get_one sont
     #   définies dans le RestController
+
+    apiver = 1
+
 
     @with_trailing_slash
     @expose("api/pds-all.xml", content_type="application/xml; charset=utf-8")
@@ -45,8 +47,8 @@ class PerfDataSourcesController(RestController):
             result.append({
                 "id": pds.idperfdatasource,
                 "name": pds.name,
-                "href": tg.url("/api/hosts/%s/perfdatasources/%s"
-                               % (host.idhost, pds.idperfdatasource)),
+                "href": tg.url("/api/v%s/hosts/%s/perfdatasources/%s"
+                           % (self.apiver, host.idhost, pds.idperfdatasource)),
                 })
         return dict(perfdatasources=result)
 
@@ -59,12 +61,12 @@ class PerfDataSourcesController(RestController):
         pds = get_pds(idpds, idhost)
         result = {
                 "id": pds.idperfdatasource,
-                "href": tg.url("/api/hosts/%s/perfdatasources/%s"
-                               % (pds.host.idhost, pds.idperfdatasource)),
+                "href": tg.url("/api/v%s/hosts/%s/perfdatasources/%s"
+                       % (self.apiver, pds.host.idhost, pds.idperfdatasource)),
                 "host": {
                     "id": pds.host.idhost,
                     "name": pds.host.name,
-                    "href": tg.url("/api/hosts/%s" % pds.host.idhost),
+                    "href": tg.url("/api/v%s/hosts/%s" % (self.apiver, pds.host.idhost)),
                     },
                 "name": pds.name,
                 "type": pds.type,
@@ -76,7 +78,7 @@ class PerfDataSourcesController(RestController):
         for graph in pds.graphs:
             graphs.append({
                 "id": graph.idgraph,
-                "href": tg.url("/api/graphs/%s" % graph.idgraph),
+                "href": tg.url("/api/v%s/graphs/%s" % (self.apiver, graph.idgraph)),
                 "name": graph.name,
                 })
         result["graphs"] = graphs

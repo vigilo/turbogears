@@ -12,13 +12,12 @@ from tg.decorators import with_trailing_slash
 #from vigilo.models import tables
 #from vigilo.models.session import DBSession
 from vigilo.turbogears.controllers.api import get_all_hosts, get_host
-from vigilo.turbogears.controllers.api.services import ServicesController
-from vigilo.turbogears.controllers.api.graphs import GraphsController
-from vigilo.turbogears.controllers.api.perfdatasources import \
-        PerfDataSourcesController
+from vigilo.turbogears.controllers.api.services import ServicesV1
+from vigilo.turbogears.controllers.api.graphs import GraphsV1
+from vigilo.turbogears.controllers.api.perfdatasources import PerfDataSourcesV1
 
 
-class HostsController(RestController):
+class HostsV1(RestController):
     """
     Contrôleur permettant de récupérer des L{Host<tables.Host>}s
     """
@@ -29,9 +28,11 @@ class HostsController(RestController):
     # - C0111: missing docstring: les fonctions get_all et get_one sont
     #   définies dans le RestController
 
-    lls = ServicesController("lls")
-    graphs = GraphsController()
-    perfdatasources = PerfDataSourcesController()
+    apiver = 1
+
+    lls = ServicesV1("lls")
+    graphs = GraphsV1()
+    perfdatasources = PerfDataSourcesV1()
 
 
     @with_trailing_slash
@@ -44,7 +45,7 @@ class HostsController(RestController):
         for host in hosts:
             result.append({
                     "id": host.idhost,
-                    "href": tg.url("/api/hosts/%s" % host.idhost),
+                    "href": tg.url("/api/v%s/hosts/%s" % (self.apiver, host.idhost)),
                     "name": host.name,
                     })
         return dict(hosts=result)
@@ -55,7 +56,7 @@ class HostsController(RestController):
     def get_one(self, idhost):
         # pylint:disable-msg=C0111,R0201
         host = get_host(idhost)
-        baseurl = tg.url("/api/hosts/%s" % host.idhost)
+        baseurl = tg.url("/api/v%s/hosts/%s" % (self.apiver, host.idhost))
         result = {"id": host.idhost,
                   "name": host.name,
                   "href": baseurl,
@@ -77,7 +78,8 @@ class HostsController(RestController):
             groups.append({
                 "id": group.idgroup,
                 "name": group.name,
-                "href": tg.url("/api/supitemgroups/%s" % group.idgroup),
+                "href": tg.url("/api/v%s/supitemgroups/%s"
+                               % (self.apiver, group.idgroup)),
                 })
         result["groups"] = groups
         return dict(host=result)

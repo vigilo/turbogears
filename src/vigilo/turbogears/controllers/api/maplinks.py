@@ -16,18 +16,20 @@ from vigilo.models.session import DBSession
 from vigilo.turbogears.controllers.api import get_parent_id, check_map_access
 
 
-class MapLinksController(RestController):
+class MapLinksV1(RestController):
     """
     Controlleur d'accès aux liens d'une carte. Ne peut être monté qu'après une
     carte dans l'arborescence.
     """
-
 
     # Messages PyLint qu'on supprime
     # - R0201: method could be a function: c'est le fonctionnement du
     #   RestController
     # - C0111: missing docstring: les fonctions get_all et get_one sont
     #   définies dans le RestController
+
+    apiver = 1
+
 
     @with_trailing_slash
     @expose("api/maplinks-all.xml", content_type="application/xml; charset=utf-8")
@@ -47,8 +49,8 @@ class MapLinksController(RestController):
         for link in links:
             result.append({
                 "id": link.idmaplink,
-                "href": tg.url("/api/maps/%s/links/%s"
-                               % (idmap, link.idmaplink)),
+                "href": tg.url("/api/v%s/maps/%s/links/%s"
+                               % (self.apiver, idmap, link.idmaplink)),
                 })
         return dict(maplinks=result)
 
@@ -59,44 +61,47 @@ class MapLinksController(RestController):
         # pylint:disable-msg=C0111,R0201
         link = DBSession.query(tables.MapLink).get(idmaplink)
         check_map_access(link.map)
+        baseurl = tg.url("/api/v%s" % self.apiver)
         result = {"id": link.idmaplink,
                   "from": {
                       "id": link.idfrom_node,
-                      "href": tg.url("/api/mapnodes/%s" % link.idfrom_node),
+                      "href": baseurl + "/mapnodes/%s" % link.idfrom_node,
                       },
                   "to": {
                       "id": link.idto_node,
-                      "href": tg.url("/api/mapnodes/%s" % link.idto_node),
+                      "href": baseurl + "/mapnodes/%s" % link.idto_node,
                       },
+                  "href": baseurl + "/maps/%s/links/%s" %
+                                    (link.map.idmap, link.idmaplink),
                   }
         # Spécifique MapServiceLink
         if isinstance(link, tables.MapServiceLink):
             if link.idgraph:
                 result["graph"] = {
                         "id": link.idgraph,
-                        "href": tg.url("/api/graphs/%s" % link.idgraph)
+                        "href": baseurl + "/graphs/%s" % link.idgraph
                         }
             datasources = {}
             if link.idds_from_to_to:
                 datasources["out"] = {
                         "id": link.idds_from_to_to,
-                        "href": tg.url("/api/perfdatasources/%s"
-                                       % link.idds_from_to_to),
+                        "href": baseurl + "/perfdatasources/%s"
+                                          % link.idds_from_to_to,
                         }
             if link.idds_to_to_from:
                 datasources["in"] = {
                         "id": link.idds_to_to_from,
-                        "href": tg.url("/api/perfdatasources/%s"
-                                       % link.idds_to_to_from),
+                        "href": baseurl + "/perfdatasources/%s"
+                                          % link.idds_to_to_from,
                         }
             result["perfdatasources"] = datasources
-            result["reference"] = {"id": link.idref}
+            result["supitem"] = {"id": link.idref}
             if isinstance(link, tables.MapLlsLink):
-                result["reference"]["href"] = tg.url("/api/lls/%s"
-                                                     % link.idref)
+                result["supitem"]["type"] = "lls"
+                result["supitem"]["href"] = baseurl + "/lls/%s" % link.idref
             elif isinstance(link, tables.MapHlsLink):
-                result["reference"]["href"] = tg.url("/api/hls/%s"
-                                                     % link.idref)
+                result["supitem"]["type"] = "hls"
+                result["supitem"]["href"] = baseurl + "/hls/%s" % link.idref
         # Spécifique MapSegment
         elif isinstance(link, tables.MapSegment):
             result["color"] = link.color,

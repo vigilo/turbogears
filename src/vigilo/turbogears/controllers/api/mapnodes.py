@@ -15,7 +15,7 @@ from vigilo.models.session import DBSession
 from vigilo.turbogears.controllers.api import get_parent_id, check_map_access
 
 
-class MapNodesController(RestController):
+class MapNodesV1(RestController):
     """
     Controlleur d'accès aux noeuds d'une carte. Ne peut être monté qu'après une
     carte dans l'arborescence.
@@ -26,6 +26,8 @@ class MapNodesController(RestController):
     #   RestController
     # - C0111: missing docstring: les fonctions get_all et get_one sont
     #   définies dans le RestController
+
+    apiver = 1
 
 
     @with_trailing_slash
@@ -46,8 +48,8 @@ class MapNodesController(RestController):
         for node in m.nodes:
             result.append({
                 "id": node.idmapnode,
-                "href": tg.url("/api/maps/%s/nodes/%s"
-                               % (idmap, node.idmapnode)),
+                "href": tg.url("/api/v%s/maps/%s/nodes/%s"
+                               % (self.apiver, idmap, node.idmapnode)),
                 })
         return dict(mapnodes=result)
 
@@ -59,6 +61,7 @@ class MapNodesController(RestController):
         # pylint:disable-msg=C0111,R0201
         node = DBSession.query(tables.MapNode).get(idmapnode)
         check_map_access(node.map)
+        baseurl = tg.url("/api/v%s" % self.apiver)
         result = {
                 "id": node.idmapnode,
                 "label": node.label,
@@ -67,28 +70,31 @@ class MapNodesController(RestController):
                 "widget": node.widget,
                 "type": node.type_node,
                 "icon": node.icon,
+                "href": baseurl + "/maps/%s/nodes/%s"
+                                  % (node.map.idmap, node.idmapnode),
                 }
         submaps = []
         for submap in node.submaps:
             submaps.append({
                 "id": submap.idmap,
-                "href": tg.url("/api/maps/%s" % submap.idmap),
+                "href": baseurl + "/maps/%s" % submap.idmap,
                 "title": submap.title,
                 })
         result["submaps"] = submaps
         if isinstance(node, tables.MapNodeHost):
-            result["host"] = {
+            result["supitem"] = {
                     "id": node.idhost,
-                    "href": tg.url("/api/hosts/%s" % node.idhost),
+                    "href": baseurl + "/hosts/%s" % node.idhost,
                     }
         elif isinstance(node, tables.MapNodeLls):
-            result["lls"] = {
+            result["supitem"] = {
                     "id": node.idservice,
-                    "href": tg.url("/api/lls/%s" % node.idservice),
+                    "href": baseurl + "/lls/%s" % node.idservice,
                     }
         elif isinstance(node, tables.MapNodeHls):
-            result["hls"] = {
+            result["supitem"] = {
                     "id": node.idservice,
-                    "href": tg.url("/api/hls/%s" % node.idservice),
+                    "href": baseurl + "/hls/%s" % node.idservice,
                     }
         return dict(mapnode=result)
+

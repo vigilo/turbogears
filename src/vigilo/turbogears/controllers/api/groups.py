@@ -20,7 +20,7 @@ from vigilo.turbogears.helpers import get_current_user
 LOGGER = logging.getLogger(__name__)
 
 
-class GroupsController(RestController):
+class GroupsV1(RestController):
     """
     Contrôleur permettant de récupérer des sous-classes de
     L{Group<tables.Group>}, c'est à dire L{MapGroup<tables.MapGroup>},
@@ -38,6 +38,8 @@ class GroupsController(RestController):
     @type model_class: sous-classe de L{Group<tables.Group>}
     """
 
+    apiver = 1
+
 
     def __init__(self, group_type):
         """
@@ -45,7 +47,7 @@ class GroupsController(RestController):
             C{graph} soit C{supitem}
         @type  group_type: C{str}
         """
-        super(GroupsController, self).__init__()
+        super(GroupsV1, self).__init__()
         self.type = group_type
         if self.type == "map":
             self.model_class = tables.MapGroup
@@ -89,7 +91,8 @@ class GroupsController(RestController):
             groups.append({
                 "id": group.idgroup,
                 "name": group.name,
-                "href": tg.url("/api/%sgroups/%s" % (self.type, group.idgroup)),
+                "href": tg.url("/api/v%s/%sgroups/%s"
+                               % (self.apiver, self.type, group.idgroup)),
                 })
         return dict(groups=groups, type=self.type)
 
@@ -106,10 +109,11 @@ class GroupsController(RestController):
         allowed_groups = self._get_allowed_groups()
         if allowed_groups is not None and int(idgroup) not in allowed_groups:
             raise HTTPForbidden("Access denied to group %s" % idgroup)
+        baseurl = tg.url("/api/v%s" % self.apiver)
         result = {"id": group.idgroup,
                   "name": group.name,
-                  "href": tg.url("/api/%sgroups/%s"
-                                 % (self.type, group.idgroup)),
+                  "href": baseurl + "/%sgroups/%s" %
+                                    (self.type, group.idgroup),
                   }
         children = []
         for subgroup in group.get_children():
@@ -119,8 +123,8 @@ class GroupsController(RestController):
             children.append({
                 "id": subgroup.idgroup,
                 "name": subgroup.name,
-                "href": tg.url("/api/%sgroups/%s"
-                               % (self.type, subgroup.idgroup)),
+                "href": baseurl + "/%sgroups/%s" %
+                                  (self.type, subgroup.idgroup),
                 })
         result["children"] = children
         if self.type == "map":
@@ -129,7 +133,7 @@ class GroupsController(RestController):
                 maps.append({
                     "id": m.idmap,
                     "title": m.title,
-                    "href": tg.url("/api/maps/%s" % m.idmap),
+                    "href": baseurl + "/maps/%s" % m.idmap,
                     })
             result["maps"] = maps
         if self.type == "graph":
@@ -137,7 +141,7 @@ class GroupsController(RestController):
             for graph in group.graphs:
                 graphs.append({
                     "id": graph.idgraph,
-                    "href": tg.url("/api/graphs/%s" % graph.idgraph),
+                    "href": baseurl + "/graphs/%s" % graph.idgraph,
                     "name": graph.name,
                     })
             result["graphs"] = graphs
@@ -146,19 +150,19 @@ class GroupsController(RestController):
             for host in group.hosts:
                 supitems["hosts"].append({
                         "id": host.idhost,
-                        "href": tg.url("/api/hosts/%s" % host.idhost),
+                        "href": baseurl + "/hosts/%s" % host.idhost,
                         "name": host.name,
                         })
             for lls in group.lls:
                 supitems["lls"].append({
                     "id": lls.idservice,
-                    "href": tg.url("/api/lls/%s" % lls.idservice),
+                    "href": baseurl + "/lls/%s" % lls.idservice,
                     "name": lls.servicename,
                     })
             for hls in group.hls:
                 supitems["hls"].append({
                     "id": hls.idservice,
-                    "href": tg.url("/api/hls/%s" % hls.idservice),
+                    "href": baseurl + "/hls/%s" % hls.idservice,
                     "name": hls.servicename,
                     })
             result.update(supitems)

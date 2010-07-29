@@ -15,11 +15,11 @@ from vigilo.models.session import DBSession
 
 from vigilo.turbogears.helpers import get_current_user
 from vigilo.turbogears.controllers.api import check_map_access
-from vigilo.turbogears.controllers.api.mapnodes import MapNodesController
-from vigilo.turbogears.controllers.api.maplinks import MapLinksController
+from vigilo.turbogears.controllers.api.mapnodes import MapNodesV1
+from vigilo.turbogears.controllers.api.maplinks import MapLinksV1
 
 
-class MapsController(RestController):
+class MapsV1(RestController):
     """
     Récupération des L{Map<tables.Map>}s
     """
@@ -30,8 +30,10 @@ class MapsController(RestController):
     # - C0111: missing docstring: les fonctions get_all et get_one sont
     #   définies dans le RestController
 
-    nodes = MapNodesController()
-    links = MapLinksController()
+    apiver = 1
+
+    nodes = MapNodesV1()
+    links = MapLinksV1()
 
 
     @with_trailing_slash
@@ -51,7 +53,7 @@ class MapsController(RestController):
                     continue # Déjà ajouté
                 result.append({
                     "id": m.idmap,
-                    "href": tg.url("/api/maps/%s" % m.idmap),
+                    "href": tg.url("/api/v%s/maps/%s" % (self.apiver, m.idmap)),
                     "title": m.title,
                     })
         return dict(maps=result)
@@ -65,6 +67,7 @@ class MapsController(RestController):
         if m is None:
             raise HTTPNotFound("Can't find map %s" % idmap)
         check_map_access(m)
+        baseurl = tg.url("/api/v%s/maps/%s" % (self.apiver, m.idmap))
         result = {"id": m.idmap,
                   "title": m.title,
                   "mtime": m.mtime.isoformat(),
@@ -75,8 +78,8 @@ class MapsController(RestController):
                       "position": m.background_position,
                       "repeat": m.background_repeat,
                       },
+                  "href": baseurl,
                   }
-        baseurl = tg.url("/api/maps/%s" % m.idmap)
         # groups
         result["groups_href"] = baseurl+"/groups/"
         groups = []
@@ -84,7 +87,7 @@ class MapsController(RestController):
             groups.append({
                 "id": group.idgroup,
                 "name": group.name,
-                "href": tg.url("/api/mapgroups/%s" % group.idgroup),
+                "href": tg.url("/api/v%s/mapgroups/%s" % (self.apiver, group.idgroup)),
                 })
         result["groups"] = groups
         # nodes

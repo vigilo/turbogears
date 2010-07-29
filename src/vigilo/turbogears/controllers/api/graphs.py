@@ -18,7 +18,7 @@ from vigilo.turbogears.controllers.api import get_all_hosts, get_host, \
                                               get_parent_id
 
 
-class GraphsController(RestController):
+class GraphsV1(RestController):
     """
     Récupération des L{Graph<tables.Graph>}es.  Ce contrôlleur peut être monté
     soit à la racine soit sous un hôte.
@@ -29,6 +29,8 @@ class GraphsController(RestController):
     #   RestController
     # - C0111: missing docstring: les fonctions get_all et get_one sont
     #   définies dans le RestController
+
+    apiver = 1
 
     @with_trailing_slash
     @expose("api/graphs-all.xml", content_type="application/xml; charset=utf-8")
@@ -45,7 +47,7 @@ class GraphsController(RestController):
             for graph in host.graphs:
                 result.append({
                         "id": graph.idgraph,
-                        "href": tg.url("/api/graphs/%s" % graph.idgraph),
+                        "href": tg.url("/api/v%s/graphs/%s" % (self.apiver, graph.idgraph)),
                         "name": graph.name,
                         })
         return dict(graphs=result)
@@ -66,7 +68,7 @@ class GraphsController(RestController):
                 raise HTTPForbidden("Access denied to graphs on host %s"
                                     % pds.host.name)
         result = {"id": graph.idgraph,
-                  "href": tg.url("/api/graphs/%s" % graph.idgraph),
+                  "href": tg.url("/api/v%s/graphs/%s" % (self.apiver, graph.idgraph)),
                   "name": graph.name,
                   "template": graph.template,
                   "vlabel": graph.vlabel,
@@ -76,7 +78,7 @@ class GraphsController(RestController):
             groups.append({
                 "id": group.idgroup,
                 "name": group.name,
-                "href": tg.url("/api/graphgroups/%s" % group.idgroup),
+                "href": tg.url("/api/v%s/graphgroups/%s" % (self.apiver, group.idgroup)),
                 })
         result["groups"] = groups
         datasources = []
@@ -84,8 +86,8 @@ class GraphsController(RestController):
             datasources.append({
                 "id": pds.idperfdatasource,
                 "name": pds.name,
-                "href": tg.url("/api/host/%s/perfdatasources/%s"
-                               % (pds.idhost, pds.idperfdatasource)),
+                "href": tg.url("/api/v%s/host/%s/perfdatasources/%s"
+                               % (self.apiver, pds.idhost, pds.idperfdatasource)),
                 })
         result["perfdatasources"] = datasources
         return dict(graph=result)
