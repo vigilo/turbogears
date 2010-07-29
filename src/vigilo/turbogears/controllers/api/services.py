@@ -131,7 +131,7 @@ class ServicesV1(RestController):
             result["host"] = {
                     "id": service.host.idhost,
                     "name": service.host.name,
-                    "href": tg.url("/api/v%s/hosts/%s/"
+                    "href": tg.url("/api/v%s/hosts/%s"
                                 % (self.apiver, service.host.idhost)),
                     }
         else:
