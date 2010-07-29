@@ -35,8 +35,7 @@ class MapsController(RestController):
 
 
     @with_trailing_slash
-    @expose("api/maps-all.xml",
-            content_type="application/vnd.vigilo.api+xml; charset=utf-8")
+    @expose("api/maps-all.xml", content_type="application/xml; charset=utf-8")
     @expose("json")
     def get_all(self):
         # pylint:disable-msg=C0111,R0201
@@ -58,8 +57,7 @@ class MapsController(RestController):
         return dict(maps=result)
 
 
-    @expose("api/maps-one.xml",
-            content_type="application/vnd.vigilo.api+xml; charset=utf-8")
+    @expose("api/maps-one.xml", content_type="application/xml; charset=utf-8")
     @expose("json")
     def get_one(self, idmap):
         # pylint:disable-msg=C0111,R0201

@@ -31,8 +31,7 @@ class GraphsController(RestController):
     #   définies dans le RestController
 
     @with_trailing_slash
-    @expose("api/graphs-all.xml",
-            content_type="application/vnd.vigilo.api+xml; charset=utf-8")
+    @expose("api/graphs-all.xml", content_type="application/xml; charset=utf-8")
     @expose("json")
     def get_all(self):
         # pylint:disable-msg=C0111,R0201
@@ -52,8 +51,7 @@ class GraphsController(RestController):
         return dict(graphs=result)
 
 
-    @expose("api/graphs-one.xml",
-            content_type="application/vnd.vigilo.api+xml; charset=utf-8")
+    @expose("api/graphs-one.xml", content_type="application/xml; charset=utf-8")
     @expose("json")
     def get_one(self, idgraph):
         # pylint:disable-msg=C0111,R0201

@@ -52,9 +52,8 @@ class ApiRootController(BaseController):
 
 
     @with_trailing_slash
-    @expose("api/root.xml",
-            content_type="application/vnd.vigilo.api+xml; charset=utf-8")
     @expose("json")
+    @expose("api/root.xml", content_type="application/xml; charset=utf-8")
     def index(self):
         # pylint:disable-msg=C0111,R0201
         result = {}

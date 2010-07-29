@@ -73,8 +73,7 @@ class GroupsController(RestController):
         return allowed_groups
 
     @with_trailing_slash
-    @expose("api/groups-all.xml",
-            content_type="application/vnd.vigilo.api+xml; charset=utf-8")
+    @expose("api/groups-all.xml", content_type="application/xml; charset=utf-8")
     @expose("json")
     def get_all(self):
         """
@@ -95,8 +94,7 @@ class GroupsController(RestController):
         return dict(groups=groups, type=self.type)
 
 
-    @expose("api/groups-one.xml",
-            content_type="application/vnd.vigilo.api+xml; charset=utf-8")
+    @expose("api/groups-one.xml", content_type="application/xml; charset=utf-8")
     @expose("json")
     def get_one(self, idgroup):
         # Suppression du message "missing docstring", c'est une méthode

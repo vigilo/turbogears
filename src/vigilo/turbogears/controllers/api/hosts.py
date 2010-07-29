@@ -35,8 +35,7 @@ class HostsController(RestController):
 
 
     @with_trailing_slash
-    @expose("api/hosts-all.xml",
-            content_type="application/vnd.vigilo.api+xml; charset=utf-8")
+    @expose("api/hosts-all.xml", content_type="application/xml; charset=utf-8")
     @expose("json")
     def get_all(self):
         # pylint:disable-msg=C0111,R0201
@@ -51,8 +50,7 @@ class HostsController(RestController):
         return dict(hosts=result)
 
 
-    @expose("api/hosts-one.xml",
-            content_type="application/vnd.vigilo.api+xml; charset=utf-8")
+    @expose("api/hosts-one.xml", content_type="application/xml; charset=utf-8")
     @expose("json")
     def get_one(self, idhost):
         # pylint:disable-msg=C0111,R0201

@@ -30,8 +30,7 @@ class MapLinksController(RestController):
     #   définies dans le RestController
 
     @with_trailing_slash
-    @expose("api/maplinks-all.xml",
-            content_type="application/vnd.vigilo.api+xml; charset=utf-8")
+    @expose("api/maplinks-all.xml", content_type="application/xml; charset=utf-8")
     @expose("json")
     def get_all(self):
         # pylint:disable-msg=C0111,R0201
@@ -54,8 +53,7 @@ class MapLinksController(RestController):
         return dict(maplinks=result)
 
 
-    @expose("api/maplinks-one.xml",
-            content_type="application/vnd.vigilo.api+xml; charset=utf-8")
+    @expose("api/maplinks-one.xml", content_type="application/xml; charset=utf-8")
     @expose("json")
     def get_one(self, idmaplink):
         # pylint:disable-msg=C0111,R0201

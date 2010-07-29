@@ -72,7 +72,7 @@ class ServicesController(RestController):
 
     @with_trailing_slash
     @expose("api/services-all.xml",
-            content_type="application/vnd.vigilo.api+xml; charset=utf-8")
+            content_type="application/xml; charset=utf-8")
     @expose("json")
     def get_all(self):
         # pylint:disable-msg=C0111,R0201
@@ -94,7 +94,7 @@ class ServicesController(RestController):
 
 
     @expose("api/services-one.xml",
-            content_type="application/vnd.vigilo.api+xml; charset=utf-8")
+            content_type="application/xml; charset=utf-8")
     @expose("json")
     def get_one(self, idservice):
         # pylint:disable-msg=C0111,R0201
