@@ -38,6 +38,9 @@ setup(
         "setuptools",
         "repoze.tm2 >= 1.0a4",
         "repoze.what-quickstart >= 1.0",
+        "repoze.what.plugins.sql",
+        "repoze.who_testutil",
+        "repoze.who.plugins.sa",
         "tg.devtools",
         "TurboGears2 >= 2.0b7",
         "ToscaWidgets >= 0.9.7.1",
@@ -78,4 +81,3 @@ setup(
     package_dir={'': 'src'},
     data_files=install_i18n("i18n", os.path.join(sys.prefix, 'share', 'locale')),
 )
-
