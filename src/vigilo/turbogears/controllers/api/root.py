@@ -58,7 +58,7 @@ class ApiRootController(BaseController):
 
 
     # Prédicat pour la restriction de l'accès aux interfaces.
-    access_restriction = not_anonymous(msg=l_("You need to be authenticated"))
+    allow_only = not_anonymous(msg=l_("You need to be authenticated"))
     #access_restriction = All(
     #    not_anonymous(msg=l_("You need to be authenticated")),
     #    Any(in_group('managers'),
@@ -75,4 +75,3 @@ class ApiRootController(BaseController):
         # pylint:disable-msg=C0111,R0201
         result = [{"version": 1, "href": tg.url("/api/v1")}, ]
         return {"apis": result}
-
