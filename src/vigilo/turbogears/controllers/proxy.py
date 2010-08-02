@@ -13,6 +13,7 @@ from tg.exceptions import HTTPForbidden, HTTPNotFound
 from repoze.what.predicates import in_group
 from vigilo.turbogears.helpers import ugettext as _
 from sqlalchemy import or_, and_
+from paste.deploy.converters import asbool
 
 from vigilo.models.session import DBSession
 from vigilo.models.tables import VigiloServer, Host, Ventilation, Application
@@ -177,8 +178,17 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
                 "",
                 ""]
     full_url = urlparse.urlunsplit(full_url)
-    LOGGER.info(_("Fetching '%s' through the proxy"), full_url)
 
+    try:
+        should_redirect = asbool(config.get('app_redirect.%s' % server_type, False))
+    except ValueError:
+        LOGGER.error(_('Invalid value for app_redirect.%s, not redirecting.'), server_type)
+        should_redirect = False
+
+    if should_redirect:
+        raise tg.redirect(full_url)
+
+    LOGGER.info(_("Fetching '%s' through the proxy"), full_url)
     req = urllib2.Request(full_url, data, headers=headers)
     res = urllib2.urlopen(req)
     return res
@@ -221,7 +231,7 @@ class ProxyController(BaseController):
         "http://localhost/nagios/example.com/cgi-bin/status.cgi?a=b"
         affichera la page de statut de Nagios concernant l'hôte
         "example.com".
-        
+
         Les paramètres de la requête (query string) sont automatiquement
         transmis dans la requête au serveur distant (en POST).
 
@@ -266,6 +276,7 @@ class ProxyController(BaseController):
         post_data = None
         if pylons.request.POST:
             post_data = pylons.request.POST
+
         res = get_through_proxy(self.server_type,
             host, url, post_data, headers)
 
@@ -281,10 +292,9 @@ class ProxyController(BaseController):
         # des URLs de la page pour que tout passe par le proxy.
         if info['Content-Type'].startswith('text/html'):
             orig_url = config['app_path.%s' % self.server_type]
-            # Le str() est obligatoire, sinon exception 
+            # Le str() est obligatoire, sinon exception
             # "AttributeError: You cannot access Response.unicode_body
             #  unless charset is set"
             dest_url = str('%s%s/' % (tg.url(self.mount_point), host))
             doc = doc.replace(orig_url, dest_url)
         return doc
-
