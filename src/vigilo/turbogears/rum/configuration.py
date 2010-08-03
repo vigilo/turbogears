@@ -43,7 +43,7 @@ class RumGenshiRenderer(GenshiRenderer):
             callback=self.__setup_filters,
         )
 
-        # On consifigure la classe pour que les traductions
+        # On configure la classe pour que les traductions
         # de vigilo.themes soient utilisées pour traduire
         # les templates utilisés par Rum.
         i18n_dir = resource_filename('vigilo.themes.i18n', '')
@@ -53,7 +53,7 @@ class RumGenshiRenderer(GenshiRenderer):
             self.__tpl_translator = gettext.NullTranslations()
         else:
             self.__tpl_translator = gettext.translation(
-                'vigilo-themes', i18n_dir, get_lang())
+                'vigilo-themes', i18n_dir, lang, fallback=True)
 
     def __setup_filters(self, tpl):
         """
@@ -106,4 +106,3 @@ def get_rum_config(model):
     }
 
     return rum_config
-
