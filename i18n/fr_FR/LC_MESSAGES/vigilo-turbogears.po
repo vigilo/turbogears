@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: vigilo-turbogears 2.0.0\n"
 "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
 "POT-Creation-Date: 2010-07-26 13:47+0200\n"
-"PO-Revision-Date: 2010-07-26 14:47+0200\n"
+"PO-Revision-Date: 2010-08-24 14:33+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_FR <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -18,44 +18,54 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.4\n"
 
-#: src/vigilo/turbogears/helpers.py:63
+#: src/vigilo/turbogears/helpers.py:65
 #, python-format
 msgid "Failed to get URL: %s"
 msgstr "Impossible d'obtenir le contenu de l'URL: %s"
 
-#: src/vigilo/turbogears/helpers.py:76
+#: src/vigilo/turbogears/helpers.py:78
 #, python-format
 msgid ""
 "Failed to convert DS %(ds)s on %(host)s: value was %(value)s (max: "
 "%(max)s)"
-msgstr "Impossible de convertir la DS %(ds)s sur %(host)s: la valeur était %(value)s (max : %(max)s)"
+msgstr ""
+"Impossible de convertir la DS %(ds)s sur %(host)s: la valeur était "
+"%(value)s (max : %(max)s)"
 
 #: src/vigilo/turbogears/controllers/error.py:26
 msgid "We're sorry but we weren't able to process this request."
 msgstr "Nous sommes désolés, mais nous n'avons pas pu traiter votre requête."
 
-#: src/vigilo/turbogears/controllers/proxy.py:97
+#: src/vigilo/turbogears/controllers/proxy.py:98
 #, python-format
 msgid "No such monitored host: %s"
 msgstr "Hôte supervisé inexistant : %s"
 
-#: src/vigilo/turbogears/controllers/proxy.py:142
+#: src/vigilo/turbogears/controllers/proxy.py:143
 #, python-format
 msgid "Access denied to host \"%(host)s\" and service \"%(service)s\""
 msgstr "Accès refusé au service \"%(service)s\" sur l'hôte \"%(host)s\""
 
-#: src/vigilo/turbogears/controllers/proxy.py:148
+#: src/vigilo/turbogears/controllers/proxy.py:149
 #, python-format
 msgid "Access denied to host \"%s\""
 msgstr "Accès refusé à l'hôte \"%s\""
 
-#: src/vigilo/turbogears/controllers/proxy.py:157
+#: src/vigilo/turbogears/controllers/proxy.py:158
 #, python-format
 msgid "No %(server_type)s server configured to monitor \"%(host)s\""
 msgstr "Aucun serveur %(server_type)s configuré pour superviser \"%(host)s\""
 
-#: src/vigilo/turbogears/controllers/proxy.py:180
+#: src/vigilo/turbogears/controllers/proxy.py:185
+#, python-format
+msgid "Invalid value for app_redirect.%s, not redirecting."
+msgstr "Valeur incorrecte pour app_redirect.%s, pas de redirection."
+
+#: src/vigilo/turbogears/controllers/proxy.py:191
 #, python-format
 msgid "Fetching '%s' through the proxy"
 msgstr "Récupération de '%s' via le serveur mandataire"
 
+#: src/vigilo/turbogears/controllers/api/root.py:61
+msgid "You need to be authenticated"
+msgstr "Vous devez vous authentifier"

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vigilo-turbogears 2.0.0\n"
 "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
-"POT-Creation-Date: 2010-07-26 14:47+0200\n"
+"POT-Creation-Date: 2010-08-24 14:33+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,12 +18,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.4\n"
 
-#: src/vigilo/turbogears/helpers.py:63
+#: src/vigilo/turbogears/helpers.py:65
 #, python-format
 msgid "Failed to get URL: %s"
 msgstr ""
 
-#: src/vigilo/turbogears/helpers.py:76
+#: src/vigilo/turbogears/helpers.py:78
 #, python-format
 msgid "Failed to convert DS %(ds)s on %(host)s: value was %(value)s (max: %(max)s)"
 msgstr ""
@@ -32,28 +32,37 @@ msgstr ""
 msgid "We're sorry but we weren't able to process this request."
 msgstr ""
 
-#: src/vigilo/turbogears/controllers/proxy.py:97
+#: src/vigilo/turbogears/controllers/proxy.py:98
 #, python-format
 msgid "No such monitored host: %s"
 msgstr ""
 
-#: src/vigilo/turbogears/controllers/proxy.py:142
+#: src/vigilo/turbogears/controllers/proxy.py:143
 #, python-format
 msgid "Access denied to host \"%(host)s\" and service \"%(service)s\""
 msgstr ""
 
-#: src/vigilo/turbogears/controllers/proxy.py:148
+#: src/vigilo/turbogears/controllers/proxy.py:149
 #, python-format
 msgid "Access denied to host \"%s\""
 msgstr ""
 
-#: src/vigilo/turbogears/controllers/proxy.py:157
+#: src/vigilo/turbogears/controllers/proxy.py:158
 #, python-format
 msgid "No %(server_type)s server configured to monitor \"%(host)s\""
 msgstr ""
 
-#: src/vigilo/turbogears/controllers/proxy.py:180
+#: src/vigilo/turbogears/controllers/proxy.py:185
+#, python-format
+msgid "Invalid value for app_redirect.%s, not redirecting."
+msgstr ""
+
+#: src/vigilo/turbogears/controllers/proxy.py:191
 #, python-format
 msgid "Fetching '%s' through the proxy"
+msgstr ""
+
+#: src/vigilo/turbogears/controllers/api/root.py:61
+msgid "You need to be authenticated"
 msgstr ""
 
