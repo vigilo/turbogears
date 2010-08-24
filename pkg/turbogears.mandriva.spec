@@ -59,11 +59,14 @@ make install \
 	DESTDIR=$RPM_BUILD_ROOT \
 	PYTHON=%{_bindir}/python
 
+%find_lang %{name}
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files
+
+%files -f %{name}.lang
 %defattr(-,root,root)
 %doc COPYING
 %{python_sitelib}/vigilo
@@ -72,6 +75,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Aug 24 2010  BURGUIERE Thomas <thomas.burguiere@c-s.fr>
+- modification for traduction files
+
 * Mon Feb 08 2010 Aurelien Bompard <aurelien.bompard@c-s.fr> - 1.0-1
 - initial package
 
