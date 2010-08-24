@@ -7,7 +7,7 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-import os
+import os, sys
 
 def install_i18n(i18ndir, destdir):
     data_files = []
