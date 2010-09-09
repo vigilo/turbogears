@@ -29,7 +29,7 @@ class VigiloRumTranslator(RumTranslator):
         """
         orig_translation = super(VigiloRumTranslator, self).ugettext(
             singular, plural, count)
-        if orig_translation != msg:
+        if orig_translation != singular and orig_translation != plural:
             return orig_translation
         return i18n.ungettext(singular, plural, count)
 
