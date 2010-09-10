@@ -6,6 +6,7 @@ Bibliothèque de fonctions outils pour les applications utilisant TurboGears.
 import logging
 import urllib2
 import pylons
+from pylons.i18n.translation import lazify
 
 import simplejson
 from tg import request, url
@@ -91,12 +92,7 @@ def ugettext(message):
     if not pylons.c.vigilo_turbogears:
         return message
     return pylons.c.vigilo_turbogears.ugettext(message)
-
-def lazy_ugettext(message):
-    # Lors du passage des tests unitaires,
-    # le code qui définit le traducteur n'est pas exécuté.
-    if not pylons.c.vigilo_turbogears:
-        return message
-    return pylons.c.vigilo_turbogears.lazy_ugettext(message)
 _ = ugettext
+
+lazy_ugettext = lazify(ugettext)
 
