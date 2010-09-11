@@ -1,0 +1,11 @@
+--- tg/controllers.py.orig	2010-09-11 10:35:46.000000000 +0200
++++ tg/controllers.py	2010-09-11 10:38:00.000000000 +0200
+@@ -74,7 +74,7 @@
+             # the @allow_only decorator.
+             predicate = self.allow_only
+             self = allow_only(predicate)(self)
+-        super(DecoratedController, self).__init__(*args, **kwargs)
++        super(DecoratedController, self).__init__()
+ 
+     def __before__(self, *args, **kw):
+         """
