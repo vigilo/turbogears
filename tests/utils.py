@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import os
+import shutil
+
 import unittest
 import tg
 from webob import Request
@@ -8,6 +11,13 @@ from paste.registry import Registry
 from vigilo.turbogears.controllers.autocomplete import AutoCompleteController
 from vigilo.models.session import metadata, DBSession
 from vigilo.models import tables
+
+
+import pylons
+from pylons import url
+from tg import tmpl_context
+from pylons.util import ContextObj
+
 
 class DbTest(unittest.TestCase):
     def setUp(self):
@@ -148,4 +158,64 @@ class AutoCompleterTest(DbTest):
         res = self._query_autocompleter(u'barbaz', True)
         expected = {'results': []}
         self.assertEqual(res, expected)
+
+
+data_dir = os.path.dirname(os.path.abspath(__file__))
+session_dir = os.path.join(data_dir, 'session')
+
+class ApiTest(DbTest):
+    def setUp(self):
+        super(ApiTest, self).setUp()
+        if not os.path.exists(session_dir):
+            os.makedirs(session_dir)
+        #environ = {
+        #    'repoze.what.credentials': {
+        #        'groups': ['managers'],
+        #    }
+        #}
+        #request = Request(environ)
+        #registry = Registry()
+        #registry.prepare()
+        #registry.register(tg.request, request)
+        #registry.register(tg.url, request)
+        #self.ctrl = AutoCompleteController()
+
+        #tg.request.identity = {
+        #    'repoze.who.userid': 'manager',
+        #}
+
+        manager = tables.User(
+            user_name=u'manager',
+            fullname=u'',
+            email=u'manager@test',
+        )
+        DBSession.add(manager)
+
+        managers = tables.UserGroup(
+            group_name=u'managers',
+        )
+        DBSession.add(managers)
+        manager.usergroups.append(managers)
+        #####
+        tmpl_options = {}
+        tmpl_options['genshi.search_path'] = ['tests']
+        self._ctx = ContextObj()
+        tmpl_context._push_object(self._ctx)
+        self._buffet = pylons.templating.Buffet(
+            default_engine='genshi',tmpl_options=tmpl_options
+            )
+        pylons.buffet._push_object(self._buffet)
+
+    def tearDown(self):
+        super(ApiTest, self).tearDown()
+        shutil.rmtree(session_dir, ignore_errors=True)
+
+    def shortDescription(self):
+        desc = DbTest.shortDescription(self)
+        return "%s (%s)" % (desc, self.__class__.__name__)
+
+    def run(self, result):
+        if self.__class__ == ApiTest:
+            return
+        return super(ApiTest, self).run(result)
 
