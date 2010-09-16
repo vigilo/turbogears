@@ -52,6 +52,8 @@ setup(
         "vigilo-themes-default",
         "rum",
         "TgRum",
+        "urllib2_kerberos",
+        "kerberos",
     ],
     paster_plugins=[
         'PasteScript',
