@@ -14,6 +14,7 @@ from repoze.what.predicates import in_group
 from vigilo.turbogears.helpers import ugettext as _
 from sqlalchemy import or_, and_
 from paste.deploy.converters import asbool
+from urllib2_kerberos import HTTPKerberosAuthHandler
 
 from vigilo.models.session import DBSession
 from vigilo.models.tables import VigiloServer, Host, Ventilation, Application
@@ -190,7 +191,22 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
 
     LOGGER.info(_("Fetching '%s' through the proxy"), full_url)
     req = urllib2.Request(full_url, data, headers=headers)
-    res = urllib2.urlopen(req)
+    opener = urllib2.build_opener()
+    opener.add_handler(HTTPKerberosAuthHandler())
+    try:
+        res = opener.open(req)
+    except urllib2.HTTPError, e:
+        # Permet d'associer les erreurs levées par urllib2
+        # à des erreurs reconnues par TurboGears2.
+        # On obtient ainsi une page d'erreur plus sympathique.
+        errors = {
+            '401': HTTPForbidden,
+            '404': HTTPNotFound,
+        }
+        error = errors.get(str(e.code))
+        if error is None:
+            raise e
+        raise error(unicode(e.msg))
     return res
 
 
