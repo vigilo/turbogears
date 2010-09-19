@@ -22,7 +22,7 @@ LOGGER = logging.getLogger(__name__)
 def get_current_user():
     """
     Renvoie l'instance de l'utilisateur actuellement connecté.
-    
+
     @return: Instance correspondant à l'utilisateur actuellement connecté
         ou None s'il n'est pas identifié.
     @rtype: L{User} ou None
@@ -51,8 +51,8 @@ def get_readable_metro_value(pds):
     trois chiffres significatifs et l'ordre de grandeur.
 
     @param pds: l'indicateur de métrologie
-    @type  pds: L{vigilo.models.tables.perfdatasource.PerfDataSource}
-    @return: un couple valeur entière, valeur en pourcentage 
+    @type  pds: C{vigilo.models.tables.perfdatasource.PerfDataSource}
+    @return: un couple valeur entière, valeur en pourcentage
     @rtype:  C{tuple}
     """
     # doit être chargé après

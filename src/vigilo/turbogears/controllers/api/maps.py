@@ -10,7 +10,7 @@ from tg.decorators import with_trailing_slash
 from tg.controllers import RestController
 from tg.exceptions import HTTPNotFound, HTTPForbidden
 
-from vigilo.models import tables
+from vigilo.models.tables import Map, MapLink
 from vigilo.models.session import DBSession
 
 from vigilo.turbogears.helpers import get_current_user
@@ -21,7 +21,7 @@ from vigilo.turbogears.controllers.api.maplinks import MapLinksV1
 
 class MapsV1(RestController):
     """
-    Récupération des L{Map<tables.Map>}s
+    Récupération des cartes (L{Map}).
     """
 
     # Messages PyLint qu'on supprime
@@ -63,7 +63,7 @@ class MapsV1(RestController):
     @expose("json")
     def get_one(self, idmap):
         # pylint:disable-msg=C0111,R0201
-        m = DBSession.query(tables.Map).get(idmap)
+        m = DBSession.query(Map).get(idmap)
         if m is None:
             raise HTTPNotFound("Can't find map %s" % idmap)
         check_map_access(m)
@@ -102,7 +102,7 @@ class MapsV1(RestController):
         # links
         result["links_href"] = baseurl+"/links/"
         links = []
-        for link in DBSession.query(tables.MapLink).filter_by(
+        for link in DBSession.query(MapLink).filter_by(
                                     idmap=idmap).all():
             links.append({
                 "id": link.idmaplink,

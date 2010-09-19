@@ -12,7 +12,7 @@ from tg.decorators import with_trailing_slash
 from tg.controllers import RestController
 from tg.exceptions import HTTPNotFound
 
-from vigilo.models import tables
+from vigilo.models.tables import Service, LowLevelService, HighLevelService
 
 from vigilo.turbogears.controllers.api import get_host, get_all_services, \
         get_service, get_parent_id
@@ -23,9 +23,8 @@ LOGGER = logging.getLogger(__name__)
 
 class ServicesV1(RestController):
     """
-    Récupération des sous-classes de L{Service<tables.Service>}, c'est à dire
-    L{LowLevelService<tables.LowLevelService>} et
-    L{HighLevelService<tables.HighLevelService>}. Le choix du type se fait par
+    Récupération des sous-classes de L{Service}, c'est à dire
+    L{LowLevelService} et L{HighLevelService}. Le choix du type se fait par
     passage d'argument au constructeur de la classe.
 
     Ce contrôlleur peut être monté soit à la racine soit sous un hôte. Il
@@ -34,9 +33,8 @@ class ServicesV1(RestController):
     @ivar type: type de service, passé en argument. Soit C{lls} soit C{hls}
     @type type: C{str}
     @ivar model_class: classe du modèle correspondante au type, c'est à dire
-        soit L{LowLevelService<tables.LowLevelService>} soit
-        L{HighLevelService<tables.HighLevelService>}
-    @type model_class: sous-classe de L{Service<tables.Service>}
+        soit L{LowLevelService} soit L{HighLevelService}.
+    @type model_class: sous-classe de L{Service}
     """
 
     # Messages PyLint qu'on supprime
@@ -57,9 +55,9 @@ class ServicesV1(RestController):
         super(ServicesV1, self).__init__()
         self.type = service_type
         if self.type == "lls":
-            self.model_class = tables.LowLevelService
+            self.model_class = LowLevelService
         elif self.type == "hls":
-            self.model_class = tables.HighLevelService
+            self.model_class = HighLevelService
         else:
             LOGGER.warning("Unknown service type: %s", self.type)
 
@@ -127,7 +125,7 @@ class ServicesV1(RestController):
                 "name": group.name,
                 })
         result["groups"] = groups
-        if isinstance(service, tables.LowLevelService):
+        if isinstance(service, LowLevelService):
             result["host"] = {
                     "id": service.host.idhost,
                     "name": service.host.name,

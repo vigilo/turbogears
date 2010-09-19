@@ -24,11 +24,10 @@ def convert_with_unit(value, digits=3):
     Conversion valeur avec suffixe multiplication
     (cf http://fr.wikipedia.org/wiki/Kilo et autres)
 
-    @param value : valeur
-    @type value : C{float}
-
-    @return : valeur
-    @rtype : C{str}
+    @param value: valeur
+    @type value: C{float}
+    @return: valeur
+    @rtype: C{str}
     '''
 
     power, suffix = _get_value_suffix(value)

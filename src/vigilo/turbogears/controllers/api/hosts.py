@@ -19,7 +19,7 @@ from vigilo.turbogears.controllers.api.perfdatasources import PerfDataSourcesV1
 
 class HostsV1(RestController):
     """
-    Contrôleur permettant de récupérer des L{Host<tables.Host>}s
+    Contrôleur permettant de récupérer des hôtes (C{tables.Host}).
     """
 
     # Messages PyLint qu'on supprime

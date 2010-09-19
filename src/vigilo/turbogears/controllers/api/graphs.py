@@ -10,7 +10,7 @@ from tg.controllers import RestController
 from tg.decorators import with_trailing_slash
 from tg.exceptions import HTTPNotFound, HTTPForbidden
 
-from vigilo.models import tables
+from vigilo.models.tables import Graph
 from vigilo.models.session import DBSession
 
 from vigilo.turbogears.helpers import get_current_user
@@ -20,8 +20,8 @@ from vigilo.turbogears.controllers.api import get_all_hosts, get_host, \
 
 class GraphsV1(RestController):
     """
-    Récupération des L{Graph<tables.Graph>}es.  Ce contrôlleur peut être monté
-    soit à la racine soit sous un hôte.
+    Récupération des graphes (L{Graph}).  Ce contrôleur
+    peut être monté soit à la racine soit sous un hôte.
     """
 
     # Messages PyLint qu'on supprime
@@ -57,7 +57,7 @@ class GraphsV1(RestController):
     @expose("json")
     def get_one(self, idgraph):
         # pylint:disable-msg=C0111,R0201
-        graph = DBSession.query(tables.Graph).get(idgraph)
+        graph = DBSession.query(Graph).get(idgraph)
         if not graph:
             raise HTTPNotFound("Can't find graph %s" % idgraph)
         # ACLs

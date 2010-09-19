@@ -17,7 +17,8 @@ from vigilo.turbogears.helpers import get_current_user
 
 def get_parent_id(obj_type=None):
     """
-    Retourne l'ID de l'objet parent dans l'URL, avec une vérification optionnelle sur le type.
+    Retourne l'ID de l'objet parent dans l'URL, avec une vérification
+    optionnelle sur le type.
 
     @param obj_type: type d'élément à retourner, tel qu'il apparaît dans l'URL
     @type  obj_type: C{str}
@@ -35,7 +36,7 @@ def get_parent_id(obj_type=None):
 
 def get_all_hosts():
     """
-    Retourne tous les L{Host<tables.Host>}s auxquels l'utilisateur à accès
+    Retourne tous les hôtes (C{tables.Host}) auxquels l'utilisateur à accès
     """
     user = get_current_user()
     #user = tables.User.by_user_name(u"editor") # debug
@@ -62,7 +63,7 @@ def get_all_hosts():
 
 def get_host(idhost):
     """
-    Retourne un L{Host<tables.Host>} à partir de son ID ou de son nom
+    Retourne un hôte (C{tables.Host}) à partir de son ID ou de son nom
 
     @param idhost: l'identifiant de l'hôte
     @type  idhost: C{int} ou C{str}
@@ -91,7 +92,7 @@ def get_all_services(model_class):
 
     @param model_class: la classe du modèle correspondante au type de service
         demandé
-    @type  model_class: sous-classe de L{Service<tables.Service>}
+    @type  model_class: sous-classe de C{tables.Service}
     """
     user = get_current_user()
     #user = tables.User.by_user_name(u"editor") # debug
@@ -112,7 +113,7 @@ def get_all_services(model_class):
 def get_service(idservice, service_type, idhost=None):
     """
     Retourne un service à partir de son ID ou de son nom. Si le service est un
-    L{LowLevelService<tables.LowLevelService>}, il faut aussi fournir un
+    service de bas niveau (C{tables.LowLevelService}), il faut aussi fournir un
     identifiant d'hôte (ID ou nom).
 
     @param idservice: l'identifiant du service à récupérer, ou son nom
@@ -149,9 +150,9 @@ def get_service(idservice, service_type, idhost=None):
 
 def get_pds(idpds, idhost=None):
     """
-    Retourne une L{PerfDataSource<tables.PerfDataSource>} à partir de son ID ou de son nom. Si
-    seul le nom est fourni, il faut aussi préciser un hôte sur lequel est
-    hébergé cette donnée.
+    Retourne un indicateur de performance (C{tables.PerfDataSource}) à partir
+    de son ID ou de son nom. Si seul le nom est fourni, il faut aussi préciser
+    un hôte sur lequel est hébergé cette donnée.
 
     @param idpds: identifiant de la donnée de perf, ou son nom
     @type  idpds: C{int} ou C{str}
@@ -180,7 +181,7 @@ def check_map_access(m):
     argument
 
     @param m: carte à tester
-    @type  m: L{Map<tables.Map>}
+    @type  m: C{tables.Map}
     """
     user = get_current_user()
     #user = tables.User.by_user_name(u"editor") # debug

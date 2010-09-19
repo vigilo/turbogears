@@ -11,7 +11,8 @@ from tg.decorators import with_trailing_slash
 from tg.controllers import RestController
 from tg.exceptions import HTTPNotFound, HTTPForbidden
 
-from vigilo.models import tables
+from vigilo.models.tables import MapGroup, GraphGroup, SupItemGroup
+from vigilo.models.tables.group import Group
 from vigilo.models.session import DBSession
 
 from vigilo.turbogears.helpers import get_current_user
@@ -22,20 +23,20 @@ LOGGER = logging.getLogger(__name__)
 
 class GroupsV1(RestController):
     """
-    Contrôleur permettant de récupérer des sous-classes de
-    L{Group<tables.Group>}, c'est à dire L{MapGroup<tables.MapGroup>},
-    L{GraphGroup<tables.GraphGroup>}, ou L{SupItemGroup<tables.SupItemGroup>}.
+    Contrôleur permettant de récupérer des sous-classes de L{Group},
+    c'est à dire L{MapGroup}, L{GraphGroup}, ou L{SupItemGroup}.
     Le choix du type se fait par passage d'argument au constructeur de la
     classe.
 
-    Ce contrôlleur est monté à la racine, sous plusieurs identifiants correspondants au type de groups désiré.
+    Ce contrôlleur est monté à la racine, sous plusieurs identifiants
+    correspondants au type de groups désiré.
 
-    @ivar type: type de groupe, passé en argument. Soit C{map} soit C{graph} soit C{supitem}
+    @ivar type: type de groupe, passé en argument. Soit C{map} soit C{graph}
+        soit C{supitem}
     @type type: C{str}
     @ivar model_class: classe du modèle correspondante au type, c'est à dire
-        soit L{MapGroup<tables.MapGroup>} soit L{GraphGroup<tables.GraphGroup>}
-        soit L{SupItemGroup<tables.SupItemGroup>}
-    @type model_class: sous-classe de L{Group<tables.Group>}
+        soit L{MapGroup} soit L{GraphGroup} soit L{SupItemGroup}
+    @type model_class: sous-classe de L{Group}
     """
 
     apiver = 1
@@ -50,11 +51,11 @@ class GroupsV1(RestController):
         super(GroupsV1, self).__init__()
         self.type = group_type
         if self.type == "map":
-            self.model_class = tables.MapGroup
+            self.model_class = MapGroup
         elif self.type == "graph":
-            self.model_class = tables.GraphGroup
+            self.model_class = GraphGroup
         elif self.type == "supitem":
-            self.model_class = tables.SupItemGroup
+            self.model_class = SupItemGroup
         else:
             LOGGER.warning("Unknown group type: %s", self.type)
 

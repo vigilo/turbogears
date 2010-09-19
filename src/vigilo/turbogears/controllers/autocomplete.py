@@ -32,7 +32,9 @@ class AutoCompleteController(BaseController):
             self.allow_only = allow_only
 
     class HostSchema(schema.Schema):
-        """Schéma de validation de la méthode default."""
+        """
+        Schéma de validation de la méthode default.
+        """
         host = validators.UnicodeString()
         partial = validators.StringBool(if_missing=False)
 
@@ -41,9 +43,9 @@ class AutoCompleteController(BaseController):
     def host(self, host, partial):
         """
         Auto-compléteur pour les noms d'hôtes.
-        
+
         @param host: Motif qui doit apparaître dans le nom de l'hôte.
-        @type host: C{unicode}
+        @type  host: C{unicode}
         @note: Les caractères '?' et '*' peuvent être utilisés dans
             le paramètre L{host} pour remplacer un caractère quelconque
             ou une chaîne de caractères, respectivement.
@@ -86,7 +88,9 @@ class AutoCompleteController(BaseController):
         return dict(results=[h.name for h in hostnames])
 
     class ServiceSchema(schema.Schema):
-        """Schéma de validation de la méthode default."""
+        """
+        Schéma de validation de la méthode default.
+        """
         service = validators.UnicodeString()
         host = validators.UnicodeString(if_missing=None)
         partial = validators.StringBool(if_missing=False)
@@ -96,12 +100,12 @@ class AutoCompleteController(BaseController):
     def service(self, service, host, partial):
         """
         Auto-compléteur pour les noms des services d'un hôte.
-        
+
         @param host: Nom d'hôte (optionnel) sur lequel s'applique
             l'autocomplétion.
-        @type host: C{unicode}
+        @type  host: C{unicode}
         @param service: Motif qui doit apparaître dans le nom de service.
-        @type service: C{unicode}
+        @type  service: C{unicode}
         @note: Les caractères '?' et '*' peuvent être utilisés dans
             le paramètre L{service} pour remplacer un caractère quelconque
             ou une chaîne de caractères, respectivement.
@@ -148,7 +152,9 @@ class AutoCompleteController(BaseController):
         return dict(results=[s.servicename for s in services])
 
     class HlsSchema(schema.Schema):
-        """Schéma de validation de la méthode default."""
+        """
+        Schéma de validation de la méthode default.
+        """
         service = validators.UnicodeString()
         partial = validators.StringBool(if_missing=False)
 
@@ -157,9 +163,9 @@ class AutoCompleteController(BaseController):
     def hls(self, service, partial):
         """
         Auto-compléteur pour les noms des services de haut niveau.
-        
+
         @param service: Motif qui doit apparaître dans le nom de service.
-        @type service: C{unicode}
+        @type  service: C{unicode}
         @note: Les caractères '?' et '*' peuvent être utilisés dans
             le paramètre L{service} pour remplacer un caractère quelconque
             ou une chaîne de caractères, respectivement.
