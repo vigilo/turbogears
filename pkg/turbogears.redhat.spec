@@ -45,6 +45,7 @@ Requires:   python26-weberror >= 0.10.1
 Requires:   python26-repoze.what-pylons 
 Requires:   python26-repoze.tm2 >= 1.0a4
 Requires:   python26-turbojson >= 1.2.1
+Requires:   python26-kerberos python26-urllib2-kerberos
 
 
 %description
