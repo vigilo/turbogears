@@ -46,6 +46,7 @@ Requires:   python26-repoze.what-pylons
 Requires:   python26-repoze.tm2 >= 1.0a4
 Requires:   python26-turbojson >= 1.2.1
 Requires:   python26-kerberos python26-urllib2-kerberos
+Requires:   python-rum-policy python-rum-component python-rum-generic
 
 
 %description

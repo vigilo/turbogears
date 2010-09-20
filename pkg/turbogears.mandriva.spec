@@ -40,6 +40,7 @@ Requires:   python-repoze.what-pylons
 Requires:   python-repoze.tm2 >= 1.0a4
 Requires:   python-turbojson >= 1.2.1
 Requires:   python-kerberos python-urllib2-kerberos
+Requires:   python-rum-policy python-rum-component python-rum-generic
 
 Buildarch:  noarch
 
