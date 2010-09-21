@@ -301,6 +301,11 @@ class ProxyController(BaseController):
         # utile lorsque le type MIME du résultat n'est pas "text/html".
         info = res.info()
         for k, v in info.items():
+            # La réponse obtenue via le proxy est complète,
+            # donc il ne faut pas envoyer un en-tête au client
+            # indiquant qu'elle est morcelée.
+            if k.lower() == 'transfer-encoding':
+                continue
             response.headers[k] = v
 
         doc = res.read()
