@@ -7,7 +7,7 @@ Name:       %{name}
 Summary:    Vigilo Turbogears extension library
 Version:    %{version}
 Release:    %{release}
-Source0:    %{module}.tar.bz2
+Source0:    %{name}-%{version}.tar.gz
 URL:        http://www.projet-vigilo.org
 Group:      System/Servers
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-build
@@ -50,7 +50,7 @@ This library provides the Vigilo extensions to TurboGears 2
 This library is part of the Vigilo Project <http://vigilo-project.org>
 
 %prep
-%setup -q -n %{module}
+%setup -q
 
 %build
 make PYTHON=%{_bindir}/python
