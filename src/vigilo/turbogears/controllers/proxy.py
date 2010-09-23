@@ -283,8 +283,13 @@ class ProxyController(BaseController):
         # de la négociation de contenu sur certaines pages
         # (pour afficher un graphe si Accept = "image/*" ou une
         # page HTML avec une représentation équivalente sinon).
-        if pylons.request.accept:
-            headers['Accept'] = pylons.request.accept.header_value
+        #
+        # Idem pour "Accept-Language" qui permettra de traduire
+        # partiellement les graphes de VigiRRD.
+        for header in ('accept', 'accept_language'):
+            header_obj = getattr(pylons.request, header)
+            if header_obj:
+                headers[header_obj.header_name] = header_obj.header_value
 
         url = '/'.join(args)
         if pylons.request.GET:
