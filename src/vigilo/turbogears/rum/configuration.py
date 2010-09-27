@@ -8,6 +8,7 @@ from rum.templating.genshi_renderer import GenshiRenderer, add_lang_attrs
 from genshi.template import TemplateLoader
 from genshi.filters import Translator
 from tw import framework as tw_framework
+from paste.deploy.converters import asbool
 
 from pkg_resources import resource_filename, resource_listdir, resource_isdir
 import gettext
@@ -71,7 +72,9 @@ class RumGenshiRenderer(GenshiRenderer):
     def render(self, data, possible_templates=[]):
         # Force l'utilisation de genshi pour le rendu des templates.
         tw_framework.default_view = 'genshi'
-        return super(RumGenshiRenderer, self).render(data, possible_templates)
+        data_copy = data.copy()
+        data_copy['asbool'] = asbool
+        return super(RumGenshiRenderer, self).render(data_copy, possible_templates)
 
 def get_rum_config(model):
     """Renvoie un dictionnaire avec la configuration à passer à Rum."""
