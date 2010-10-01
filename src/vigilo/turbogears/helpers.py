@@ -61,10 +61,10 @@ def get_readable_metro_value(pds):
     host = pds.host.name
     usage_url = "lastvalue?host=%s&ds=%s" % (host, pds.name)
     try:
-        usage_req = get_through_proxy("rrdgraph", host, usage_url)
+        usage_req = get_through_proxy("vigirrd", host, usage_url)
     except urllib2.HTTPError:
         logging.warning(_("Failed to get URL: %s"),
-                        url("/rrdgraph/%s/%s" % (host, usage_url),
+                        url("/vigirrd/%s/%s" % (host, usage_url),
                         qualified=True))
         raise
     usage = simplejson.load(usage_req)['lastvalue']
@@ -95,4 +95,3 @@ def ugettext(message):
 _ = ugettext
 
 lazy_ugettext = lazify(ugettext)
-

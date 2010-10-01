@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Ce module agit comme un proxy qui va interroger les interfaces de
-Nagios/RRDgraph et renvoyer le résultat pour qu'il puisse être
+Nagios/VigiRRD et renvoyer le résultat pour qu'il puisse être
 affiché dans Vigilo.
 """
 
@@ -33,7 +33,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
     Récupère le contenu d'un document à travers le mécanisme de proxy.
 
     @param server_type: Type d'application à "proxifier",
-        par exemple : "nagios" ou "rrdgraph".
+        par exemple : "nagios" ou "vigirrd".
     @type server_type: C{basestring}
     @param host: Nom de l'hôte (supervisé) concerné par la demande.
     @type host: C{unicode}
@@ -216,7 +216,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
 
 class ProxyController(BaseController):
     """
-    Contrôleur agissant comme un proxy vers Nagios ou RRDgraph.
+    Contrôleur agissant comme un proxy vers Nagios ou VigiRRD.
     Ce contrôleur utilise la méthode get_through_proxy de ce module
     pour obtenir les documents.
     """
@@ -240,7 +240,7 @@ class ProxyController(BaseController):
         """
         Cette méthode capture toutes les requêtes HTTP transmises
         au contrôleur puis les redirige vers le serveur Nagios ou
-        RRDgraph (selon le paramètre C{server_type} donné au constructeur)
+        VigiRRD (selon le paramètre C{server_type} donné au constructeur)
         responsable de l'hôte donné.
 
         Si ce contrôleur est monté dans "/nagios/", un appel à

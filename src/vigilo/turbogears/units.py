@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# vim:set expandtab tabstop=4 shiftwidth=4: 
+# vim:set expandtab tabstop=4 shiftwidth=4:
 """
 Contient le gestionnaire d'unités,
 capable de représenter une valeur en utilisant
@@ -29,6 +29,8 @@ def convert_with_unit(value, digits=3):
     @return: valeur
     @rtype: C{str}
     '''
+    if value is None:
+        return None
 
     power, suffix = _get_value_suffix(value)
     if power is None or suffix is None:
