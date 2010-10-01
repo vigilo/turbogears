@@ -8,7 +8,7 @@ from vigilo.turbogears.units import convert_with_unit
 
 class TestUnitManager(unittest.TestCase):
     """Conversion utilisant les puissances d'une unité."""
- 
+
     def test_small(self):
         value = 5
         result = convert_with_unit(value)
@@ -74,3 +74,7 @@ class TestUnitManager(unittest.TestCase):
         result = convert_with_unit(value)
         assert(result == '-30.1k')
 
+    def test_None(self):
+        value = None
+        result = convert_with_unit(value)
+        assert(result is None)
