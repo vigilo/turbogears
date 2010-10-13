@@ -173,6 +173,13 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
     app_port = int(app_port)
     url = url.lstrip('/')
 
+    manager_url = [app_scheme,
+                    "%s:%d" % (vigilo_server, app_port),
+                    app_path + "/",
+                    "",
+                    ""]
+    manager_url = urlparse.urlunsplit(manager_url)
+
     full_url = [app_scheme,
                 "%s:%d" % (vigilo_server, app_port),
                 "%s/%s" % (app_path, url),
@@ -193,6 +200,47 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
     req = urllib2.Request(full_url, data, headers=headers)
     opener = urllib2.build_opener()
     opener.add_handler(HTTPKerberosAuthHandler())
+
+    # Configuration de l'authentification
+    # vers un éventuel proxy intermédiaire.
+    proxy_auth_method = config.get('app_proxy_auth_method.%s' % server_type, None)
+    proxy_auth_username = config.get('app_proxy_auth_username.%s' % server_type, None)
+    proxy_auth_password = config.get('app_proxy_auth_password.%s' % server_type, None)
+    if proxy_auth_method and proxy_auth_username and \
+        proxy_auth_password is not None:
+        proxy_auth_method = proxy_auth_method.lower()
+        proxy_pass_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        proxy_pass_manager.add_password(
+            None, manager_url,
+            proxy_auth_username,
+            proxy_auth_password)
+        if proxy_auth_method == 'basic':
+            opener.add_handler(urllib2.ProxyBasicAuthHandler(proxy_pass_manager))
+            LOGGER.debug(_('Basic authentification to the proxy.'))
+        elif proxy_auth_method == 'digest':
+            opener.add_handler(urllib2.ProxyDigestAuthHandler(proxy_pass_manager))
+            LOGGER.debug(_('Digest authentification to the proxy.'))
+
+    # Configuration de l'authentification
+    # vers le site final (Nagios, VigiRRD, ...).
+    final_auth_method = config.get('app_auth_method.%s' % server_type, None)
+    final_auth_username = config.get('app_auth_username.%s' % server_type, None)
+    final_auth_password = config.get('app_auth_password.%s' % server_type, None)
+    if final_auth_method and final_auth_username and \
+        final_auth_password is not None:
+        final_auth_method = final_auth_method.lower()
+        final_pass_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        final_pass_manager.add_password(
+            None, manager_url,
+            final_auth_username,
+            final_auth_password)
+        if final_auth_method == 'basic':
+            opener.add_handler(urllib2.HTTPBasicAuthHandler(final_pass_manager))
+            LOGGER.debug(_('Basic authentification to the website.'))
+        elif final_auth_method == 'digest':
+            opener.add_handler(urllib2.HTTPDigestAuthHandler(final_pass_manager))
+            LOGGER.debug(_('Digest authentification to the website.'))
+
     try:
         res = opener.open(req)
     except urllib2.HTTPError, e:
