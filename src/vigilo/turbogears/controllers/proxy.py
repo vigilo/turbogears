@@ -203,9 +203,9 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
 
     # Configuration de l'authentification
     # vers un éventuel proxy intermédiaire.
-    proxy_auth_method = config.get('app_proxy_auth_method.%s' % server_type, None)
-    proxy_auth_username = config.get('app_proxy_auth_username.%s' % server_type, None)
-    proxy_auth_password = config.get('app_proxy_auth_password.%s' % server_type, None)
+    proxy_auth_method = config.get('app_proxy_auth_method', None)
+    proxy_auth_username = config.get('app_proxy_auth_username', None)
+    proxy_auth_password = config.get('app_proxy_auth_password', None)
     if proxy_auth_method and proxy_auth_username and \
         proxy_auth_password is not None:
         proxy_auth_method = proxy_auth_method.lower()
