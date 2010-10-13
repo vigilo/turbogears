@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vigilo-turbogears 2.0.0\n"
 "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
-"POT-Creation-Date: 2010-08-24 14:33+0200\n"
+"POT-Creation-Date: 2010-10-13 11:03+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,48 +18,64 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.4\n"
 
-#: src/vigilo/turbogears/helpers.py:65
+#: src/vigilo/turbogears/helpers.py:66
 #, python-format
 msgid "Failed to get URL: %s"
 msgstr ""
 
-#: src/vigilo/turbogears/helpers.py:78
+#: src/vigilo/turbogears/helpers.py:79
 #, python-format
 msgid "Failed to convert DS %(ds)s on %(host)s: value was %(value)s (max: %(max)s)"
 msgstr ""
 
-#: src/vigilo/turbogears/controllers/error.py:26
+#: src/vigilo/turbogears/controllers/error.py:27
 msgid "We're sorry but we weren't able to process this request."
 msgstr ""
 
-#: src/vigilo/turbogears/controllers/proxy.py:98
+#: src/vigilo/turbogears/controllers/proxy.py:99
 #, python-format
 msgid "No such monitored host: %s"
 msgstr ""
 
-#: src/vigilo/turbogears/controllers/proxy.py:143
+#: src/vigilo/turbogears/controllers/proxy.py:144
 #, python-format
 msgid "Access denied to host \"%(host)s\" and service \"%(service)s\""
 msgstr ""
 
-#: src/vigilo/turbogears/controllers/proxy.py:149
+#: src/vigilo/turbogears/controllers/proxy.py:150
 #, python-format
 msgid "Access denied to host \"%s\""
 msgstr ""
 
-#: src/vigilo/turbogears/controllers/proxy.py:158
+#: src/vigilo/turbogears/controllers/proxy.py:159
 #, python-format
 msgid "No %(server_type)s server configured to monitor \"%(host)s\""
 msgstr ""
 
-#: src/vigilo/turbogears/controllers/proxy.py:185
+#: src/vigilo/turbogears/controllers/proxy.py:193
 #, python-format
 msgid "Invalid value for app_redirect.%s, not redirecting."
 msgstr ""
 
-#: src/vigilo/turbogears/controllers/proxy.py:191
+#: src/vigilo/turbogears/controllers/proxy.py:199
 #, python-format
 msgid "Fetching '%s' through the proxy"
+msgstr ""
+
+#: src/vigilo/turbogears/controllers/proxy.py:219
+msgid "Basic authentification to the proxy."
+msgstr ""
+
+#: src/vigilo/turbogears/controllers/proxy.py:222
+msgid "Digest authentification to the proxy."
+msgstr ""
+
+#: src/vigilo/turbogears/controllers/proxy.py:239
+msgid "Basic authentification to the website."
+msgstr ""
+
+#: src/vigilo/turbogears/controllers/proxy.py:242
+msgid "Digest authentification to the website."
 msgstr ""
 
 #: src/vigilo/turbogears/controllers/api/root.py:61
