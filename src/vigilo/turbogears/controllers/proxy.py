@@ -169,7 +169,8 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
     # texte clair (http) sur le port standard (80).
     app_path = config['app_path.%s' % server_type].strip('/')
     app_scheme = config.get('app_scheme.%s' % server_type, 'http')
-    app_port = config.get('app_port.%s' % server_type, 80)
+    app_port = config.get('app_port.%s' % server_type,
+        app_scheme == 'https' and 443 or 80)
     app_port = int(app_port)
     url = url.lstrip('/')
 
