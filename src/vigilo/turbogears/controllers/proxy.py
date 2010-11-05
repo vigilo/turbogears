@@ -284,6 +284,8 @@ class ProxyController(BaseController):
             mount_point = mount_point + '/'
         self.mount_point = mount_point
 
+    # TG2 lève une exception si on n'expose pas explicitement JSON.
+    @expose('json')
     @expose(content_type=CUSTOM_CONTENT_TYPE)
     def default(self, *args, **kwargs):
         """
