@@ -54,7 +54,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
     @rtype: C{file-like}
     """
 
-    def _get_server(hostname):
+    def _get_server(idhost):
         """
         Étant donné le nom d'un hôte du parc, cette méthode
         renvoie le nom de domaine qualifié (FQDN) du serveur
@@ -71,18 +71,22 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
                 ).join(
                     (Ventilation, Ventilation.idvigiloserver ==
                         VigiloServer.idvigiloserver),
-                    (Host, Host.idhost == Ventilation.idhost),
                     (Application, Application.idapp == Ventilation.idapp),
-                ).filter(Host.name == hostname
+                ).filter(Ventilation.idhost == idhost
                 ).filter(Application.name == server_type
                 ).scalar()
 
+    service_name = None
     service = None
     if data is not None:
         # Éventuellement, l'utilisateur demande une page
         # qui se rapporte à un service particulier.
-        service = data.get('service')
+        service_name = data.get('service')
         data = urllib.urlencode(data)
+        service = DBSession.query(
+                Service
+            ).filter(Service.servicename == service_name
+            ).scalar()
 
     if headers is None:
         headers = {}
@@ -91,70 +95,37 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
 
     # On vérifie qu'il existe effectivement un hôte portant ce nom
     # et configuré pour être supervisé par Vigilo.
-    idhost = DBSession.query(
-                Host.idhost
+    host = DBSession.query(
+                Host
             ).filter(Host.name == host
             ).scalar()
-    if idhost is None:
-        message = _('No such monitored host: %s') % host
+    if host is None:
+        message = _('No such monitored host: %s') % host.idhost
         LOGGER.warning(message)
         raise HTTPNotFound(message)
 
     # On regarde si l'utilisateur a accès à l'hôte demandé.
-    perm = DBSession.query(
-                SupItemGroup.idgroup
-            ).join(
-                (SUPITEM_GROUP_TABLE, SUPITEM_GROUP_TABLE.c.idgroup ==
-                    SupItemGroup.idgroup),
-            ).outerjoin(
-                (LowLevelService, LowLevelService.idservice ==
-                    SUPITEM_GROUP_TABLE.c.idsupitem),
-            )
-
     is_manager = in_group('managers').is_met(request.environ)
     if not is_manager:
-        supitemgroups = [ug[0] for ug in user.supitemgroups() if ug[1]]
-        perm = perm.filter(SUPITEM_GROUP_TABLE.c.idgroup.in_(supitemgroups))
-
-    # Si en plus on a demandé un service particulier,
-    # alors on vérifie les permissions de l'utilisateur
-    # sur ce service.
-    if service is not None:
-        perm = perm.filter(
-                    or_(
-                        and_(
-                            LowLevelService.idhost == idhost,
-                            LowLevelService.servicename == service,
-                        ),
-                        SUPITEM_GROUP_TABLE.c.idsupitem == idhost,
-                    ),
-                )
-    else:
-        perm = perm.filter(
-                    or_(
-                        LowLevelService.idhost == idhost,
-                        SUPITEM_GROUP_TABLE.c.idsupitem == idhost,
-                    ),
-                )
-
-    # On traite le cas où l'utilisateur n'a pas les droits requis.
-    if perm.scalar() is None:
-        message = None
-        if service is not None:
-            message = _('Access denied to host "%(host)s" and '
-                        'service "%(service)s"') % {
-                            'host': host,
-                            'service': service,
-                        }
-        else:
-            message = _('Access denied to host "%s"') % host
-        LOGGER.warning(message)
-        raise HTTPForbidden(message)
+        # On traite le cas où l'utilisateur n'a pas les droits requis.
+        if (service is not None and not service.is_allowed_for(user)) \
+            or (not host.is_allowed_for(user)):
+            message = None
+            if service is not None:
+                message = _('Access denied to host "%(host)s" and '
+                            'service "%(service)s"') % {
+                                'host': host.name,
+                                'service': service.servicename,
+                            }
+            else:
+                message = _('Access denied to host "%s"') % host
+            LOGGER.warning(message)
+            raise HTTPForbidden(message)
 
     # On vérifie que l'hôte est effectivement pris en charge.
     # ie: qu'un serveur du parc héberge l'application server_type
     # responsable de cet hôte.
-    vigilo_server = _get_server(host)
+    vigilo_server = _get_server(host.idhost)
     if vigilo_server is None:
         message = _('No %(server_type)s server configured to '
                     'monitor "%(host)s"') % {
@@ -284,11 +255,7 @@ class ProxyController(BaseController):
             mount_point = mount_point + '/'
         self.mount_point = mount_point
 
-    # Cette méthode ne semble pas fonctionner correctement lorsque
-    # la requête est de type application/json.
-    # De plus, un @expose('json') engendre plus de problèmes qu'il
-    # n'en résoud. Utilisez get_through_proxy() explicitement pour
-    # ce cas particulier.
+    @expose('json')
     @expose(content_type=CUSTOM_CONTENT_TYPE)
     def default(self, *args, **kwargs):
         """
