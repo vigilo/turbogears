@@ -9,7 +9,7 @@ import urllib, urllib2, urlparse, logging
 import tg, pylons
 from tg import request, expose, config, response
 from tg.controllers import CUSTOM_CONTENT_TYPE
-import tg.exceptions http_exc
+import tg.exceptions as http_exc
 from repoze.what.predicates import in_group
 from vigilo.turbogears.helpers import ugettext as _
 from sqlalchemy import or_, and_
