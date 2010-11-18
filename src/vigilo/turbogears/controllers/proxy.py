@@ -9,7 +9,7 @@ import urllib, urllib2, urlparse, logging
 import tg, pylons
 from tg import request, expose, config, response
 from tg.controllers import CUSTOM_CONTENT_TYPE
-from tg.exceptions import HTTPForbidden, HTTPNotFound
+import tg.exceptions http_exc
 from repoze.what.predicates import in_group
 from vigilo.turbogears.helpers import ugettext as _
 from sqlalchemy import or_, and_
@@ -102,7 +102,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
     if host is None:
         message = _('No such monitored host: %s') % host.idhost
         LOGGER.warning(message)
-        raise HTTPNotFound(message)
+        raise http_exc.HTTPNotFound(message)
 
     # On regarde si l'utilisateur a accès à l'hôte demandé.
     is_manager = in_group('managers').is_met(request.environ)
@@ -120,7 +120,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
             else:
                 message = _('Access denied to host "%s"') % host
             LOGGER.warning(message)
-            raise HTTPForbidden(message)
+            raise http_exc.HTTPForbidden(message)
 
     # On vérifie que l'hôte est effectivement pris en charge.
     # ie: qu'un serveur du parc héberge l'application server_type
@@ -133,7 +133,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
                         'host': host,
                     }
         LOGGER.warning(message)
-        raise HTTPNotFound(message)
+        raise http_exc.HTTPNotFound(message)
 
     # Récupére les informations sur l'emplacement de l'application
     # distante. Par défaut, on suppose que la connexion se fait en
@@ -220,8 +220,9 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
         # à des erreurs reconnues par TurboGears2.
         # On obtient ainsi une page d'erreur plus sympathique.
         errors = {
-            '401': HTTPForbidden,
-            '404': HTTPNotFound,
+            '401': http_exc.HTTPForbidden,
+            '404': http_exc.HTTPNotFound,
+            '503': http_exc.HTTPServiceUnavailable,
         }
         error = errors.get(str(e.code))
         if error is None:
