@@ -59,7 +59,10 @@ def get_readable_metro_value(pds):
     from vigilo.turbogears.controllers.proxy import get_through_proxy
 
     host = pds.host.name
-    usage_url = "lastvalue?host=%s&ds=%s" % (host, pds.name)
+    usage_url = "lastvalue?host=%s&ds=%s" % (
+        urllib2.quote(host, ''),
+        urllib2.quote(pds.name, ''),
+    )
     try:
         usage_req = get_through_proxy("vigirrd", host, usage_url)
     except urllib2.HTTPError:
