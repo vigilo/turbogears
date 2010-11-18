@@ -256,7 +256,11 @@ class ProxyController(BaseController):
             mount_point = mount_point + '/'
         self.mount_point = mount_point
 
-    @expose('json')
+    # Cette méthode ne semble pas fonctionner correctement lorsque 
+    # la requête est de type application/json. 
+    # De plus, un @expose('json') engendre plus de problèmes qu'il 
+    # n'en résoud. Utilisez get_through_proxy() explicitement pour 
+    # ce cas particulier.
     @expose(content_type=CUSTOM_CONTENT_TYPE)
     def default(self, *args, **kwargs):
         """
