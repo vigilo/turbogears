@@ -1,4 +1,4 @@
-# French (France) translations for vigilo-turbogears.
+# German translations for vigilo-turbogears.
 # Copyright (C) 2010 ORGANIZATION
 # This file is distributed under the same license as the vigilo-turbogears
 # project.
@@ -7,12 +7,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: vigilo-turbogears 2.0.0\n"
-"Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
-"POT-Creation-Date: 2010-07-26 13:47+0200\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2010-11-19 12:48+0100\n"
 "PO-Revision-Date: 2010-11-19 12:48+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: fr_FR <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -21,7 +21,7 @@ msgstr ""
 #: src/vigilo/turbogears/helpers.py:69
 #, python-format
 msgid "Failed to get URL: %s"
-msgstr "Impossible d'obtenir le contenu de l'URL: %s"
+msgstr "URL: %s konnte nicht geholt werden"
 
 #: src/vigilo/turbogears/helpers.py:82
 #, python-format
@@ -29,60 +29,62 @@ msgid ""
 "Failed to convert DS %(ds)s on %(host)s: value was %(value)s (max: "
 "%(max)s)"
 msgstr ""
-"Impossible de convertir la DS %(ds)s sur %(host)s: la valeur était "
-"%(value)s (max : %(max)s)"
+"DS %(ds)s auf %(host)s konnte nicht umgewandelt werden: Wert %(value)s "
+"(max: %(max)s)"
 
 #: src/vigilo/turbogears/controllers/error.py:27
 msgid "We're sorry but we weren't able to process this request."
-msgstr "Nous sommes désolés, mais nous n'avons pas pu traiter votre requête."
+msgstr "Leider kann diese Anforderung nicht verarbeitet werden."
 
 #: src/vigilo/turbogears/controllers/proxy.py:103
 #, python-format
 msgid "No such monitored host: %s"
-msgstr "Hôte supervisé inexistant : %s"
+msgstr "Überwachter Host: %s nicht vorhanden"
 
 #: src/vigilo/turbogears/controllers/proxy.py:115
 #, python-format
 msgid "Access denied to host \"%(host)s\" and service \"%(service)s\""
-msgstr "Accès refusé au service \"%(service)s\" sur l'hôte \"%(host)s\""
+msgstr "Zugang zu Host \"%(host)s\" und Service \"%(service)s\" verweigert"
 
 #: src/vigilo/turbogears/controllers/proxy.py:121
 #, python-format
 msgid "Access denied to host \"%s\""
-msgstr "Accès refusé à l'hôte \"%s\""
+msgstr "Zugang zu Host \"%s\" verweigert"
 
 #: src/vigilo/turbogears/controllers/proxy.py:130
 #, python-format
 msgid "No %(server_type)s server configured to monitor \"%(host)s\""
-msgstr "Aucun serveur %(server_type)s configuré pour superviser \"%(host)s\""
+msgstr ""
+"Es wurde kein %(server_type)s Server zur Überwachung von \"%(host)s\" "
+"konfiguriert"
 
 #: src/vigilo/turbogears/controllers/proxy.py:165
 #, python-format
 msgid "Invalid value for app_redirect.%s, not redirecting."
-msgstr "Valeur incorrecte pour app_redirect.%s, pas de redirection."
+msgstr "Ungültiger Wert für app_redirect.%s, wird nicht umgeleitet."
 
 #: src/vigilo/turbogears/controllers/proxy.py:171
 #, python-format
 msgid "Fetching '%s' through the proxy"
-msgstr "Récupération de '%s' via le serveur mandataire"
+msgstr "'%s' wird über den Proxy abgerufen"
 
 #: src/vigilo/turbogears/controllers/proxy.py:191
 msgid "Basic authentification to the proxy."
-msgstr "Authentification de type Basic auprès du proxy."
+msgstr ""
 
 #: src/vigilo/turbogears/controllers/proxy.py:194
 msgid "Digest authentification to the proxy."
-msgstr "Authentification de type Digest auprès du proxy."
+msgstr ""
 
 #: src/vigilo/turbogears/controllers/proxy.py:211
 msgid "Basic authentification to the website."
-msgstr "Authentification de type Basic auprès du site distant."
+msgstr ""
 
 #: src/vigilo/turbogears/controllers/proxy.py:214
 msgid "Digest authentification to the website."
-msgstr "Authentification de type Digest auprès du site distant."
+msgstr ""
 
 #: src/vigilo/turbogears/controllers/api/root.py:61
 msgid "You need to be authenticated"
-msgstr "Vous devez vous authentifier"
+msgstr "Sie müssen sich authentifizieren"
 
