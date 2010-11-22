@@ -84,8 +84,8 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
         service_name = data.get('service')
         data = urllib.urlencode(data)
         service = DBSession.query(
-                Service
-            ).filter(Service.servicename == service_name
+                LowLevelService
+            ).filter(LowLevelService.servicename == service_name
             ).scalar()
 
     if headers is None:
@@ -95,12 +95,12 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
 
     # On vérifie qu'il existe effectivement un hôte portant ce nom
     # et configuré pour être supervisé par Vigilo.
-    host = DBSession.query(
+    host_obj = DBSession.query(
                 Host
             ).filter(Host.name == host
             ).scalar()
-    if host is None:
-        message = _('No such monitored host: %s') % host.idhost
+    if host_obj is None:
+        message = _('No such monitored host: %s') % host
         LOGGER.warning(message)
         raise http_exc.HTTPNotFound(message)
 
@@ -109,12 +109,12 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
     if not is_manager:
         # On traite le cas où l'utilisateur n'a pas les droits requis.
         if (service is not None and not service.is_allowed_for(user)) \
-            or (not host.is_allowed_for(user)):
+            or (not host_obj.is_allowed_for(user)):
             message = None
             if service is not None:
                 message = _('Access denied to host "%(host)s" and '
                             'service "%(service)s"') % {
-                                'host': host.name,
+                                'host': host,
                                 'service': service.servicename,
                             }
             else:
@@ -125,7 +125,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
     # On vérifie que l'hôte est effectivement pris en charge.
     # ie: qu'un serveur du parc héberge l'application server_type
     # responsable de cet hôte.
-    vigilo_server = _get_server(host.idhost)
+    vigilo_server = _get_server(host_obj.idhost)
     if vigilo_server is None:
         message = _('No %(server_type)s server configured to '
                     'monitor "%(host)s"') % {
@@ -256,10 +256,10 @@ class ProxyController(BaseController):
             mount_point = mount_point + '/'
         self.mount_point = mount_point
 
-    # Cette méthode ne semble pas fonctionner correctement lorsque 
-    # la requête est de type application/json. 
-    # De plus, un @expose('json') engendre plus de problèmes qu'il 
-    # n'en résoud. Utilisez get_through_proxy() explicitement pour 
+    # Cette méthode ne semble pas fonctionner correctement lorsque
+    # la requête est de type application/json.
+    # De plus, un @expose('json') engendre plus de problèmes qu'il
+    # n'en résoud. Utilisez get_through_proxy() explicitement pour
     # ce cas particulier.
     @expose(content_type=CUSTOM_CONTENT_TYPE)
     def default(self, *args, **kwargs):
@@ -291,7 +291,7 @@ class ProxyController(BaseController):
         args = list(args[1:])
 
         # TurboGears supprime l'extension de la requête
-        # car il peut effectivement des traitements différents
+        # car il peut effectuer des traitements différents
         # à partir d'une même méthode (ex: rendu HTML ou JSON).
         # On la réintègre dans les paramètres pour que les
         # fichier .css ou .js puissent être proxifiés correctement.
