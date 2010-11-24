@@ -2,7 +2,7 @@
 """Gère différents aspects de la configuration de Rum."""
 
 from tg.i18n import get_lang
-from tg import config
+from tg import config, request
 
 from rum.templating.genshi_renderer import GenshiRenderer, add_lang_attrs
 from genshi.template import TemplateLoader
@@ -81,13 +81,11 @@ def get_rum_config(model):
 
     base_tpl_dir = resource_filename('vigilo.themes.templates', '')
 
-    # Récupère la liste des dossiers contenus dans <application>/i18n,
-    # tels que ces dossiers ne sont pas cachés.
-    # On élimine les langues au format xx_YY car rum ne les supporte pas.
-    locales = [l for l in resource_listdir(config.app_name, 'i18n')
-                if resource_isdir(config.app_name, 'i18n/%s' % l) and
-                    (not l.startswith('.')) and
-                    l.find('_') < 0]
+    # On récupère la liste des langues supportées par l'utilisateur,
+    # en éliminant les langues au format xx_YY ou xx-YY car rum ne
+    # les supporte pas.
+    locales = [locale for locale in request.accept_language.best_matches()
+                if locale.find('-') < 0 and locale.find('_')]
 
     rum_config = {
         'rum.repositoryfactory': {
