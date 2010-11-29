@@ -89,27 +89,11 @@ class VigiloAppConfig(AppConfig):
             'asbool': asbool,
         }
 
-    def __setup_template_translator(self):
-        """Crée un traducteur pour les modèles (templates)."""
-        if self.__tpl_translator is None:
-            i18n_dir = resource_filename('vigilo.themes.i18n', '')
-
-            try:
-                # XXX We should make use of fallback languages.
-                self.__tpl_translator = gettext.translation(
-                    'vigilo-themes', i18n_dir, get_lang())
-            except IOError:
-                # During unit tests, no language is defined which results
-                # in an error when get_lang() is called.
-                # Also, an IOErrpr occurrs when no catalog exists for the
-                # given language.
-                self.__tpl_translator = gettext.NullTranslations()
-
     def setup_paths(self):
         """
         Surcharge pour modifier la liste des dossiers dans lesquels Genshi
         va chercher les templates, afin de supporter un système de thèmes.
-        """
+                                                    """
         super(VigiloAppConfig, self).setup_paths()
 
         app_templates = resource_filename(
@@ -134,22 +118,19 @@ class VigiloAppConfig(AppConfig):
         """
         def template_loaded(template):
             """Appelé lorsqu'un modèle finit son chargement."""
-            self.__setup_template_translator()
-            template.filters.insert(0, Translator(
-                self.__tpl_translator.ugettext))
+            import pylons
+            template.filters.insert(0, Translator(pylons.c.l_.ugettext))
 
         def my_render_genshi(template_name, template_vars, **kwargs):
             """Ajoute une fonction l_ dans les modèles pour les traductions."""
-            self.__setup_template_translator()
-
-            # Add custom translator to templates.
-            template_vars['l_'] = self.__tpl_translator.ugettext
-
+            import pylons
+            template_vars['l_'] = pylons.c.l_.ugettext
             return render_genshi(template_name, template_vars, **kwargs)
 
         loader = TemplateLoader(search_path=self.paths.templates,
                                 auto_reload=self.auto_reload_templates,
-                                callback=template_loaded)
+                                callback=template_loaded,
+                                max_cache_size=0)
 
         config['pylons.app_globals'].genshi_loader = loader
         self.render_functions.genshi = my_render_genshi
