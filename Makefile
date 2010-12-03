@@ -1,5 +1,5 @@
 NAME := turbogears
-EPYDOC_PARSE := vigilo\.turbogears\.controllers\.autocomplete
+EPYDOC_PARSE := vigilo\.turbogears\.(controllers\.autocomplete|rum\.fields)
 
 all: build
 
