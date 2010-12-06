@@ -27,7 +27,6 @@ class TestAutocompleterForServiceWithoutHost(utils.AutoCompleterTest):
             host=self.host,
             command=u'',
             weight=42,
-            op_dep=u'+',
         )
         DBSession.add(self.service)
         DBSession.flush()
@@ -48,4 +47,3 @@ class TestAutocompleterForServiceWithHost(
 # - un autre service répondant au motif, avec et sans hôte
 #   (vérif de la bonne prise en compte du nom d'hôte)
 # - etc.
-

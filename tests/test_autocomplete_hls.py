@@ -17,11 +17,9 @@ class TestAutocompleterForHLS(utils.AutoCompleterTest):
             warning_threshold=0,
             critical_threshold=0,
             priority=0,
-            op_dep=u'+',
         )
         DBSession.add(hls)
         DBSession.flush()
 
     def _query_autocompleter(self, pattern, partial):
         return self.ctrl.hls(pattern, partial)
-
