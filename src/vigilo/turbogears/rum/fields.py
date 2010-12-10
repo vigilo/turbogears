@@ -10,10 +10,10 @@ from tw.rum import widgets
 from rum import ViewFactory
 from rum.fields import Field, Relation
 from rum.util import NoDefault
-from tw.forms import validators
 from tw.api import JSLink, JSSource, CSSLink
 from tg import url
 
+from tw.forms import validators
 get = ViewFactory.get.im_func
 
 class Enum(Field):
@@ -25,9 +25,19 @@ class Enum(Field):
         default=NoDefault, read_only=False, searchable=True, sortable=True):
         super(Enum, self).__init__(name, required, label, default, read_only,
                                     searchable=searchable, sortable=sortable)
-        if not isinstance(options, dict):
+        if not isinstance(options, (list, tuple)):
             raise TypeError, options
         self.options = options
+
+class EnumDisplay(widgets.Span):
+#    template = """"""
+
+    def update_params(self, d):
+        super(EnumDisplay, self).update_params(d)
+        options = dict(d.field.options)
+        d.escape = False
+        template = u'<span class="rum-field-value" title="%s">%s</span>'
+        d.unicode_value = template % (options[d.unicode_value], d.unicode_value)
 
 class CitedRelation(Relation):
     """
@@ -48,10 +58,11 @@ class GroupSelector(forms.InputField):
     css = [
         CSSLink(link=url('/css/jxlib/jxtheme.uncompressed.css')),
     ]
-    params = ["choose_text", "text_value", "clear_text"]
+    params = ["choose_text", "text_value", "clear_text", "groups_url", "field"]
     choose_text = 'Choose'
     clear_text = 'Clear'
     text_value = ''
+    groups_url = None
 
     template = """
 <div xmlns="http://www.w3.org/1999/xhtml"
@@ -67,7 +78,7 @@ window.addEvent('load', function () {
     $('${id}').addEvent('click', function () {
         var tg = new TreeGroup({
             title: '',
-            url: '%(url)s',
+            url: '${groups_url}',
         });
         tg.selectGroup();
         tg.addEvent('select', function (item) {
@@ -83,9 +94,7 @@ window.addEvent('load', function () {
 });
 </script>
 </div>
-""" % {
-    'url': url('/get_groups'),
-}
+"""
 
     def update_params(self, d):
         from vigilo.models.session import DBSession
@@ -97,9 +106,12 @@ window.addEvent('load', function () {
         else:
             d.text_value = d.value.name
             d.value = str(d.value.idgroup)
+        d.groups_url = d.field.groups_url
 
 class GroupRelation(Relation):
-    pass
+    def __init__(self, groups_url, *args, **kwargs):
+        super(GroupRelation, self).__init__(*args, **kwargs)
+        self.groups_url = groups_url
 
 class GroupLink(widgets.RelationLink):
     template = widgets.Span.template
@@ -107,16 +119,14 @@ class GroupLink(widgets.RelationLink):
 @get.before("isinstance(attr, Enum)")
 def _set_options_for_enum(self, resource, parent, remote_name,
                                 attr, action, args):
-    """Passe les options de l'énumération à la vue."""
-    def get_options():
-        """Retourne les options de l'énumération."""
-        options = list(attr.options.iteritems())
-        return options
-
-    options = get_options()
-    args['options'] = options
-    v = validators.OneOf([o[0] for o in options])
+    args['options'] = attr.options
+    v = validators.OneOf([o[0] for o in attr.options])
     self.add_validator(v, args)
+
+@get.when("isinstance(attr, Enum) and action in inline_actions")
+def _show_enum_tooltip(self, resource, parent, remote_name, attr, action, args):
+    args['field'] = attr
+    return EnumDisplay
 
 @get.around("isinstance(attr, CitedRelation) and "
             "action in inline_actions", prio = 10)
@@ -136,6 +146,10 @@ def _widget_for_group_relation(self, resource, parent, remote_name,
     args['field'] = attr
     return GroupLink
 
+@get.before("isinstance(attr, GroupRelation)", prio = 10)
+def _url_for_group_relation(self, resource, parent, remote_name,
+                                attr, action, args):
+    args['field'] = attr
 
 # Enregistrement des champs personalisés auprès de rum.
 WidgetFactory.register_widget(
@@ -149,4 +163,3 @@ WidgetFactory.register_widget(
 WidgetFactory.register_widget(
     GroupSelector, GroupRelation, input_actions, _prio=10,
 )
-
