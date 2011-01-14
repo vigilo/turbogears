@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 """
+Configuration de modules pour le framework repoze.who.
+Ces différents modules seront utilisables
+dans le fichier who.ini.
 """
 
 import zope.interface
@@ -52,7 +55,16 @@ md_group_plugin = AuthorizationMetadata(
 
 def vigilo_api_classifier(environ):
     from paste.httpheaders import PATH_INFO
-    if PATH_INFO(environ).find('/api/') != -1:
+    # On classe à part les données statiques, ce qui évite
+    # de leur appliquer un test d'authentification.
+    # Il faut faire une exception pour les proxies
+    # car là on veut procéder à une authentification.
+    ext = PATH_INFO(environ).rpartition('.')
+    if '/vigirrd/' not in PATH_INFO(environ) and \
+        '/nagios/' not in PATH_INFO(environ) and \
+        ext[2] in ('png', 'jpg', 'gif', 'css', 'js'):
+        return 'static'
+    if '/api/' in PATH_INFO(environ):
         return 'vigilo-api'
     return default_request_classifier(environ)
 zope.interface.directlyProvides(vigilo_api_classifier, IRequestClassifier)

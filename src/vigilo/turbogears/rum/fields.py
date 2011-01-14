@@ -30,8 +30,6 @@ class Enum(Field):
         self.options = options
 
 class EnumDisplay(widgets.Span):
-#    template = """"""
-
     def update_params(self, d):
         super(EnumDisplay, self).update_params(d)
         options = dict(d.field.options)
@@ -75,17 +73,18 @@ class GroupSelector(forms.InputField):
 <input type="button" class="${css_class}" id="${id}.clear" value="${clear_text}" />
 <script type="text/javascript">
 window.addEvent('load', function () {
+    $('${id}').store('tree', new TreeGroup({
+        title: '',
+        url: '${groups_url}',
+    }));
     $('${id}').addEvent('click', function () {
-        var tg = new TreeGroup({
-            title: '',
-            url: '${groups_url}',
-        });
+        var tg = this.retrieve('tree');
         tg.selectGroup();
         tg.addEvent('select', function (item) {
             $('${id}.ui').set('value', item.options.label);
             $('${id}.value').set('value', item.options.data);
         });
-    });
+    }.bind($('${id}')));
 
     $('${id}.clear').addEvent('click', function () {
         $('${id}.ui').set('value', '');
@@ -150,6 +149,7 @@ def _widget_for_group_relation(self, resource, parent, remote_name,
 def _url_for_group_relation(self, resource, parent, remote_name,
                                 attr, action, args):
     args['field'] = attr
+
 
 # Enregistrement des champs personalisés auprès de rum.
 WidgetFactory.register_widget(
