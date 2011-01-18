@@ -82,17 +82,17 @@ class MapLinksV1(RestController):
                         "href": baseurl + "/graphs/%s" % link.idgraph
                         }
             datasources = {}
-            if link.idds_from_to_to:
+            if link.idds_out:
                 datasources["out"] = {
-                        "id": link.idds_from_to_to,
+                        "id": link.idds_out,
                         "href": baseurl + "/perfdatasources/%s"
-                                          % link.idds_from_to_to,
+                                          % link.idds_out,
                         }
-            if link.idds_to_to_from:
+            if link.idds_in:
                 datasources["in"] = {
-                        "id": link.idds_to_to_from,
+                        "id": link.idds_in,
                         "href": baseurl + "/perfdatasources/%s"
-                                          % link.idds_to_to_from,
+                                          % link.idds_in,
                         }
             result["perfdatasources"] = datasources
             result["supitem"] = {"id": link.idref}
