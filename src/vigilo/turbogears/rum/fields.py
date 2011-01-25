@@ -6,15 +6,17 @@ Module fournissant des types de champs additionnels pour rum.
 import string
 from tw import forms
 from tw.rum.viewfactory import WidgetFactory, input_actions, inline_actions
-from tw.rum import widgets
+from tw.rum import widgets, util
 from rum import ViewFactory
 from rum.fields import Field, Relation
 from rum.util import NoDefault
 from tw.api import JSLink, JSSource, CSSLink
 from tg import url
-
 from tw.forms import validators
 get = ViewFactory.get.im_func
+
+from pylons.i18n import ugettext as _
+from vigilo.models.tables import SupItemGroup
 
 class Enum(Field):
     """
@@ -81,7 +83,12 @@ window.addEvent('load', function () {
         var tg = this.retrieve('tree');
         tg.selectGroup();
         tg.addEvent('select', function (item) {
-            $('${id}.ui').set('value', item.options.label);
+            var node = item;
+            var label = '';
+            for (; node.owner; node = node.owner) {
+                label = '/' + node.options.label + label;
+            }
+            $('${id}.ui').set('value', label);
             $('${id}.value').set('value', item.options.data);
         });
     }.bind($('${id}')));
@@ -103,7 +110,14 @@ window.addEvent('load', function () {
             d.text_value = ''
             d.value = ''
         else:
-            d.text_value = d.value.name
+            if isinstance(d.value, SupItemGroup):
+                d.text_value = u'/' + _('Groups of monitored items') + \
+                                d.value.path
+            else:
+                # Sinon, c'est un MapGroup.
+                # On masque le préfixe "/Root".
+                d.text_value = u'/' + _('Groups of maps') + \
+                                d.value.path[5:]
             d.value = str(d.value.idgroup)
         d.groups_url = d.field.groups_url
 
@@ -112,8 +126,30 @@ class GroupRelation(Relation):
         super(GroupRelation, self).__init__(*args, **kwargs)
         self.groups_url = groups_url
 
-class GroupLink(widgets.RelationLink):
-    template = widgets.Span.template
+class GroupLink(widgets.ExpandableSpan,):
+    def update_params(self, d):
+        super(widgets.ExpandableSpan, self).update_params(d)
+        if isinstance(d.value, SupItemGroup):
+            d.unicode_value = u'/' + _('Groups of monitored items') + \
+                                d.value.path
+        else:
+            # Sinon, c'est un MapGroup.
+            # On masque le préfixe "/Root".
+            d.unicode_value = u'/' + _('Groups of maps') + \
+                                d.value.path[5:]
+
+        # Repris de ExpandableSpan
+        d.expand, d.summary = None, d.unicode_value
+        d.summarize_stream = util.summarize_stream
+        d.parse_and_summarize_value = widgets.parse_and_summarize_value
+        if d.value and self.escape:
+            try:
+                d.summary, rest= util.cut_text(d.unicode_value,
+                                                    d.max_inline_chars)
+                if rest:
+                    d.expand=d.unicode_value
+            except TypeError:
+                pass
 
 @get.before("isinstance(attr, Enum)")
 def _set_options_for_enum(self, resource, parent, remote_name,
