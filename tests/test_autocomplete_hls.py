@@ -22,4 +22,4 @@ class TestAutocompleterForHLS(utils.AutoCompleterTest):
         DBSession.flush()
 
     def _query_autocompleter(self, pattern, partial):
-        return self.ctrl.hls(pattern, partial)
+        return self.ctrl.hls(pattern, partial, 42)

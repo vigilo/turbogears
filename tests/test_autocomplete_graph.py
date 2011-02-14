@@ -39,5 +39,4 @@ class TestAutocompleterForGraph(utils.AutoCompleterTest):
         DBSession.flush()
 
     def _query_autocompleter(self, pattern, partial):
-        return self.ctrl.graph(pattern, self.host.name, partial)
-
+        return self.ctrl.graph(pattern, self.host.name, partial, 42)

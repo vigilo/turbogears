@@ -24,5 +24,4 @@ class TestAutocompleterForHost(utils.AutoCompleterTest):
         DBSession.flush()
 
     def _query_autocompleter(self, pattern, partial):
-        return self.ctrl.host(pattern, partial)
-
+        return self.ctrl.host(pattern, partial, 42)

@@ -32,13 +32,13 @@ class TestAutocompleterForServiceWithoutHost(utils.AutoCompleterTest):
         DBSession.flush()
 
     def _query_autocompleter(self, pattern, partial):
-        return self.ctrl.service(pattern, None, partial)
+        return self.ctrl.service(pattern, None, partial, 42)
 
 class TestAutocompleterForServiceWithHost(
     TestAutocompleterForServiceWithoutHost):
 
     def _query_autocompleter(self, pattern, partial):
-        return self.ctrl.service(pattern, self.host.name, partial)
+        return self.ctrl.service(pattern, self.host.name, partial, 42)
 
 # @TODO: ajouter d'autres tests...
 # Exemples de tests possibles:
