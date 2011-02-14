@@ -126,10 +126,12 @@ class GroupRelation(Relation):
         super(GroupRelation, self).__init__(*args, **kwargs)
         self.groups_url = groups_url
 
-class GroupLink(widgets.ExpandableSpan,):
+class GroupLink(widgets.Span):
     def update_params(self, d):
-        super(widgets.ExpandableSpan, self).update_params(d)
-        if isinstance(d.value, SupItemGroup):
+        super(GroupLink, self).update_params(d)
+        if d.value is None:
+            d.unicode_value = u''
+        elif isinstance(d.value, SupItemGroup):
             d.unicode_value = u'/' + _('Groups of monitored items') + \
                                 d.value.path
         else:
@@ -137,19 +139,6 @@ class GroupLink(widgets.ExpandableSpan,):
             # On masque le préfixe "/Root".
             d.unicode_value = u'/' + _('Groups of maps') + \
                                 d.value.path[5:]
-
-        # Repris de ExpandableSpan
-        d.expand, d.summary = None, d.unicode_value
-        d.summarize_stream = util.summarize_stream
-        d.parse_and_summarize_value = widgets.parse_and_summarize_value
-        if d.value and self.escape:
-            try:
-                d.summary, rest= util.cut_text(d.unicode_value,
-                                                    d.max_inline_chars)
-                if rest:
-                    d.expand=d.unicode_value
-            except TypeError:
-                pass
 
 @get.before("isinstance(attr, Enum)")
 def _set_options_for_enum(self, resource, parent, remote_name,

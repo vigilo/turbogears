@@ -37,10 +37,11 @@ class AutoCompleteController(BaseController):
         """
         host = validators.UnicodeString()
         partial = validators.StringBool(if_missing=False)
+        noCache = validators.UnicodeString(if_missing=None)
 
     @validate(validators=HostSchema())
     @expose('json')
-    def host(self, host, partial):
+    def host(self, host, partial, noCache):
         """
         Auto-compléteur pour les noms d'hôtes.
 
@@ -94,10 +95,11 @@ class AutoCompleteController(BaseController):
         service = validators.UnicodeString()
         host = validators.UnicodeString(if_missing=None)
         partial = validators.StringBool(if_missing=False)
+        noCache = validators.UnicodeString(if_missing=None)
 
     @validate(validators=ServiceSchema())
     @expose('json')
-    def service(self, service, host, partial):
+    def service(self, service, host, partial, noCache):
         """
         Auto-compléteur pour les noms des services d'un hôte.
 
@@ -157,10 +159,11 @@ class AutoCompleteController(BaseController):
         """
         service = validators.UnicodeString()
         partial = validators.StringBool(if_missing=False)
+        noCache = validators.UnicodeString(if_missing=None)
 
     @validate(validators=HlsSchema())
     @expose('json')
-    def hls(self, service, partial):
+    def hls(self, service, partial, noCache):
         """
         Auto-compléteur pour les noms des services de haut niveau.
 
@@ -204,10 +207,11 @@ class AutoCompleteController(BaseController):
         """Schéma de validation de la méthode default."""
         supitemgroup = validators.UnicodeString()
         partial = validators.StringBool(if_missing=False)
+        noCache = validators.UnicodeString(if_missing=None)
 
     @validate(validators=SupItemGroupSchema())
     @expose('json')
-    def supitemgroup(self, supitemgroup, partial):
+    def supitemgroup(self, supitemgroup, partial, noCache):
         """
         Auto-compléteur pour les noms des groupes d'éléments supervisés.
 
@@ -247,10 +251,11 @@ class AutoCompleteController(BaseController):
         ds = validators.UnicodeString()
         host = validators.UnicodeString()
         partial = validators.StringBool(if_missing=False)
+        noCache = validators.UnicodeString(if_missing=None)
 
     @validate(validators=PerfDataSourceSchema())
     @expose('json')
-    def perfdatasource(self, ds, host, partial):
+    def perfdatasource(self, ds, host, partial, noCache):
         """
         Auto-compléteur pour les noms des indicateurs de performance.
 
@@ -296,10 +301,11 @@ class AutoCompleteController(BaseController):
         graphname = validators.UnicodeString()
         host = validators.UnicodeString()
         partial = validators.StringBool(if_missing=False)
+        noCache = validators.UnicodeString(if_missing=None)
 
     @validate(validators=GraphSchema())
     @expose('json')
-    def graph(self, graphname, host, partial):
+    def graph(self, graphname, host, partial, noCache):
         """
         Auto-compléteur pour les noms des graphes.
 
@@ -343,4 +349,3 @@ class AutoCompleteController(BaseController):
 
         graphs = graphs.all()
         return dict(results=[g.name for g in graphs])
-
