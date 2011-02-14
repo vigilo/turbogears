@@ -16,11 +16,10 @@ def populate_db():
     les données nécessaires pour commencer à utiliser Vigilo.
     """
     from vigilo.models.configure import configure_db
-    engine = configure_db(config, 'sqlalchemy.', config['db_basename'])
+    engine = configure_db(config, 'sqlalchemy.')
 
     # Cette méthode se contente d'appeler le websetup du modèle
     # en réutilisant la configuration de l'application stockée
     # dans la configuration de pylons.
     from vigilo.models import websetup
     return websetup.populate_db(engine)
-

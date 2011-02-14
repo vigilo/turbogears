@@ -147,8 +147,7 @@ class VigiloAppConfig(AppConfig):
         from pylons import config as pylons_config
         from vigilo.models.configure import configure_db
 
-        engine = configure_db(pylons_config, 'sqlalchemy.',
-            pylons_config['db_basename'])
+        engine = configure_db(pylons_config, 'sqlalchemy.')
         config['pylons.app_globals'].sa_engine = engine
 
         from vigilo.models import session
