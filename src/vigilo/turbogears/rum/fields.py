@@ -77,7 +77,7 @@ class GroupSelector(forms.InputField):
 window.addEvent('load', function () {
     $('${id}').store('tree', new TreeGroup({
         title: '',
-        url: '${groups_url}',
+        url: '${groups_url}'
     }));
     $('${id}').addEvent('click', function () {
         var tg = this.retrieve('tree');
