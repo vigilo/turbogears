@@ -16,7 +16,7 @@ from tw.forms import validators
 get = ViewFactory.get.im_func
 
 from pylons.i18n import ugettext as _
-from vigilo.models.tables import SupItemGroup
+from vigilo.models.tables import SupItemGroup, MapGroup, GraphGroup
 
 class Enum(Field):
     """
@@ -110,14 +110,12 @@ window.addEvent('load', function () {
             d.text_value = ''
             d.value = ''
         else:
-            if isinstance(d.value, SupItemGroup):
-                d.text_value = u'/' + _('Groups of monitored items') + \
-                                d.value.path
-            else:
-                # Sinon, c'est un MapGroup.
-                # On masque le préfixe "/Root".
-                d.text_value = u'/' + _('Groups of maps') + \
-                                d.value.path[5:]
+            group_types = {
+                SupItemGroup: _('Groups of monitored items'),
+                MapGroup: _('Groups of maps'),
+                GraphGroup: _('Groups of graphs'),
+            }
+            d.text_value = u'/' + group_types[type(d.value)] + d.value.path[5:]
             d.value = str(d.value.idgroup)
         d.groups_url = d.field.groups_url
 
@@ -131,14 +129,14 @@ class GroupLink(widgets.Span):
         super(GroupLink, self).update_params(d)
         if d.value is None:
             d.unicode_value = u''
-        elif isinstance(d.value, SupItemGroup):
-            d.unicode_value = u'/' + _('Groups of monitored items') + \
-                                d.value.path
+            d.value = u''
         else:
-            # Sinon, c'est un MapGroup.
-            # On masque le préfixe "/Root".
-            d.unicode_value = u'/' + _('Groups of maps') + \
-                                d.value.path[5:]
+            group_types = {
+                SupItemGroup: _('Groups of monitored items'),
+                MapGroup: _('Groups of maps'),
+                GraphGroup: _('Groups of graphs'),
+            }
+            d.unicode_value = u'/' + group_types[type(d.value)] + d.value.path[5:]
 
 @get.before("isinstance(attr, Enum)")
 def _set_options_for_enum(self, resource, parent, remote_name,
