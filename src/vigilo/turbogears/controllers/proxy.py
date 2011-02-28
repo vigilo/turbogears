@@ -54,27 +54,6 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
     @rtype: C{file-like}
     """
 
-    def _get_server(idhost):
-        """
-        Étant donné le nom d'un hôte du parc, cette méthode
-        renvoie le nom de domaine qualifié (FQDN) du serveur
-        de type C{server_type} responsable de cet hôte.
-
-        @param hostname: Nom d'hôte.
-        @type  hostname: C{unicode}
-
-        @return: FQDN du serveur du type demandé responsable de cet hôte.
-        @rtype: C{unicode}
-        """
-        return DBSession.query(
-                    VigiloServer.name
-                ).join(
-                    (Ventilation, Ventilation.idvigiloserver ==
-                        VigiloServer.idvigiloserver),
-                    (Application, Application.idapp == Ventilation.idapp),
-                ).filter(Ventilation.idhost == idhost
-                ).filter(Application.name == server_type
-                ).scalar()
 
     service_name = None
     service = None
@@ -93,47 +72,78 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
 
     user = get_current_user()
 
-    # On vérifie qu'il existe effectivement un hôte portant ce nom
-    # et configuré pour être supervisé par Vigilo.
-    host_obj = DBSession.query(
-                Host
-            ).filter(Host.name == host
+    # S'il s'agit du proxy Nagios et que l'hôte donné
+    # correspond à l'hôte virtuel des Services de Haut Niveau,
+    # alors on utilise l'application "nagios-hls" à la place.
+    hls_host = config.get('nagios_hls_host')
+    if server_type == u'nagios' and host == hls_host:
+        vigilo_server = DBSession.query(
+                VigiloServer.name
+            ).distinct().join(
+                (Ventilation, Ventilation.idvigiloserver ==
+                    VigiloServer.idvigiloserver),
+                (Application, Application.idapp == Ventilation.idapp),
+            ).filter(Application.name == u'nagios-hls'
             ).scalar()
-    if host_obj is None:
-        message = _('No such monitored host: %s') % host
-        LOGGER.warning(message)
-        raise http_exc.HTTPNotFound(message)
-
-    # On regarde si l'utilisateur a accès à l'hôte demandé.
-    is_manager = in_group('managers').is_met(request.environ)
-    if not is_manager:
-        # On traite le cas où l'utilisateur n'a pas les droits requis.
-        if (service is not None and not service.is_allowed_for(user)) \
-            or (not host_obj.is_allowed_for(user)):
-            message = None
-            if service is not None:
-                message = _('Access denied to host "%(host)s" and '
-                            'service "%(service)s"') % {
-                                'host': host,
-                                'service': service.servicename,
-                            }
-            else:
-                message = _('Access denied to host "%s"') % host
+        if vigilo_server is None:
+            message = _('No server configured to monitor high-level services '
+                        'for application "%(app)s"') % {
+                            'app': server_type,
+                        }
             LOGGER.warning(message)
-            raise http_exc.HTTPForbidden(message)
+            raise http_exc.HTTPNotFound(message)
 
-    # On vérifie que l'hôte est effectivement pris en charge.
-    # ie: qu'un serveur du parc héberge l'application server_type
-    # responsable de cet hôte.
-    vigilo_server = _get_server(host_obj.idhost)
-    if vigilo_server is None:
-        message = _('No %(server_type)s server configured to '
-                    'monitor "%(host)s"') % {
-                        'server_type': server_type,
-                        'host': host,
-                    }
-        LOGGER.warning(message)
-        raise http_exc.HTTPNotFound(message)
+    else:
+        # On vérifie qu'il existe effectivement un hôte portant ce nom
+        # et configuré pour être supervisé par Vigilo.
+        host_obj = DBSession.query(
+                    Host
+                ).filter(Host.name == host
+                ).scalar()
+        if host_obj is None:
+            message = _('No such monitored host: %s') % host
+            LOGGER.warning(message)
+            raise http_exc.HTTPNotFound(message)
+
+        # On regarde si l'utilisateur a accès à l'hôte demandé.
+        is_manager = in_group('managers').is_met(request.environ)
+        if not is_manager:
+            # On traite le cas où l'utilisateur n'a pas les droits requis.
+            if (service is not None and not service.is_allowed_for(user)) \
+                or (not host_obj.is_allowed_for(user)):
+                message = None
+                if service is not None:
+                    message = _('Access denied to host "%(host)s" and '
+                                'service "%(service)s"') % {
+                                    'host': host,
+                                    'service': service.servicename,
+                                }
+                else:
+                    message = _('Access denied to host "%s"') % host
+                LOGGER.warning(message)
+                raise http_exc.HTTPForbidden(message)
+
+        # On vérifie que l'hôte est effectivement pris en charge.
+        # ie: qu'un serveur du parc héberge l'application server_type
+        # responsable de cet hôte.
+        vigilo_server = DBSession.query(
+                            VigiloServer.name
+                        ).join(
+                            (Ventilation, Ventilation.idvigiloserver ==
+                                VigiloServer.idvigiloserver),
+                            (Application, Application.idapp ==
+                                Ventilation.idapp),
+                        ).filter(Ventilation.idhost == host_obj.idhost
+                        ).filter(Application.name == server_type
+                        ).scalar()
+        if vigilo_server is None:
+            message = _('No server configured to monitor "%(host)s" '
+                        'for application "%(app)s"') % {
+                            'app': server_type,
+                            'host': host,
+                        }
+            LOGGER.warning(message)
+            raise http_exc.HTTPNotFound(message)
 
     # Récupére les informations sur l'emplacement de l'application
     # distante. Par défaut, on suppose que la connexion se fait en
