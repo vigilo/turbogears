@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: vigilo-turbogears 2.0.0\n"
 "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
 "POT-Creation-Date: 2010-07-26 13:47+0200\n"
-"PO-Revision-Date: 2010-11-19 12:48+0100\n"
+"PO-Revision-Date: 2011-03-01 13:21+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_FR <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -36,49 +36,59 @@ msgstr ""
 msgid "We're sorry but we weren't able to process this request."
 msgstr "Nous sommes désolés, mais nous n'avons pas pu traiter votre requête."
 
-#: src/vigilo/turbogears/controllers/proxy.py:103
+#: src/vigilo/turbogears/controllers/proxy.py:89
+#, python-format
+msgid ""
+"No server configured to monitor high-level services for application "
+"\"%(app)s\""
+msgstr ""
+"Aucun serveur configuré pour superviser les services de haut niveau "
+"pour l'application \"%(app)s\""
+
+#: src/vigilo/turbogears/controllers/proxy.py:104
 #, python-format
 msgid "No such monitored host: %s"
 msgstr "Hôte supervisé inexistant : %s"
 
-#: src/vigilo/turbogears/controllers/proxy.py:115
+#: src/vigilo/turbogears/controllers/proxy.py:116
 #, python-format
 msgid "Access denied to host \"%(host)s\" and service \"%(service)s\""
 msgstr "Accès refusé au service \"%(service)s\" sur l'hôte \"%(host)s\""
 
-#: src/vigilo/turbogears/controllers/proxy.py:121
+#: src/vigilo/turbogears/controllers/proxy.py:122
 #, python-format
 msgid "Access denied to host \"%s\""
 msgstr "Accès refusé à l'hôte \"%s\""
 
-#: src/vigilo/turbogears/controllers/proxy.py:130
+#: src/vigilo/turbogears/controllers/proxy.py:140
 #, python-format
-msgid "No %(server_type)s server configured to monitor \"%(host)s\""
-msgstr "Aucun serveur %(server_type)s configuré pour superviser \"%(host)s\""
+msgid "No server configured to monitor \"%(host)s\" for application \"%(app)s\""
+msgstr "Aucun serveur configuré pour superviser \"%(host)s\" pour "
+        "l'application \"%(app)s\""
 
-#: src/vigilo/turbogears/controllers/proxy.py:165
+#: src/vigilo/turbogears/controllers/proxy.py:175
 #, python-format
 msgid "Invalid value for app_redirect.%s, not redirecting."
 msgstr "Valeur incorrecte pour app_redirect.%s, pas de redirection."
 
-#: src/vigilo/turbogears/controllers/proxy.py:171
+#: src/vigilo/turbogears/controllers/proxy.py:181
 #, python-format
 msgid "Fetching '%s' through the proxy"
 msgstr "Récupération de '%s' via le serveur mandataire"
 
-#: src/vigilo/turbogears/controllers/proxy.py:191
+#: src/vigilo/turbogears/controllers/proxy.py:201
 msgid "Basic authentification to the proxy."
 msgstr "Authentification de type Basic auprès du proxy."
 
-#: src/vigilo/turbogears/controllers/proxy.py:194
+#: src/vigilo/turbogears/controllers/proxy.py:204
 msgid "Digest authentification to the proxy."
 msgstr "Authentification de type Digest auprès du proxy."
 
-#: src/vigilo/turbogears/controllers/proxy.py:211
+#: src/vigilo/turbogears/controllers/proxy.py:221
 msgid "Basic authentification to the website."
 msgstr "Authentification de type Basic auprès du site distant."
 
-#: src/vigilo/turbogears/controllers/proxy.py:214
+#: src/vigilo/turbogears/controllers/proxy.py:224
 msgid "Digest authentification to the website."
 msgstr "Authentification de type Digest auprès du site distant."
 
@@ -86,3 +96,12 @@ msgstr "Authentification de type Digest auprès du site distant."
 msgid "You need to be authenticated"
 msgstr "Vous devez vous authentifier"
 
+#: src/vigilo/turbogears/rum/fields.py:114
+#: src/vigilo/turbogears/rum/fields.py:135
+msgid "Groups of monitored items"
+msgstr "Groupes d'éléments supervisés"
+
+#: src/vigilo/turbogears/rum/fields.py:119
+#: src/vigilo/turbogears/rum/fields.py:140
+msgid "Groups of maps"
+msgstr "Groupes de cartes"
