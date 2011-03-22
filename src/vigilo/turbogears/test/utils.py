@@ -11,7 +11,7 @@ from paste.registry import Registry
 from vigilo.turbogears.controllers.autocomplete import AutoCompleteController
 from vigilo.models.session import metadata, DBSession
 from vigilo.models import tables
-
+from vigilo.models.tables.grouppath import GroupPath
 
 import pylons
 from pylons import url
@@ -22,7 +22,14 @@ from pylons.util import ContextObj
 class DbTest(unittest.TestCase):
     def setUp(self):
         print "Creating the tables"
-        metadata.create_all()
+        # La vue GroupPath dépend de Group et GroupHierarchy.
+        # SQLAlchemy ne peut pas détecter correctement la dépendance.
+        # On crée le schéma en 2 fois pour contourner ce problème.
+        mapped_tables = metadata.tables.copy()
+        del mapped_tables[GroupPath.__tablename__]
+        metadata.create_all(tables=mapped_tables.itervalues())
+        metadata.create_all(tables=[GroupPath.__table__])
+
         DBSession.add(tables.StateName(statename=u'OK', order=1))
         DBSession.add(tables.StateName(statename=u'UNKNOWN', order=2))
         DBSession.add(tables.StateName(statename=u'WARNING', order=3))
@@ -218,4 +225,3 @@ class ApiTest(DbTest):
         if self.__class__ == ApiTest:
             return
         return super(ApiTest, self).run(result)
-
