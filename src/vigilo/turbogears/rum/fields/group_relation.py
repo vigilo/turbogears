@@ -16,7 +16,7 @@ from tw.forms import validators
 get = ViewFactory.get.im_func
 
 from pylons.i18n import ugettext as _
-from vigilo.models.tables import SupItemGroup
+from vigilo.models.tables import SupItemGroup, MapGroup
 
 class GroupSelector(forms.InputField):
     javascript = [
