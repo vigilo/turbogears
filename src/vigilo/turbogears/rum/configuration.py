@@ -17,6 +17,11 @@ import os.path
 from vigilo.turbogears.rum.translator import VigiloRumTranslator
 from vigilo.models.session import DBSession
 
+# vigilo.turbogears.rum.query n'est pas utilisé directement,
+# mais son import permet d'enregistrer la classe VigiloQuery
+# qui surcharge une partie du comportement standard de rum.
+from vigilo.turbogears.rum import query
+
 class RumGenshiRenderer(GenshiRenderer):
     """
     Version personnalisée du générateur de rendu de Rum.
