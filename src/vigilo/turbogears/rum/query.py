@@ -5,6 +5,17 @@ from rum import query as rumquery
 from rumalchemy.util import get_mapper, get_dialect_name
 from rum.genericfunctions import generic
 
+__all__ = (
+    'normalize',
+    'VigiloQuery',
+    'apply_default_ordering',
+    'apply_sort',
+    'apply_joins',
+    'remap_sort_column',
+    'set_query_options',
+    'translate',
+)
+
 class VigiloQuery(SAQuery):
     def filter(self, query):
         assert self.resource
