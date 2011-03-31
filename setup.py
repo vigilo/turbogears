@@ -50,7 +50,7 @@ setup(
         "decorator != 3.1.0", # Blacklist bad version
         "vigilo-models",
         "vigilo-themes-default",
-        "rum",
+        "rum < 0.4",
         "TgRum",
         "urllib2_kerberos",
         "kerberos",

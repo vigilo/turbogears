@@ -25,6 +25,8 @@ Requires:   python-toscawidgets
 Requires:   python-paste
 Requires:   python-paste-deploy
 Requires:   python-tw-forms
+Requires:   python-rum >= 0.3
+Requires:   python-rum < 0.4
 Requires:   python-tgrum
 Requires:   python-rumalchemy
 Requires:   python-tw-rum
@@ -81,4 +83,3 @@ rm -rf $RPM_BUILD_ROOT
 
 * Mon Feb 08 2010 Aurelien Bompard <aurelien.bompard@c-s.fr> - 1.0-1
 - initial package
-

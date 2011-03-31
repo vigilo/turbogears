@@ -26,7 +26,8 @@ Requires:   python-toscawidgets
 Requires:   python-paste
 Requires:   python-pastedeploy
 Requires:   python-tw.forms
-Requires:   python-rum
+Requires:   python-rum >= 0.3
+Requires:   python-rum < 0.4
 Requires:   python-TgRum
 Requires:   python-RumAlchemy
 Requires:   python-tw.rum
@@ -36,7 +37,7 @@ Requires:   python-genshi >= 0.5.1
 Requires:   python-webflash >= 0.1a8
 Requires:   python-toscawidgets >= 0.9.4
 Requires:   python-weberror >= 0.10.1
-Requires:   python-repoze.what-pylons 
+Requires:   python-repoze.what-pylons
 Requires:   python-repoze.tm2 >= 1.0a4
 Requires:   python-turbojson >= 1.2.1
 Requires:   python-kerberos python-urllib2-kerberos
@@ -82,4 +83,3 @@ rm -rf $RPM_BUILD_ROOT
 
 * Mon Feb 08 2010 Aurelien Bompard <aurelien.bompard@c-s.fr> - 1.0-1
 - initial package
-

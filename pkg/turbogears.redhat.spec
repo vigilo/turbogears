@@ -31,6 +31,8 @@ Requires:   python26-toscawidgets
 Requires:   python26-paste
 Requires:   python26-paste-deploy
 Requires:   python26-tw-forms
+Requires:   python26-rum >= 0.3
+Requires:   python26-rum < 0.4
 Requires:   python26-tgrum
 Requires:   python26-rumalchemy
 Requires:   python26-tw-rum
@@ -40,7 +42,7 @@ Requires:   python26-genshi >= 0.5.1
 Requires:   python26-webflash >= 0.1-0.1.a8
 Requires:   python26-toscawidgets >= 0.9.4
 Requires:   python26-weberror >= 0.10.1
-Requires:   python26-repoze-what-pylons 
+Requires:   python26-repoze-what-pylons
 Requires:   python26-repoze-tm2 >= 1.0-0.1.a4
 Requires:   python26-turbojson >= 1.2.1
 Requires:   python26-kerberos python26-urllib2-kerberos
@@ -84,4 +86,3 @@ rm -rf $RPM_BUILD_ROOT
 
 * Mon Feb 08 2010 Aurelien Bompard <aurelien.bompard@c-s.fr> - 1.0-1
 - initial package
-

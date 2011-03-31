@@ -34,15 +34,6 @@ class GroupSelector(forms.InputField):
     text_value = ''
     groups_url = None
 
-#            parent: $(this.options.elementId),
-#            url: backend.maps,
-#            itemName: "map",
-#            groupingItemName: "submaps",
-#            itemImage: imgpath + "/map.png",
-#            groupingItemImage: imgpath + "/tree-submap.png",
-#            onItemClick: this.onMapClick,
-#            onGroupClick: this.onGroupClick
-
     template = """
 <div xmlns="http://www.w3.org/1999/xhtml"
    xmlns:py="http://genshi.edgewall.org/" py:strip="">
