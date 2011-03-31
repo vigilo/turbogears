@@ -23,7 +23,7 @@ class GroupSelector(forms.InputField):
         JSLink(link=url('/js/lib/mootools.js')),
         JSLink(link=url('/js/lib/mootools-more.js')),
         JSLink(link=url('/js/lib/jxlib.js')),
-        JSLink(link=url('/js/treemap.js')),
+        JSLink(link=url('/js/grouptree.js')),
     ]
     css = [
         CSSLink(link=url('/css/jxlib/jxtheme.uncompressed.css')),
