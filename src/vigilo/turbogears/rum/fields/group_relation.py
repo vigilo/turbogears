@@ -20,9 +20,17 @@ from vigilo.models.tables import SupItemGroup, MapGroup
 
 class GroupSelector(forms.InputField):
     javascript = [
+        # Frameworks dont le widget dépend.
         JSLink(link=url('/js/lib/mootools.js')),
         JSLink(link=url('/js/lib/mootools-more.js')),
         JSLink(link=url('/js/lib/jxlib.js')),
+
+        # Traductions.
+        JSLink(link=url('/js/lib/babel.js')),
+        JSLink(link=url('/js/babelThemes.js')),
+        JSLink(link=url('/i18n')),
+
+        # Code JavaScript du widget à proprement parler.
         JSLink(link=url('/js/grouptree.js')),
     ]
     css = [
