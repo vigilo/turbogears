@@ -15,6 +15,7 @@ from vigilo.turbogears.helpers import ugettext as _
 from sqlalchemy import or_, and_
 from paste.deploy.converters import asbool
 from urllib2_kerberos import HTTPKerberosAuthHandler
+from webob.multidict import MultiDict, UnicodeMultiDict
 
 from vigilo.models.session import DBSession
 from vigilo.models.tables import VigiloServer, Host, Ventilation, Application
@@ -28,6 +29,21 @@ LOGGER = logging.getLogger(__name__)
 
 __all__ = ('make_proxy_controller', 'get_through_proxy', )
 
+def to_utf8_multidict(multi):
+    """
+    Convertit un UnicodeMultiDict en un MultiDict
+    où les clés/valeurs sont encodées en UTF-8.
+    """
+    res = MultiDict()
+    for key, values in multi.dict_of_lists().iteritems():
+        if isinstance(key, unicode):
+            key = key.encode('utf-8')
+        for value in values:
+            if isinstance(value, unicode):
+                value = value.encode('utf-8')
+            res.add(key, value)
+    return res
+
 def get_through_proxy(server_type, host, url, data=None, headers=None):
     """
     Récupère le contenu d'un document à travers le mécanisme de proxy.
@@ -38,8 +54,8 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
     @param host: Nom de l'hôte (supervisé) concerné par la demande.
     @type host: C{unicode}
     @param url: URL à demander sur le serveur distant, avec éventuellement
-        des paramètres intégrés (query string).
-    @type url: C{basestring}
+        des paramètres intégrés (query string). Doit être encodé en UTF-8.
+    @type url: C{str}
     @param data: Dictionnaire contenant une série de paramètres à transmettre
         dans la requête. Si des paramètres sont donnés, la requête engendrée
         deviendra automatiquement du type POST au lieu de GET.
@@ -61,6 +77,13 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
         # Éventuellement, l'utilisateur demande une page
         # qui se rapporte à un service particulier.
         service_name = data.get('service')
+
+        # urlencode() ne tolère que le type "str" en entrée.
+        # Ici, on manipule un UnicodeMultiDict de WebOb,
+        # un passage vers UTF-8 est nécessaire.
+        if isinstance(data, UnicodeMultiDict):
+            data = to_utf8_multidict(data)
+
         data = urllib.urlencode(data)
         service = DBSession.query(
                 LowLevelService
@@ -230,6 +253,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
         # à des erreurs reconnues par TurboGears2.
         # On obtient ainsi une page d'erreur plus sympathique.
         errors = {
+            '304': http_exc.HTTPNotModified,
             '401': http_exc.HTTPForbidden,
             '404': http_exc.HTTPNotFound,
             '503': http_exc.HTTPServiceUnavailable,
@@ -309,30 +333,51 @@ class ProxyController(BaseController):
             args[-1] = args[-1] + pylons.request.response_ext
 
 
-        # Facilite la traçabilité sur le serveur distant.
-        headers = {
-            'X-Forwarded-For': request.remote_addr,
-        }
+        # En-têtes qui seront envoyés au serveur distant.
+        headers = {}
 
-        # On recopie l'en-tête HTTP "Accept" du navigateur.
-        # Nagios utilise par exemple cet en-tête pour effectuer
-        # de la négociation de contenu sur certaines pages
-        # (pour afficher un graphe si Accept = "image/*" ou une
-        # page HTML avec une représentation équivalente sinon).
-        #
-        # Idem pour "Accept-Language" qui permettra de traduire
-        # partiellement les graphes de VigiRRD.
-        for header in ('accept', 'accept_language'):
-            header_obj = getattr(pylons.request, header)
-            if header_obj:
-                headers[header_obj.header_name] = header_obj.header_value
+        # Liste des en-têtes considérés comme "sûrs".
+        safe_headers = (
+            'Accept',   # Utilisé par Nagios pour la négociation de contenu.
+            'Accept-Charset',
+            'Accept-Encoding',
+            'Accept-Language', # Pour traduire les graphes de VigiRRD.
+            'Cache-Control',
+            'Content-Type',
+            'If-Match',
+            'If-None-Match',
+            'If-Modified-Since',
+            'If-Range',
+            'If-Unmodified-Since',
+            'Max-Forwards',
+            'Pragma',
+            'Referer',
+            'User-Agent',
+            'Via',
+        )
+
+        # Recopie des en-têtes sûrs.
+        for header in safe_headers:
+            header_value = pylons.request.headers.get(header)
+            if header_value is not None:
+                headers[header] = header_value
+
+        # Traçabilité du client.
+        headers['X-Forwarded-For'] = request.remote_addr
 
         url = '/'.join(args)
+
         if pylons.request.GET:
-            url = '%s?%s' % (url, urllib.urlencode(pylons.request.GET))
+            get_data = pylons.request.GET
+            if isinstance(get_data, UnicodeMultiDict):
+                get_data = to_utf8_multidict(get_data)
+            url = '%s?%s' % (url, urllib.urlencode(get_data))
+
         post_data = None
         if pylons.request.POST:
             post_data = pylons.request.POST
+            if isinstance(post_data, UnicodeMultiDict):
+                post_data = to_utf8_multidict(post_data)
 
         res = get_through_proxy(self.server_type,
             host, url, post_data, headers)
