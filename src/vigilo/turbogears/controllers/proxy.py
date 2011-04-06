@@ -29,22 +29,30 @@ LOGGER = logging.getLogger(__name__)
 
 __all__ = ('make_proxy_controller', 'get_through_proxy', )
 
-def to_utf8_multidict(multi):
+def reencode_multidict(multi, charset):
     """
     Convertit un UnicodeMultiDict en un MultiDict
-    où les clés/valeurs sont encodées en UTF-8.
+    où les clés/valeurs sont encodées avec l'encodage
+    passé en argument.
+
+    @param multi: Dictionnaire à valeurs multiples à convertir.
+    @type multi: C{UnicodeMultiDict}
+    @param charset: Encodage pour le MultiDict résultant.
+    @type charset: C{basestring}
+    @return: Dictionnaire réencodé avec l'encodage donné.
+    @rtype: C{MultiDict}
     """
     res = MultiDict()
     for key, values in multi.dict_of_lists().iteritems():
         if isinstance(key, unicode):
-            key = key.encode('utf-8')
+            key = key.encode(charset)
         for value in values:
             if isinstance(value, unicode):
-                value = value.encode('utf-8')
+                value = value.encode(charset)
             res.add(key, value)
     return res
 
-def get_through_proxy(server_type, host, url, data=None, headers=None):
+def get_through_proxy(server_type, host, url, data=None, headers=None, charset=None):
     """
     Récupère le contenu d'un document à travers le mécanisme de proxy.
 
@@ -65,11 +73,16 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
         pour indiquer l'adresse IP de l'utilisateur à l'origine de la requête
         proxifiée (à des fins de traçabilité/imputation).
     @type headers: C{dict}
+    @param charset: Encodage éventuel de la requête. Si C{None}, l'encodage
+        est déterminé automatiquement à partir de la requête en cours de
+        traitement par TurboGears/WebOb.
     @return: Renvoie le résultat de la requête proxifiée, tel que retourné
         par urllib2.
     @rtype: C{file-like}
     """
 
+    if charset is None:
+        charset = pylons.request.charset
 
     service_name = None
     service = None
@@ -77,12 +90,14 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
         # Éventuellement, l'utilisateur demande une page
         # qui se rapporte à un service particulier.
         service_name = data.get('service')
+        if not isinstance(service_name, unicode):
+            service_name = service_name.decode(charset)
 
         # urlencode() ne tolère que le type "str" en entrée.
         # Ici, on manipule un UnicodeMultiDict de WebOb,
         # un passage vers UTF-8 est nécessaire.
         if isinstance(data, UnicodeMultiDict):
-            data = to_utf8_multidict(data)
+            data = reencode_multidict(data, charset)
 
         data = urllib.urlencode(data)
         service = DBSession.query(
@@ -253,6 +268,8 @@ def get_through_proxy(server_type, host, url, data=None, headers=None):
         # à des erreurs reconnues par TurboGears2.
         # On obtient ainsi une page d'erreur plus sympathique.
         errors = {
+            # On propage l'erreur 304 pour permettre l'utilisation
+            # du cache du navigateur (#570).
             '304': http_exc.HTTPNotModified,
             '401': http_exc.HTTPForbidden,
             '404': http_exc.HTTPNotFound,
@@ -366,18 +383,13 @@ class ProxyController(BaseController):
         headers['X-Forwarded-For'] = request.remote_addr
 
         url = '/'.join(args)
-
         if pylons.request.GET:
-            get_data = pylons.request.GET
-            if isinstance(get_data, UnicodeMultiDict):
-                get_data = to_utf8_multidict(get_data)
+            get_data = pylons.request.str_GET
             url = '%s?%s' % (url, urllib.urlencode(get_data))
 
         post_data = None
         if pylons.request.POST:
-            post_data = pylons.request.POST
-            if isinstance(post_data, UnicodeMultiDict):
-                post_data = to_utf8_multidict(post_data)
+            post_data = pylons.request.str_POST
 
         res = get_through_proxy(self.server_type,
             host, url, post_data, headers)
