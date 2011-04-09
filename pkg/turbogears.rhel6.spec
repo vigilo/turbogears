@@ -1,14 +1,11 @@
-%define module  turbogears
-%define name    vigilo-%{module}
-%define version 2.0.0
-%define release 1%{?svn}%{?dist}
+%define module  @SHORT_NAME@
 
-Name:       %{name}
-Summary:    Vigilo Turbogears extension library
-Version:    %{version}
-Release:    %{release}
+Name:       vigilo-%{module}
+Summary:    @SUMMARY@
+Version:    @VERSION@
+Release:    1%{?svn}%{?dist}
 Source0:    %{name}-%{version}.tar.gz
-URL:        http://www.projet-vigilo.org
+URL:        @URL@
 Group:      System/Servers
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-build
 License:    GPLv2
@@ -44,7 +41,7 @@ Requires:   python-rum-policy python-rum-component python-rum-generic
 
 
 %description
-This library provides the Vigilo extensions to TurboGears 2
+@DESCRIPTION@
 This library is part of the Vigilo Project <http://vigilo-project.org>
 
 %prep

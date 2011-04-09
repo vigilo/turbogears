@@ -29,11 +29,13 @@ tests_require = []
 setup(
     name='vigilo-turbogears',
     version='2.0.0',
-    description='A package containing TurboGears modifications for Vigilo',
     author='Vigilo Team',
     author_email='contact@projet-vigilo.org',
     url='http://www.projet-vigilo.org/',
     license='http://www.gnu.org/licenses/gpl-2.0.html',
+    description="Vigilo TurboGears extension library",
+    long_description="This library provides the Vigilo extensions "
+                     "to TurboGears 2",
     install_requires=[
         "setuptools",
         "repoze.tm2 >= 1.0a4",

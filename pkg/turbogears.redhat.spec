@@ -1,7 +1,4 @@
-%define module  turbogears
-%define name    vigilo-%{module}
-%define version 2.0.0
-%define release 1%{?svn}%{?dist}
+%define module  @SHORT_NAME@
 
 %define pyver 26
 %define pybasever 2.6
@@ -9,12 +6,12 @@
 %define __os_install_post %{__python26_os_install_post}
 %{!?python26_sitelib: %define python26_sitelib %(python26 -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
-Name:       %{name}
-Summary:    Vigilo Turbogears extension library
-Version:    %{version}
-Release:    %{release}
+Name:       vigilo-%{module}
+Summary:    @SUMMARY@
+Version:    @VERSION@
+Release:    1%{?svn}%{?dist}
 Source0:    %{name}-%{version}.tar.gz
-URL:        http://www.projet-vigilo.org
+URL:        @URL@
 Group:      System/Servers
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-build
 License:    GPLv2
@@ -50,7 +47,7 @@ Requires:   python26-rum-policy python26-rum-component python26-rum-generic
 
 
 %description
-This library provides the Vigilo extensions to TurboGears 2
+@DESCRIPTION@
 This library is part of the Vigilo Project <http://vigilo-project.org>
 
 %prep
