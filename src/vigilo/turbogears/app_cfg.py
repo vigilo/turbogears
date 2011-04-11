@@ -69,7 +69,7 @@ class VigiloAppConfig(AppConfig):
         self.use_sqlalchemy = True
 
         # version
-        self.version = get_distribution(self.app_name).version
+        self.version = get_distribution("vigilo-%s" % self.app_name).version
 
         # Fournisseur de variables pour les templates.
         self.variable_provider = self._variable_provider
