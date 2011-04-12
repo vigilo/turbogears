@@ -52,7 +52,7 @@ make PYTHON=%{__python}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install \
+make install_pkg \
     DESTDIR=$RPM_BUILD_ROOT \
     PYTHON=%{__python}
 
