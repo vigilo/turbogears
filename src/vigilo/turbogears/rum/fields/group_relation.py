@@ -18,23 +18,34 @@ get = ViewFactory.get.im_func
 from pylons.i18n import ugettext as _
 from vigilo.models.tables import SupItemGroup, MapGroup
 
+class UrlWrapper(object):
+    """Retarde l'appel à tg.url() jusqu'à l'affichage du widget."""
+
+    def __init__(self, path):
+        """Initialise le wrapper avec l'URL à demander."""
+        self.path = path
+
+    def __str__(self):
+        """Retourne l'URL de la ressource donnée à l'initialisateur."""
+        return url(self.path)
+
 class GroupSelector(forms.InputField):
     javascript = [
         # Frameworks dont le widget dépend.
-        JSLink(link=url('/js/lib/mootools.js')),
-        JSLink(link=url('/js/lib/mootools-more.js')),
-        JSLink(link=url('/js/lib/jxlib.js')),
+        JSLink(link=UrlWrapper('/js/lib/mootools.js')),
+        JSLink(link=UrlWrapper('/js/lib/mootools-more.js')),
+        JSLink(link=UrlWrapper('/js/lib/jxlib.js')),
 
         # Traductions.
-        JSLink(link=url('/js/lib/babel.js')),
-        JSLink(link=url('/js/babelThemes.js')),
-        JSLink(link=url('/i18n')),
+        JSLink(link=UrlWrapper('/js/lib/babel.js')),
+        JSLink(link=UrlWrapper('/js/babelThemes.js')),
+        JSLink(link=UrlWrapper('/i18n')),
 
         # Code JavaScript du widget à proprement parler.
-        JSLink(link=url('/js/grouptree.js')),
+        JSLink(link=UrlWrapper('/js/grouptree.js')),
     ]
     css = [
-        CSSLink(link=url('/css/jxlib/jxtheme.uncompressed.css')),
+        CSSLink(link=UrlWrapper('/css/jxlib/jxtheme.uncompressed.css')),
     ]
     params = ["choose_text", "text_value", "clear_text", "groups_url", "field"]
     choose_text = 'Choose'
