@@ -65,7 +65,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f %{name}.lang
 %defattr(644,root,root,755)
-%doc COPYING
+%doc COPYING.txt
 %{python_sitelib}/vigilo
 %{python_sitelib}/*.egg-info
 %{python_sitelib}/*-nspkg.pth
