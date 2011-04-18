@@ -72,13 +72,13 @@ window.addEvent('load', function () {
         content: container
     });
 
-    imgpath = '${app_url}';
     var tree = new GroupTree({
         parent: container,
         url: '${groups_url}',
         itemName: null,
         groupingItemName: null,
         groupsonly: true,
+        imgpath: '${app_url}',
         onGroupClick: function (item) {
             $('${id}.value').set('value', item.id);
             req.send({data: {idgroup: item.id}});
