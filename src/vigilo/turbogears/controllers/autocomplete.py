@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Copyright (C) 2006-2011 CS-SI
+# License: GNU GPL v2 <http://www.gnu.org/licenses/gpl-2.0.html>
+
 """
 Module permettant de mettre en commun le contrôleur d'auto-complétion
 entre les différentes applications de Vigilo.
