@@ -283,7 +283,8 @@ class AutoCompleteController(BaseController):
             ).join(
                 (Host, Host.idhost == PerfDataSource.idhost),
             ).filter(PerfDataSource.name.ilike(ds)
-            ).filter(Host.name == host)
+            ).filter(Host.name == host
+            ).order_by(PerfDataSource.name)
 
         is_manager = in_group('managers').is_met(request.environ)
         if not is_manager:
