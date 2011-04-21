@@ -140,7 +140,8 @@ class AutoCompleteController(BaseController):
                 (hostgroup, hostgroup.c.idsupitem == Host.idhost),
                 (servicegroup, servicegroup.c.idsupitem == \
                     LowLevelService.idservice),
-            ).filter(LowLevelService.servicename.ilike(service))
+            ).filter(LowLevelService.servicename.ilike(service)
+            ).order_by(LowLevelService.servicename)
 
         is_manager = in_group('managers').is_met(request.environ)
         if not is_manager:
