@@ -37,6 +37,9 @@ La bibliothèque Vigilo-TurboGears a besoin des modules Python suivants :
 - decorator (pas la version 3.1.0)
 - rum < 0.4
 - TgRum
+- ToscaWidgets.rum
+- urllib2.kerberos
+- kerberos
 
 
 Installation
