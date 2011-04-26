@@ -23,7 +23,7 @@ La bibliothèque Vigilo-TurboGears a besoin des modules Python suivants :
 - setuptools (ou distribute)
 - vigilo-models
 - vigilo-themes-default
-- TurboGears >= 2.0b7
+- TurboGears >= 2.0b7 (à patcher)
 - repoze.tm2
 - repoze.what-quickstart
 - repoze.what.plugins.sql
@@ -40,6 +40,9 @@ La bibliothèque Vigilo-TurboGears a besoin des modules Python suivants :
 - ToscaWidgets.rum
 - urllib2.kerberos
 - kerberos
+
+Des patches sont nécessaires pour les modules TurboGears et Pylons , ils se
+trouvent dans le dossier "patches".
 
 
 Installation
