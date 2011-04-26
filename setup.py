@@ -46,6 +46,7 @@ setup(
         "repoze.what.plugins.sql",
         "repoze.who_testutil",
         "repoze.who.plugins.sa",
+        "repoze.who < 2.0dev",
         "tg.devtools",
         "TurboGears2 >= 2.0b7",
         "ToscaWidgets >= 0.9.7.1",
@@ -55,7 +56,8 @@ setup(
         "decorator != 3.1.0", # Blacklist bad version
         "vigilo-models",
         "vigilo-themes-default",
-        "rum < 0.4",
+        "RumAlchemy < 0.4dev",
+        "rum < 0.4dev",
         "TgRum",
         "urllib2_kerberos",
         "kerberos",
