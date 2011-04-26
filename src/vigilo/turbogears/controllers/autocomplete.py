@@ -194,7 +194,8 @@ class AutoCompleteController(BaseController):
         services = DBSession.query(
                 HighLevelService.servicename
             ).distinct(
-            ).filter(HighLevelService.servicename.ilike(service))
+            ).filter(HighLevelService.servicename.ilike(service)
+            ).order_by(HighLevelService.servicename)
 
         is_manager = in_group('managers').is_met(request.environ)
         if not is_manager:
