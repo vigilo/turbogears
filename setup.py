@@ -65,8 +65,6 @@ setup(
         "RumAlchemy < 0.4dev",
         "rum < 0.4dev",
         "TgRum",
-        "urllib2_kerberos",
-        "kerberos",
     ],
     paster_plugins=[
         'PasteScript',
