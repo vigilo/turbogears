@@ -17,7 +17,6 @@ from repoze.what.predicates import in_group
 from vigilo.turbogears.helpers import ugettext as _
 from sqlalchemy import or_, and_
 from paste.deploy.converters import asbool
-from urllib2_kerberos import HTTPKerberosAuthHandler
 from webob.multidict import MultiDict, UnicodeMultiDict
 
 from vigilo.models.session import DBSession
@@ -27,6 +26,15 @@ from vigilo.models.tables.secondary_tables import SUPITEM_GROUP_TABLE
 
 from vigilo.turbogears.helpers import get_current_user
 from vigilo.turbogears.controllers import BaseController
+
+try:
+    from urllib2_kerberos import HTTPKerberosAuthHandler
+except:
+    # Le proxy doit continuer à fonctionner,
+    # même lorsque le support pour Kerberos
+    # n'est pas installé.
+    HTTPKerberosAuthHandler = None
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -222,7 +230,10 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
     LOGGER.info(_("Fetching '%s' through the proxy"), full_url)
     req = urllib2.Request(full_url, data, headers=headers)
     opener = urllib2.build_opener()
-    opener.add_handler(HTTPKerberosAuthHandler())
+
+    # Si le support pour Kerberos est installé, on l'active.
+    if HTTPKerberosAuthHandler:
+        opener.add_handler(HTTPKerberosAuthHandler())
 
     # Configuration de l'authentification
     # vers un éventuel proxy intermédiaire.
