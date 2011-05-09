@@ -19,14 +19,24 @@ __all__ = ['Controller', 'BaseController']
 old_set_temp_lang = i18n.set_temporary_lang
 def set_temporary_lang(languages):
     old_set_temp_lang(languages)
-    tg_translator = translation('vigilo-turbogears', languages=languages, fallback=True)
-    tg_translator.lang = languages
+
+    # On récupère la langue définie par Pylons
+    # (compromis entre les langues supportées par le navigateur
+    # de l'utilisateur et celles supportées par l'application).
+    environ = pylons.request.environ
+    lang = environ['pylons.pylons'].translator.pylons_lang
+
+    # On définit un traducteur pour vigilo-turbogears.
+    tg_translator = translation('vigilo-turbogears',
+        languages=lang, fallback=True)
+    tg_translator.lang = lang
     pylons.c.vigilo_turbogears = tg_translator
 
+    # Et un autre pour les thèmes.
     localedir = resource_filename('vigilo.themes.i18n', '')
     themes_translator = translation('vigilo-themes', localedir=localedir,
-        languages=languages, fallback=True)
-    themes_translator.lang = languages
+        languages=lang, fallback=True)
+    themes_translator.lang = lang
     pylons.c.l_ = themes_translator
 i18n.set_temporary_lang = set_temporary_lang
 
@@ -38,7 +48,6 @@ class BaseController(TGController):
     your application is used to compute URLs used by your app.
 
     """
-
     def __call__(self, environ, start_response):
         """Invoke the Controller"""
         # TGController.__call__ dispatches to the Controller method
@@ -48,4 +57,3 @@ class BaseController(TGController):
         request.identity = request.environ.get('repoze.who.identity')
         tmpl_context.identity = request.identity
         return TGController.__call__(self, environ, start_response)
-
