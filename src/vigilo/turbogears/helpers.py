@@ -14,6 +14,7 @@ from pylons.i18n.translation import lazify
 import simplejson
 from tg import request, url
 from vigilo.models.tables import User
+import pkg_resources
 
 from vigilo.turbogears.units import convert_with_unit
 
@@ -47,6 +48,20 @@ def get_current_user():
     if userid is None:
         return None
     return User.by_user_name(userid)
+
+def get_locales(modname):
+    try:
+        locales = pkg_resources.resource_listdir(modname, 'i18n')
+    except ImportError:
+        return []
+    else:
+        # On ne garde que les dossiers non cachés.
+        locales = [
+            locale for locale in locales
+            if pkg_resources.resource_isdir(modname, 'i18n/%s' % locale)
+            and not locale.startswith('.')
+        ]
+        return locales
 
 def get_readable_metro_value(pds):
     """
