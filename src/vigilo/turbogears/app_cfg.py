@@ -107,9 +107,14 @@ class VigiloAppConfig(AppConfig):
         self.paths['templates'] = [app_templates, common_templates]
 
         # Spécifique projets
-        for ext in self.get("extensions", []):
+        for module in ["turbogears", self.app_name]:
             for entry in working_set.iter_entry_points(
-                                    "vigilo.turbogears.templates", ext):
+                                    "vigilo.%s.templates" % module):
+                if (entry.name != "enterprise" and
+                        entry.name not in self.get("extensions", [])):
+                    # les points d'entrée "enterprise" sont automatiquement
+                    # chargés, il faut lister les autres dans la conf
+                    continue
                 self.paths['templates'].insert(0, resource_filename(
                                            entry.module_name, "templates"))
 
