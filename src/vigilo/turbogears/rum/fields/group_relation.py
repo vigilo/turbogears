@@ -30,7 +30,7 @@ class GroupSelector(forms.InputField):
 
         # Traductions.
         JSLink(link=url('/js/lib/babel.js')),
-        JSLink(link=url('/js/babelThemes.js')),
+        JSLink(link=url('/js/lib/babelThemes.js')),
         JSLink(link=url('/i18n')),
 
         # Code JavaScript du widget à proprement parler.
