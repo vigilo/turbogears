@@ -1,3 +1,6 @@
+# Cf. http://trac.turbogears.org/ticket/2454
+# Un autre correctif a été implémenté upstream, qui nécessitera
+#de mettre à jour certains composants (repoze.who_testutil).
 --- a/Pylons-0.9.7/pylons/middleware.py	2009-02-18 01:12:45.000000000 +0100
 +++ b/Pylons-0.9.7/pylons/middleware.py	2010-09-09 12:24:39.000000000 +0200
 @@ -212,6 +212,13 @@

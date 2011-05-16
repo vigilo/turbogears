@@ -1,3 +1,5 @@
+# Corrigé indépendamment upstream (cf. http://sourceforge.net/p/turbogears2/tg2/ci/79672709c87484d6f4852c3d2d46a5ceaacd88b1/),
+# mais uniquement dans la branche "master" (ie. trunk). Ce patch reste donc pertinent pour nous.
 --- tg/controllers.py.orig	2010-09-11 10:35:46.000000000 +0200
 +++ tg/controllers.py	2010-09-11 10:38:00.000000000 +0200
 @@ -74,7 +74,7 @@
