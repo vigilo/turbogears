@@ -26,7 +26,7 @@ def set_temporary_lang(languages):
     # Durant les tests, l'attribut pylons_lang n'est pas défini,
     # on utilise "en" comme langue de repli.
     environ = pylons.request.environ
-    lang = getattr(environ['pylons.pylons'], 'translator.pylons_lang', 'en')
+    lang = getattr(environ['pylons.pylons'].translator, 'pylons_lang', 'en')
 
     # On définit un traducteur pour vigilo-turbogears.
     tg_translator = translation('vigilo-turbogears',
