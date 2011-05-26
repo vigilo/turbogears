@@ -18,6 +18,24 @@ __all__ = ['Controller', 'BaseController']
 # Monkey-patching.
 old_set_temp_lang = i18n.set_temporary_lang
 def set_temporary_lang(languages):
+    # Pour les locales de la forme "en_US",
+    # on ajoute le langage (en) en fin de liste.
+    # Voir aussi #651.
+    languages.extend( [
+        lang.split('_', 1)[0]
+        for lang in languages
+        if '_' in lang
+    ] )
+
+    # Pour les locales de la forme "en-us",
+    # on ajoute le langage (en) en fin de liste.
+    # Voir aussi #651.
+    languages.extend( [
+        lang.split('-', 1)[0]
+        for lang in languages
+        if '-' in lang
+    ] )
+
     old_set_temp_lang(languages)
 
     # On récupère la langue définie par Pylons
