@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # vim: set fileencoding=utf-8 sw=4 ts=4 et :
 
+import nose
+
 from vigilo.models.session import DBSession
 from vigilo.models import tables
 
@@ -23,3 +25,6 @@ class TestAutocompleterForHLS(utils.AutoCompleterTest):
 
     def _query_autocompleter(self, pattern, partial):
         return self.ctrl.hls(pattern, partial, 42)
+
+    def test_without_access(self):
+        raise nose.plugins.skip.SkipTest("Not ready yet.")

@@ -197,13 +197,13 @@ class AutoCompleteController(BaseController):
             ).filter(HighLevelService.servicename.ilike(service)
             ).order_by(HighLevelService.servicename)
 
-        is_manager = in_group('managers').is_met(request.environ)
-        if not is_manager:
-            user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
-            services = services.join(
-                    (SUPITEM_GROUP_TABLE, SUPITEM_GROUP_TABLE.c.idsupitem == \
-                                            HighLevelService.idservice),
-                ).filter(SUPITEM_GROUP_TABLE.c.idgroup.in_(user_groups))
+#        is_manager = in_group('managers').is_met(request.environ)
+#        if not is_manager:
+#            user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
+#            services = services.join(
+#                    (SUPITEM_GROUP_TABLE, SUPITEM_GROUP_TABLE.c.idsupitem == \
+#                                            HighLevelService.idservice),
+#                ).filter(SUPITEM_GROUP_TABLE.c.idgroup.in_(user_groups))
 
         services = services.all()
         return dict(results=[s.servicename for s in services])
