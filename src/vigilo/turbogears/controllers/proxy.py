@@ -111,10 +111,6 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
             data = reencode_multidict(data, charset)
 
         data = urllib.urlencode(data)
-        service = DBSession.query(
-                LowLevelService
-            ).filter(LowLevelService.servicename == service_name
-            ).scalar()
 
     if headers is None:
         headers = {}
@@ -157,6 +153,14 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
         # On regarde si l'utilisateur a accès à l'hôte demandé.
         is_manager = in_group('managers').is_met(request.environ)
         if not is_manager:
+            if servicename:
+                service = DBSession.query(
+                        LowLevelService
+                    ).join(
+                        (Host, Host.idhost == Lowlevelservice.idservice),
+                    ).filter(Host.name == host
+                    ).filter(LowLevelService.servicename == service_name
+                    ).scalar()
             # On traite le cas où l'utilisateur n'a pas les droits requis.
             if (service is not None and not service.is_allowed_for(user)) \
                 or (not host_obj.is_allowed_for(user)):
@@ -321,6 +325,8 @@ class ProxyController(BaseController):
             mount_point = mount_point + '/'
         self.mount_point = mount_point
 
+        self.data_retriever = get_through_proxy
+
     # Cette méthode ne semble pas fonctionner correctement lorsque
     # la requête est de type application/json.
     # De plus, un @expose('json') engendre plus de problèmes qu'il
@@ -405,7 +411,7 @@ class ProxyController(BaseController):
         if pylons.request.POST:
             post_data = pylons.request.str_POST
 
-        res = get_through_proxy(self.server_type,
+        res = self.data_retriever(self.server_type,
             host, url, post_data, headers)
 
         # On recopie les en-têtes de la réponse du serveur distant
