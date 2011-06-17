@@ -101,7 +101,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
         # Éventuellement, l'utilisateur demande une page
         # qui se rapporte à un service particulier.
         service_name = data.get('service')
-        if not isinstance(service_name, unicode):
+        if isinstance(service_name, str):
             service_name = service_name.decode(charset)
 
         # urlencode() ne tolère que le type "str" en entrée.
@@ -153,7 +153,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
         # On regarde si l'utilisateur a accès à l'hôte demandé.
         is_manager = in_group('managers').is_met(request.environ)
         if not is_manager:
-            if servicename:
+            if service_name:
                 service = DBSession.query(
                         LowLevelService
                     ).join(
