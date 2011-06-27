@@ -8,8 +8,10 @@ Definit la classe chargée de gérer la configuration des applications
 utilisant Turbogears sur Vigilo.
 """
 
-from pkg_resources import resource_filename, working_set, get_distribution
+import os
 import gettext
+import codecs
+from pkg_resources import resource_filename, working_set, get_distribution
 from paste.deploy.converters import asbool
 from logging import getLogger
 
@@ -21,14 +23,59 @@ from tg.render import render_genshi
 
 from genshi.template import TemplateLoader
 from genshi.filters import Translator
+from vigilo.turbogears.js_codec import backslash_search
+
+from webob import Response
+from tw.core.resources import _FileIter
 
 # Middleware d'authentification adapté à nos besoins.
 from vigilo.turbogears.repoze.middleware import make_middleware_with_config
 
 # Enregistre le codec pour l'encodage des textes dans le code JavaScript.
-import codecs
-from vigilo.turbogears.js_codec import backslash_search
 codecs.register(backslash_search)
+
+# Ajoute le support de la mise en cache par le navigateur
+# pour les ressources statiques servies par ToscaWidgets.
+old_func = Response.cache_expires
+def cache_expires(self, seconds=0, **kw):
+    """
+    Surcharge la méthode "cache_expires" native
+    pour pouvoir envoyer un en-tête "Last-Modified"
+    qui permet d'avoir des réponses conditionnées
+    en fonction de l'en-tête "If-Modified-Since".
+
+    Cette méthode n'est appelée que par ToscaWidgets,
+    lorsque le paramètre "toscawidgets.resources_expire"
+    est positionné dans la configuration.
+    Voir L{VigiloAppConfig.add_tosca_middleware} pour plus
+    d'informations.
+
+    @param seconds: Nombre de secondes durant lequel la ressource
+        peut être réutilisée depuis le cache du navigateur.
+    """
+    # Pour garder le comportement par défaut
+    # (positionnement des en-têtes relatifs au cache).
+    old_func(self, seconds, **kw)
+
+    # On essaye de trouver un objet file-like
+    # qui servira pour déterminer la date de
+    # dernière modification de la ressource.
+    if isinstance(self.app_iter, _FileIter):
+        stream = self.app_iter.fileobj
+    else:
+        stream = self.app_iter
+
+    # Si un tel objet a été trouvé, on ajoute
+    # en en-tête sa date de dernière modification.
+    if isinstance(stream, file):
+        try:
+            self.last_modified = os.path.getmtime(stream.name)
+        except os.error:
+            pass
+Response.cache_expires = cache_expires
+# Utilisation de réponses conditionnées par défaut.
+Response.default_conditional_response = True
+
 
 __all__ = ('VigiloAppConfig', )
 
@@ -231,3 +278,23 @@ class VigiloAppConfig(AppConfig):
         app = SessionMiddleware(app, config)
         app = CacheMiddleware(app, config)
         return app
+
+    def add_tosca_middleware(self, app):
+        """
+        Ajoute le middleware qui gère les ressources ToscaWidgets.
+
+        La méthode est surchargée afin d'injecter dynamiquement
+        dans la requête HTTP la configuration permettant la mise
+        en cache (pour une durée de 1h) des ressources statiques
+        de ToscaWidgets par le navigateur.
+
+        @param app: Application WSGI à laquelle on ajoute la
+            surcouche ToscaWidgets.
+        @return: Une nouvelle application WSGI avec la surcouche
+            ToscaWidgets.
+        """
+        wrapped_app = super(VigiloAppConfig, self).add_tosca_middleware(app)
+        def _wrapper(environ, start_response):
+            environ['toscawidgets.resources_expire'] = 3600
+            return wrapped_app(environ, start_response)
+        return _wrapper
