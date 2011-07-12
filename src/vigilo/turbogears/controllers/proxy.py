@@ -157,7 +157,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
                 service = DBSession.query(
                         LowLevelService
                     ).join(
-                        (Host, Host.idhost == Lowlevelservice.idservice),
+                        (Host, Host.idhost == LowLevelService.idservice),
                     ).filter(Host.name == host
                     ).filter(LowLevelService.servicename == service_name
                     ).scalar()
