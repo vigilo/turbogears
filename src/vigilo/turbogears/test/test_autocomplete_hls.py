@@ -18,7 +18,6 @@ class TestAutocompleterForHLS(utils.AutoCompleterTest):
             message=u'',
             warning_threshold=0,
             critical_threshold=0,
-            priority=0,
         )
         DBSession.add(hls)
         DBSession.flush()
