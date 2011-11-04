@@ -11,7 +11,10 @@ utilisant Turbogears sur Vigilo.
 from pkg_resources import resource_filename, working_set, get_distribution
 import gettext
 from paste.deploy.converters import asbool
+from logging import getLogger
 
+from routes.middleware import RoutesMiddleware
+from beaker.middleware import SessionMiddleware, CacheMiddleware
 from tg.configuration import AppConfig, config
 from tg.i18n import get_lang
 from tg.render import render_genshi
@@ -19,11 +22,13 @@ from tg.render import render_genshi
 from genshi.template import TemplateLoader
 from genshi.filters import Translator
 
+# Middleware d'authentification adapté à nos besoins.
+from vigilo.turbogears.repoze.middleware import make_middleware_with_config
+
 # Enregistre le codec pour l'encodage des textes dans le code JavaScript.
 import codecs
 from vigilo.turbogears.js_codec import backslash_search
 codecs.register(backslash_search)
-
 
 __all__ = ('VigiloAppConfig', )
 
@@ -47,6 +52,8 @@ class VigiloAppConfig(AppConfig):
         # thèmes (cf. <module>/config/middleware.py dans une application).
         self.serve_static = False
 
+        # Permet d'initialiser correctement la base de données.
+        self.auth_backend = 'sqlalchemy'
         self.DBSession = None
 
         # On monkey-patch WebOb pour pouvoir récupérer facilement les
@@ -179,3 +186,46 @@ class VigiloAppConfig(AppConfig):
         # The name "groups" is already used for groups of hosts.
         # We use "usergroups" when referering to users to avoid confusion.
         self.sa_auth.translations.groups = 'usergroups'
+
+    def add_core_middleware(self, app):
+        """
+        Ajoute les middlewares vitaux au fonctionnement de l'application.
+
+        Les middlewares relatifs à Beaker (cache et session) ne sont pas
+        instanciés à cet endroit car on veut les rendre accessibles depuis
+        le middleware d'authentification (repoze.who); ils doivent donc
+        apparaître APRÈS dans la pile.
+
+        Voir L{add_auth_middleware} pour savoir comment les middlewares
+        de Beaker sont ajoutés.
+        """
+        app = RoutesMiddleware(app, config['routes.map'])
+        return app
+
+    def add_auth_middleware(self, app, skip_authentication):
+        """
+        Ajoute le middleware d'authentification.
+
+        Contrairement à la méthode héritée de TurboGears, celle-ci
+        ajoute en plus les middlewares de Beaker (session/cache).
+        Voir L{add_core_middleware} pour plus d'information.
+        """
+        # Ajout du middleware d'authentification adapté pour Vigilo.
+        app = make_middleware_with_config(
+            app, config,
+            config.get('auth.config', 'who.ini'),
+            None,
+            None,
+            skip_authentication,
+        )
+        # On force l'utilisation d'un logger nommé "auth"
+        # pour repoze.who (compatibilité avec TurboGears).
+        app.logger = getLogger('auth')
+
+        # On ajoute les middlewares de gestion de cache/sessions.
+        # Normalement, add_core_middleware le fait, mais on veut
+        # que ces middlewares soient utilisable depuis repoze.who,
+        # donc on doit les ajouter APRÈS le middleware d'auth.
+        app = SessionMiddleware(app, config)
+        app = CacheMiddleware(app, config)
+        return app

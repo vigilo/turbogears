@@ -2,8 +2,10 @@
 """
 """
 import sys, logging
+from paste.response import remove_header
 from paste.deploy.converters import asbool
-from repoze.who.plugins.testutil import AuthenticationForgerMiddleware
+from repoze.who.plugins.testutil import AuthenticationForgerMiddleware, \
+                                        AuthenticationForgerPlugin
 from repoze.who.config import WhoConfig, _LEVELS
 from repoze.who.middleware import PluggableAuthenticationMiddleware, Identity, \
                                     _STARTED, _ENDED, StartResponseWrapper, \
@@ -39,7 +41,6 @@ class VigiloAuthMiddleware(PluggableAuthenticationMiddleware):
         via les modules fournisseurs de méta-données (mdproviders).
         """
         path_info = environ.get('PATH_INFO', None)
-
         environ['repoze.who.plugins'] = self.name_registry
         environ['repoze.who.logger'] = self.logger
         environ['repoze.who.application'] = self.app
@@ -155,7 +156,21 @@ class VigiloAuthMiddleware(PluggableAuthenticationMiddleware):
         logger and logger.info(_ENDED % path_info)
         return app_iter
 
-class VigiloAuthForgerMiddleware(AuthenticationForgerMiddleware):
+class VigiloAuthForgerPlugin(AuthenticationForgerPlugin):
+    def challenge(self, environ, status, app_headers, forget_headers):
+        """
+        Retourne systématiquement une page d'erreur 401.
+
+        Retire également un éventuel en-tête "Content-Lenght" erroné
+        (correctif tiré de la révision r8220 de repoze.who.testutil,
+        disponible sur http://svn.repoze.org/whoplugins/whotestutil/).
+        """
+        remove_header(app_headers, 'content-length')
+        remove_header(forget_headers, 'content-length')
+        return super(VigiloAuthForgerPlugin, self).challenge(
+                    environ, status, app_headers, forget_headers)
+
+class VigiloAuthForgerMiddleware(VigiloAuthMiddleware):
     """
     Un middleware inspiré de
     C{repoze.who.plugins.testutil:AuthenticationForgerMiddleware}
@@ -165,7 +180,47 @@ class VigiloAuthForgerMiddleware(AuthenticationForgerMiddleware):
     de simuler l'utilisation d'un mécanisme d'authentification externe
     avec Vigilo.
     """
+    plugin_factory = VigiloAuthForgerPlugin
+
+    def __init__(self, app, identifiers, authenticators, challengers,
+                 mdproviders, classifier, challenge_decider, log_stream=None,
+                 log_level=logging.INFO, remote_user_key='REMOTE_USER'):
+        """
+        Setup authentication in an easy to forge way.
+
+        All the arguments received will be passed as is to
+        :class:`VigiloAuthForgerMiddleware`,
+        with one instance of :class:`VigiloAuthForgerPlugin` in:
+
+        * ``identifiers``. This instance will be inserted in the first position
+          of the list.
+        * ``authenticators``. Any authenticator passed will be ignored; such
+          an instance will be the only authenticator defined.
+        * ``challengers``. Any challenger passed will be ignored; such
+          an instance will be the only challenger defined.
+
+        Internally, it will also set ``remote_user_key`` to
+        ``'repoze.who.testutil.userid'``, so that you can use the standard
+        ``'REMOTE_USER'`` in your tests.
+
+        The metadata providers won't be modified.
+
+        """
+        self.actual_remote_user_key = remote_user_key
+        forger = self.plugin_factory(fake_user_key=remote_user_key)
+        forger = ('auth_forger', forger)
+        identifiers.insert(0, forger)
+        authenticators = [forger]
+        challengers = [forger]
+        init = super(VigiloAuthForgerMiddleware, self).__init__
+        init(app, identifiers, authenticators, challengers, mdproviders,
+             classifier, challenge_decider, log_stream, log_level,
+             'repoze.who.testutil.userid')
+
     def __call__(self, environ, start_response):
+        """
+        Appelle le middleware d'authentification de test.
+        """
         # Les tests unitaires peuvent définir cette variable
         # pour simuler l'utilisation d'un mécanisme d'authentification
         # externe. Par défaut, on utilise l'authentification interne.
@@ -173,7 +228,6 @@ class VigiloAuthForgerMiddleware(AuthenticationForgerMiddleware):
             environ['vigilo.external_auth'] = False
         return super(VigiloAuthForgerMiddleware, self).__call__(
                     environ, start_response)
-
 
 def _mk_mw_cfg(app, global_conf, config_file,
                 log_file=None, log_level=None):
@@ -215,7 +269,7 @@ def make_middleware_with_config(app, global_conf, config_file, log_file=None,
     authentication when required.
 
     If  ``skip_authentication`` evaluates to ``True``, then the returned
-    middleware will be an instance of :class:`AuthenticationForgerMiddleware`.
+    middleware will be an instance of :class:`VigiloAuthForgerMiddleware`.
 
     Inspiré par C{repoze.who.plugins.testutil:make_middleware_with_config}.
     """

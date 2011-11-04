@@ -65,6 +65,7 @@ setup(
         "RumAlchemy < 0.4dev",
         "rum < 0.4dev",
         "TgRum",
+        "python-ldap",
     ],
     paster_plugins=[
         'PasteScript',

@@ -44,6 +44,12 @@ Requires:   python26-repoze-tm2 >= 1.0-0.1.a4
 Requires:   python26-turbojson >= 1.2.1
 Requires:   python26-kerberos python26-urllib2-kerberos
 Requires:   python26-rum-policy python26-rum-component python26-rum-generic
+Requires:   python26-ldap
+Requires:   python26-transaction
+
+# Le plugin a été absorbé par vigilo-turbogears 2.0.8.
+Obsoletes:  vigilo-repoze.who.plugins.vigilo.kerberos <= 2.0.7
+Conflicts:  vigilo-repoze.who.plugins.vigilo.kerberos <= 2.0.7
 
 
 %description

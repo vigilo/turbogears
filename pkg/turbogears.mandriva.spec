@@ -40,6 +40,12 @@ Requires:   python-repoze.tm2 >= 1.0a4
 Requires:   python-turbojson >= 1.2.1
 Requires:   python-kerberos python-urllib2-kerberos
 Requires:   python-rum-policy python-rum-component python-rum-generic
+Requires:   python-ldap
+Requires:   python-transaction
+
+# Le plugin a été absorbé par vigilo-turbogears 2.0.8.
+Obsoletes:  vigilo-repoze.who.plugins.vigilo.kerberos <= 2.0.7
+Conflicts:  vigilo-repoze.who.plugins.vigilo.kerberos <= 2.0.7
 
 
 %description
