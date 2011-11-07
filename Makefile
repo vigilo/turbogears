@@ -12,7 +12,7 @@ install_pkg: $(PYTHON) build
 
 lint: lint_pylint
 tests: tests_nose
-doc: apidoc
+doc: apidoc sphinxdoc
 clean: clean_python
 
 .PHONY: install_pkg
