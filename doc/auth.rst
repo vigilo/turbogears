@@ -383,6 +383,9 @@ Le listing ci-dessous présente un exemple complet de configuration utilisant Ke
     http_charset = utf-8
     binddn = mybinduser
     bindpw = mybindpassword
+    attr_cn = cn
+    attr_mail = mail
+    attr_member_of = memberOf
 
     [general]
     request_classifier = vigilo.turbogears.repoze_plugins:vigilo_api_classifier
@@ -411,7 +414,7 @@ Le listing ci-dessous présente un exemple complet de configuration utilisant Ke
     vigilo.turbogears.repoze_plugins:md_plugin
     vigilo.turbogears.repoze_plugins:md_group_plugin
 
-Les lignes 22 à 31 chargent le module de Vigilo permettant de gérer
+Les lignes 22 à 33 chargent le module de Vigilo permettant de gérer
 l'authentification par Kerberos, en lui associant le nom « kerberos ». Les
 paramètres associés à ce module sont listés ci-dessous :
 
@@ -469,13 +472,29 @@ paramètres associés à ce module sont listés ci-dessous :
 ``bindpw``
     Mot de passe associé au DN indiqué dans le paramètre « binddn ».
 
+``attr_cn``
+    Nom de l'attribut (mono-valué) dans l'annuaire permettant d'obtenir le nom
+    usuel (Common Name) de l'utilisateur. La valeur par défaut est « cn », ce
+    qui correspond au nom de cet attribut dans un schéma LDAP classique.
+
+``attr_mail``
+    Nom de l'attribut (mono-valué) dans l'annuaire permettant d'obtenir
+    l'adresse de courrier électronique de l'utilisateur. La valeur par défaut
+    est « mail », ce qui correspond au nom de cet attribut dans un schéma LDAP
+    classique.
+
+``attr_member_of``
+    Nom de l'attribut (multivalué) dans l'annuaire qui identifie les groupes
+    dont l'utilisateur est membre. La valeur par défaut est « memberOf », ce
+    qui correspond au nom de cet attribut dans un schéma LDAP classique.
+
 L'ajout de la ligne « ``remote_user_key`` » permet d'éviter que les
 applications ignorent purement et simplement les informations
 d'authentification transmises par le serveur Web (comportement par défaut du
 framework repoze.who lorsque cette clé est absente ou positionnée à
 « ``REMOTE_USER`` »).
 
-Les lignes 39 et 45 indiquent au framework d'authentification d'utiliser le
+Les lignes 42 et 49 indiquent au framework d'authentification d'utiliser le
 module d'authentification « kerberos » défini plus haut, à la fois pour
 l'identification de l'utilisateur et pour son authentification.
 
