@@ -211,16 +211,18 @@ class VigiloAppConfig(AppConfig):
         Voir L{add_core_middleware} pour plus d'information.
         """
         # Ajout du middleware d'authentification adapté pour Vigilo.
-        app = make_middleware_with_config(
-            app, config,
-            config.get('auth.config', 'who.ini'),
-            None,
-            None,
-            skip_authentication,
-        )
-        # On force l'utilisation d'un logger nommé "auth"
-        # pour repoze.who (compatibilité avec TurboGears).
-        app.logger = getLogger('auth')
+        auth_config = config.get('auth.config')
+        if auth_config:
+            app = make_middleware_with_config(
+                app, config,
+                auth_config,
+                None,
+                None,
+                skip_authentication,
+            )
+            # On force l'utilisation d'un logger nommé "auth"
+            # pour repoze.who (compatibilité avec TurboGears).
+            app.logger = getLogger('auth')
 
         # On ajoute les middlewares de gestion de cache/sessions.
         # Normalement, add_core_middleware le fait, mais on veut
