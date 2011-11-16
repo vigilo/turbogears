@@ -32,10 +32,10 @@ Un compte par défaut est créé lors de l'installation de Vigilo, appelé
 d'exploitation, mais plutôt à permettre des interventions ponctuelles liées à
 des tâches d'administration.
 
-Le mot de passe par défaut de ce compte est « ``iddad`` ». Ce mot de passe peut
+Le mot de passe par défaut de ce compte est ``iddad``. Ce mot de passe peut
 être modifié depuis une machine sur laquelle Vigilo est installé, via la ligne
 de commandes en exécutant la commande vigilo-passwd, à partir du compte de
-l'utilisateur « ``root`` ».
+l'utilisateur ``root``.
 
 
 Phases de l'authentification
@@ -58,7 +58,7 @@ Repoze <http://what.repoze.org/docs/1.0/>`_.  L'authentification se déroule en
 plusieurs phases :
 
 - phase de classification, qui permet de savoir d'où provient la requête en
-  cours de traitement (par exemple, provient-elle d'un navigateur Web ou
+  cours de traitement (par exemple, provient-elle d'un navigateur web ou
   s'agit-il d'une requête interne à Vigilo ?),
 - phase d'identification, chargée de reconnaître l'utilisateur lorsqu'il se
   connecte,
@@ -73,7 +73,10 @@ Fichier de configuration
 ========================
 
 La configuration de l'authentification se fait en créant un fichier INI. Ce
-fichier INI utilise le format suivant::
+fichier INI utilise le format suivant:
+
+.. sourcecode:: ini
+    :linenos:
 
     [plugin:foo]
     use = bar.baz.foo:FooPlugin
@@ -86,48 +89,49 @@ fichier INI utilise le format suivant::
 
     [identifiers]
     plugins =
-    foo
+        foo
 
     [authenticators]
     plugins =
-    foo
+        foo
 
     [challengers]
     plugins =
-    foo
+        foo
 
     [mdproviders]
     plugins =
-    foo
+        foo
 
-La documentation du framework ``repoze.who`` contient `de plus amples informations <http://docs.repoze.org/who/1.0/narr.html#middleware-configuration-via-config-file>`_.
+La documentation du framework ``repoze.who`` contient
+`de plus amples informations <http://docs.repoze.org/who/1.0/narr.html#middleware-configuration-via-config-file>`_.
 
 Lien avec les phases de l'authentification
 ------------------------------------------
 Le contenu du fichier de configuration suit de près les différentes phases de
 l'authentification. Tout d'abord, des modules sont configurés, à l'aide de
-section « plugin: », puis ceux-ci sont associés aux différentes étapes de
-l'authentification à l'aide des sections « identifiers » (identification),
-« authenticators » (authentification), « challengers » (challenge) et
-« mdproviders » (fournisseurs de méta-données).
+sections ``plugin:``, puis ceux-ci sont associés aux différentes étapes de
+l'authentification à l'aide des sections ``identifiers`` (identification),
+``authenticators`` (authentification), ``challengers`` (challenge) et
+``mdproviders`` (fournisseurs de méta-données).
 
-La section « general » contient la configuration pour l'étape de
+La section ``general`` contient la configuration pour l'étape de
 classification, ainsi que des paramètres généraux, qui ne sont pas liés aux
 différentes étapes.
 
 La suite de ce document décrit plus en détail le contenu des différentes
 sections du fichier de configuration.
 
-Sections « plugin: »
+Sections ``plugin:``
 --------------------
-Les sections dont le nom commence par « plugin: » correspondent à la
+Les sections dont le nom commence par ``plugin:`` correspondent à la
 configuration d'un module qui pourra être utilisé dans le cadre de la
 configuration de l'authentification. Le libellé après les deux points « : »
 correspond à un alias qui sera affecté au plugin.
 
-La clé « use » permet de spécifier l'emplacement de la fonction ou de la classe
+La clé ``use`` permet de spécifier l'emplacement de la fonction ou de la classe
 Python implémentant le module. L'emplacement du module est donné en utilisant
-la syntaxe : « module.python:ClassOuFonction ». Les autres clés de la section
+la syntaxe : ``module.python:ClassOuFonction``. Les autres clés de la section
 correspondent aux différents paramètres attendus par le module.
 
 Tous les modules définis par défaut dans *repoze.who* sont utilisables ici
@@ -141,57 +145,62 @@ Vigilo fournit également le module d'identification et d'authentification
 d'utiliser un annuaire LDAP et la méthode Kerberos pour l'authentification des
 utilisateurs.
 
-Sections « identifiers », « authenticators », « challengers » et « mdproviders »
+Sections ``identifiers``, ``authenticators``, ``challengers`` et ``mdproviders``
 --------------------------------------------------------------------------------
-Les sections « identifiers », « authenticators », « challengers » et
-« mdproviders » permettent de définir les modules à utiliser au cours des
-phases décrites au chapitre .
+Les sections ``identifiers``, ``authenticators``, ``challengers`` et
+``mdproviders`` permettent de définir les modules à utiliser au cours des
+phases décrites au chapitre `Phases de l'authentification`_.
 
-Chacune de ces sections ne contient qu'une seule clé, appelée « plugins » et
+Chacune de ces sections ne contient qu'une seule clé, appelée ``plugins``,
 qui contient la liste des modules à appeler, à l'aide des alias définis pour
-ces modules lors de leur configuration (voir le chapitre ).
+ces modules lors de leur configuration (voir le chapitre
+`Fichier de configuration`_).
 
 La liste des modules doit être écrites à la ligne, indentée, avec un module par
 ligne. Il est possible de n'appliquer un module que pour une classification
-particulière (voir la fonction « request_classifier » décrite au chapitre ) en
+particulière (voir la fonction ``request_classifier`` décrite dans la
+`Section general`_ du chapitre `Fichier de configuration`_) en
 suffixant le nom du module par « ; » suivi de la classification pour laquelle
 il agit.
 
-Exemple de configuration possible pour les « challengers »::
+Exemple de configuration possible pour les ``challengers``:
+
+.. sourcecode:: ini
+    :linenos:
 
     [challengers]
     plugins =
-    friendlyform;browser
-    basicauth;vigilo-api
+        friendlyform;browser
+        basicauth;vigilo-api
 
-Ici, le module « friendlyform » est appelé lorsque la fonction de
-classification attribut la classification « browser » à la requête, tandis
-qu'elle appelle le module « basicauth » lorsque la classification renvoyée est
-« vigilo-api ».
+Ici, le module ``friendlyform`` est appelé lorsque la fonction de
+classification attribue la classification ``browser`` à la requête, tandis
+qu'elle appelle le module ``basicauth`` lorsque la classification renvoyée est
+``vigilo-api``.
 
-Section « general »
+Section ``general``
 -------------------
-La section « general » contient deux options :
+La section ``general`` contient deux options :
 
-- « request_classifier » permet de classer les requêtes (par exemple, selon
+- ``request_classifier`` permet de classer les requêtes (par exemple, selon
   leur origine). Il s'agit d'une fonction qui sera appelée à chaque requête et
   renvoie une chaîne de caractères décrivant la classification de la requête.
   Cette fonction est indiquée en utilisant la même syntaxe que pour la
-  définition des modules, à savoir : « module.python:ClasseOuFonction ».
+  définition des modules, à savoir : ``module.python:ClasseOuFonction``.
 
   Vigilo fournit la fonction
   ``vigilo.turbogears.repoze_plugins:vigilo_api_classifier`` qui permet de
-  distinguer les requêtes provenant d'un navigateur Web des requêtes provenant
+  distinguer les requêtes provenant d'un navigateur web des requêtes provenant
   de l'API interne de Vigilo.
 
-- « challenge_decider » permet de définir une fonction qui sera appelée pour
+- ``challenge_decider`` permet de définir une fonction qui sera appelée pour
   décider si la requête actuelle nécessite d'obtenir de plus amples
   informations sur l'utilisateur afin de pouvoir l'authentifier. Si la réponse
-  est oui, alors les plugins définis dans la section « challengers » sont
+  est positive, alors les plugins définis dans la section ``challengers`` sont
   utilisés.
 
   Vigilo utilise le module de challenge standard de ``repoze.who`` (implémenté
-  par la fonction repoze.who.classifiers:default_challenge_decider) pour
+  par la fonction ``repoze.who.classifiers:default_challenge_decider``) pour
   décider si des informations supplémentaires sont nécessaires au traitement de
   la demande d'authentification.
 
@@ -206,49 +215,51 @@ diverses interfaces graphiques de Vigilo.
 
 Dans ce chapitre, nous allons mettre en place une solution d'authentification
 unique (Single Sign-On) basée sur l'utilisation de la méthode
-d'authentification Kerberos auprès d'un annuaire LDAP. On suppose que
-l'infrastructure nécessaire est déjà en place (un annuaire LDAP, un KDC et
-éventuellement une PKI).
+d'authentification Kerberos auprès d'un annuaire LDAP.
 
-On suppose également que l'annuaire LDAP en place contient des informations sur
-les autorisations accordées aux différents utilisateurs (par exemple, la liste
-des groupes auxquels un utilisateur à accès, et donc les éléments du parc ou
-les applications qu'il est susceptible de consulter).
+On suppose que l'infrastructure nécessaire est déjà en place (un annuaire LDAP,
+un KDC et éventuellement une PKI). On suppose également que l'annuaire LDAP
+en place contient des informations sur les autorisations accordées aux
+différents utilisateurs (par exemple, la liste des groupes auxquels un
+utilisateur à accès, et donc les éléments du parc ou les applications qu'il
+est susceptible de consulter).
 
-Le chapitre TODO donne un exemple de configuration du module mod_auth_kerb
-d'Apache, permettant d'authentifier les utilisateurs grâce à la méthode
-Kerberos, en fonction du contenu d'un annuaire LDAP.
+Le chapitre `Configuration d'Apache avec Kerberos`_ donne un exemple de
+configuration du module mod_auth_kerb d'Apache, permettant d'authentifier
+les utilisateurs grâce à la méthode Kerberos.
 
-Le chapitre TODO décrit les modifications apportées au fichier who.ini afin
-d'utiliser le ticket Kerberos transmis par Apache au sein des interfaces
-graphiques de Vigilo.
+Le chapitre `Adaptation du fichier who.ini`_ décrit les modifications apportées
+au fichier who.ini afin d'utiliser le ticket Kerberos transmis par Apache au
+sein des interfaces graphiques de Vigilo. Ce ticket sera notamment utilisé pour
+interroger un annuaire LDAP et obtenir des informations sur l'utilisateur
+actuellement connecté (nom complet, adresse email, groupes dont il est membre).
 
-Le chapitre TODO décrit les changements apportés dans le fichier de configuration
-des différentes interfaces graphiques afin de permettre la prise en compte de
-l'utilisation d'un mécanisme d'authentification externe.
-
-Enfin, le chapitre TODO décrit la configuration à apporter au sein du navigateur
-Web afin de permettre l'utilisation de Kerberos comme méthode
-d'authentification.
+Enfin, le chapitre `Configuration du navigateur web des exploitants`_ décrit
+la configuration à apporter au sein du navigateur web afin de permettre
+l'utilisation de Kerberos comme méthode d'authentification.
 
 Configuration d'Apache avec Kerberos
 ------------------------------------
 Afin d'utiliser Kerberos comme méthode d'authentification, le module
 ``mod_auth_kerb`` d'Apache doit être configuré afin de pouvoir décoder le
-ticket Kerberos transmis par le navigateur Web des utilisateurs (voir aussi le
-chapitre  pour la configuration du navigateur Web).
+ticket Kerberos transmis par le navigateur web des utilisateurs (voir aussi le
+chapitre `Configuration du navigateur web des exploitants`_ pour la
+configuration à apporter dans le navigateur web).
 
-Le listing suivant montre comment charger le module « mod_auth_kerb » dans Apache pour
-activer le support de Kerberos::
+Le listing suivant montre comment charger le module ``mod_auth_kerb``
+dans Apache pour activer le support de Kerberos:
+
+.. sourcecode:: apache
+    :linenos:
 
     <IfModule !mod_auth_kerb.c>
-    LoadModule auth_kerb_module extramodules/mod_auth_kerb.so
+        LoadModule auth_kerb_module extramodules/mod_auth_kerb.so
     </IfModule>
 
 Le chargement du module n'est fait que s'il n'était pas déjà chargé (cette
 vérification est faite grâce à l'encapsulation dans la directive IfModule à la
 ligne 1). La directive ``LoadModule`` à la ligne 2 donne le nom du point
-d'entrée à charger dans le module (« ``auth_kerb_module`` » dans le cas du
+d'entrée à charger dans le module (``auth_kerb_module`` dans le cas du
 module mod_auth_kerb), ainsi que l'emplacement du module. Le module peut être
 installé à un autre endroit sur la machine, en fonction de la distribution
 Linux utilisée.
@@ -257,70 +268,83 @@ Une fois le module chargé, il faut adapter la configuration Apache des
 différentes applications (fichiers « vigiboard.conf », « vigimap.conf » et
 « vigigraph.conf » du répertoire /etc/httpd/conf.d/).
 
-Le listing suivant donne un exemple de configuration de VigiBoard dans Apache afin de
-gérer l'authentification Kerberos. Ce fichier se trouve dans
-/etc/httpd/conf.d/vigiboard.conf::
+Le listing suivant donne un exemple de configuration de VigiBoard dans Apache
+afin de gérer l'authentification Kerberos. Ce fichier se trouve dans
+/etc/httpd/conf.d/vigiboard.conf:
+
+.. sourcecode:: apache
+    :linenos:
 
     <IfModule mod_wsgi.c>
 
-    WSGIRestrictStdout off
-    WSGIPassAuthorization on
-    WSGIDaemonProcess vigiboard user=apache group=apache threads=2
-    WSGIScriptAlias /vigilo/vigiboard "/etc/vigilo/vigiboard/vigiboard.wsgi"
+        WSGIRestrictStdout off
+        WSGIPassAuthorization on
+        WSGIDaemonProcess vigiboard user=apache group=apache threads=2
+        WSGIScriptAlias /vigilo/vigiboard "/etc/vigilo/vigiboard/vigiboard.wsgi"
 
-    KeepAlive Off
+        KeepAlive Off
 
-    <Directory "/etc/vigilo/vigiboard/">
-    <Files "vigiboard.wsgi">
-    WSGIProcessGroup vigiboard
-    WSGIApplicationGroup %{GLOBAL}
+        <Directory "/etc/vigilo/vigiboard/">
+            <Files "vigiboard.wsgi">
+                WSGIProcessGroup vigiboard
+                WSGIApplicationGroup %{GLOBAL}
+            </Files>
 
-    AuthType kerberos
-    AuthName "Kerberos"
-    KrbServiceName HTTP
-    KrbAuthRealms EXAMPLE.COM
-    Krb5Keytab /etc/httpd/conf/HTTP.vigilo.example.com.keytab
-    KrbMethodNegotiate on
-    KrbMethodK5Passwd off
-    KrbSaveCredentials on
-    KrbVerifyKDC on
+            Order deny,allow
+            Allow from all
+        </Directory>
 
-    Require valid-user
-    </Files>
-    </Directory>
+        <Location "/vigilo/vigiboard/login">
+            AuthType kerberos
+            AuthName "Kerberos"
+            KrbServiceName HTTP
+            KrbAuthRealms EXAMPLE.COM
+            Krb5Keytab /etc/httpd/conf/HTTP.vigilo.example.com.keytab
+            KrbMethodNegotiate on
+            KrbMethodK5Passwd off
+            KrbSaveCredentials on
+            KrbVerifyKDC on
 
+            Order allow,deny
+            Require valid-user
+        </Location>
     </IfModule>
 
-Les lignes modifiées par rapport à une installation standard de VigiBoard
-apparaissent en gras dans le listing.
+Avec cette configuration, seule l'URL
+``http://vigilo.example.com/vigilo/vigiboard/login`` est protégée par une
+authentification Kerberos. Les autres pages redirigent vers celle-ci
+lorsqu'un utilisateur authentifié est attendu et que l'utilisateur courant
+ne l'est pas. Cette solution offre le meilleur compromis possible entre la
+sécurité (il n'est pas possible d'accéder à une ressource protégée sans être
+authentifié) et les performances (une seule authentification par session).
 
-La ligne 15 indique qu'Apache doit procéder à une authentification de type
-« kerberos » afin d'autoriser l'accès à l'application (directive AuthType).
+La ligne 21 indique qu'Apache doit procéder à une authentification de type
+« kerberos » afin d'autoriser l'accès à l'application (directive ``AuthType``).
 
-La ligne 16 permet d'associer un nom à cette méthode d'authentification
-(directive AuthName). Ce nom apparaîtra dans les journaux d'événements du
+La ligne 22 permet d'associer un nom à cette méthode d'authentification
+(directive ``AuthName``). Ce nom apparaîtra dans les journaux d'événements du
 serveur.
 
-La ligne 17 spécifie le nom du service Kerberos qui sera utilisé pour procéder
-à l'authentification (directive KrbServiceName). La valeur par défaut est
+La ligne 23 spécifie le nom du service Kerberos qui sera utilisé pour procéder
+à l'authentification (directive ``KrbServiceName``). La valeur par défaut est
 « HTTP » qui correspond à la valeur recommandée.
 
-La ligne 18 indique le nom du domaine Kerberos dans lequel l'authentification a
-lieu (directive KrbAuthRealms). Par convention, il s'agit du nom de domaine du
-parc, en majuscules.
+La ligne 24 indique le nom du domaine Kerberos dans lequel l'authentification a
+lieu (directive ``KrbAuthRealms``). Par convention, il s'agit du nom de domaine
+du parc, **en majuscules**.
 
-La ligne 19 spécifie l'emplacement du fichier contenant la clé secrète
-d'authentification de ce service (directive Krb5Keytab). Ce fichier doit être
-accessible par le serveur Web (et uniquement celui-ci).
+La ligne 25 spécifie l'emplacement du fichier contenant la clé secrète
+d'authentification de ce service (directive ``Krb5Keytab``). Ce fichier
+doit être accessible par le serveur web (et uniquement celui-ci).
 
-La directive KrbMethodNegotiate à la ligne 20 autorise la négociation de la
-méthode d'authentification entre le navigateur et le serveur Web. Il est
+La directive ``KrbMethodNegotiate`` à la ligne 26 autorise la négociation de
+la méthode d'authentification entre le navigateur et le serveur web. Il est
 recommandé d'autoriser la négociation.
 
-La ligne 21 désactive l'authentification à la volée par identifiant/mot de
-passe (directive KrbMethodK5Password). Cette directive peut être positionnée à
-« on » pour autoriser les utilisateurs à s'authentifier à la volée auprès du
-serveur Web. Si l'utilisateur tente de se connecter à l'application alors qu'il
+La ligne 27 désactive l'authentification à la volée par identifiant/mot de
+passe (directive ``KrbMethodK5Password``). Cette directive peut être positionnée
+à « on » pour autoriser les utilisateurs à s'authentifier à la volée auprès du
+serveur web. Si l'utilisateur tente de se connecter à l'application alors qu'il
 ne dispose pas d'un ticket Kerberos valide, une boîte de dialogue l'invite à
 saisir son identifiant et son mot de passe. La suite du processus
 d'authentification se déroule alors comme si un ticket Kerberos avait été
@@ -331,7 +355,7 @@ recommandé de positionner cette directive à « on » pour permettre aux
 utilisateurs ne disposant pas des outils nécessaires sur leur machine de
 pouvoir s'authentifier malgré tout.
 
-La directive KrbSaveCredentials à la ligne 22 permet de sauvegarder
+La directive ``KrbSaveCredentials`` à la ligne 28 permet de sauvegarder
 temporairement le ticket Kerberos de l'utilisateur afin de permettre à
 l'application d'interroger d'autres services en utilisant la méthode Kerberos.
 Cette option est nécessaire dans les interfaces graphiques lorsque l'accès à
@@ -339,19 +363,30 @@ Nagios se fait via une authentification Kerberos, afin de propager le ticket
 Kerberos reçu et maintenir la traçabilité des accès. Le fichier contenant le
 ticket Kerberos est supprimé automatiquement à la fin de la requête.
 
-La directive KrbVerifyKdc à la ligne 23 désactive la vérification de l'identité
-du KDC du parc. Pour plus de sécurité, il est recommandé de positionner cette
-directive à la valeur « on ». L'activation de cette option nécessite cependant
-une configuration plus avancée de l'infrastructure Kerberos, qui dépasse le
-cadre de ce document.
+La directive ``KrbVerifyKdc`` à la ligne 29 désactive la vérification de
+l'identité du KDC du parc. Pour plus de sécurité, il est recommandé de
+positionner cette directive à la valeur « on ». L'activation de cette option
+nécessite cependant une configuration plus avancée de l'infrastructure
+Kerberos, qui dépasse le cadre de ce document.
 
-La directive Require (ligne 25) indique que l'utilisateur doit avoir un compte
-valide dans l'annuaire LDAP pour pouvoir accéder à l'application.
+La directive ``Require`` (ligne 32) indique que l'utilisateur doit dispose
+d'un compte valide dans la base Kerberos pour pouvoir accéder à l'application.
 
 Adaptation du fichier who.ini
-=============================
-La prise en charge de Kerberos comme méthode d'authentification dans Vigilo se fait en paramétrant le fichier « who.ini » des interfaces graphiques (VigiMap, VigiGraph et VigiBoard), selon la méthode présentée au chapitre .
-Le listing ci-dessous présente un exemple complet de configuration utilisant Kerberos. Les modifications notables sont indiquées en gras::
+-----------------------------
+La prise en charge de Kerberos comme méthode d'authentification dans Vigilo
+se fait en paramétrant le fichier « who.ini » des interfaces graphiques
+(VigiMap, VigiGraph et VigiBoard), selon la méthode présentée dans ce
+chapitre. Lorsque Kerberos est utilisé comme méthode d'authentification,
+l'identifiant Kerberos de l'utilisateur est transmis à l'application
+au travers de la variable CGI ``REMOTE_USER``.
+
+Le listing ci-dessous présente un exemple complet de configuration permettant
+de synchroniser les comptes utilisateurs dans Vigilo avec un annuaire LDAP
+externe, tout en utilisant l'identité Kerberos obtenue depuis le serveur web :
+
+.. sourcecode:: ini
+    :linenos:
 
     [plugin:auth_tkt]
     use = repoze.who.plugins.auth_tkt:make_plugin
@@ -371,98 +406,98 @@ Le listing ci-dessous présente un exemple complet de configuration utilisant Ke
     post_login_url = /post_login
     post_logout_url = /post_logout
 
-    [plugin:sqlauth]
-    use = vigilo.turbogears.repoze_plugins:auth_plugin
-
-    [plugin:kerberos]
-    use = repoze.who.plugins.vigilo.kerberos:VigiloKerberosAuthenticator
-    ldap_url = ldap://ldap.example.com
-    ldap_base = uid=%(login)s,dc=example,dc=com
-    filterstr = sAMAccountName=%(login)s
+    [plugin:ldapsync]
+    use = vigilo.turbogears.repoze.plugins.mdldapsync:VigiloLdapSync
+    ldap_url = ldap://vigilo-dev12.si.c-s.fr
+    ldap_base = dc=vigilo,dc=si.c-s.fr
+    filterstr= (&(uid=%s)(objectClass=*))
     ldap_charset = cp1252
     http_charset = utf-8
+    cache_name = vigilo
     binddn = mybinduser
     bindpw = mybindpassword
     attr_cn = cn
     attr_mail = mail
     attr_member_of = memberOf
 
+    [plugin:externalid]
+    use = vigilo.turbogears.repoze.plugins.externalid:ExternalIdentification
+    cache_name = vigilo
+
     [general]
-    request_classifier = vigilo.turbogears.repoze_plugins:vigilo_api_classifier
+    request_classifier = vigilo.turbogears.repoze.classifier:vigilo_classifier
     challenge_decider = repoze.who.classifiers:default_challenge_decider
-    remote_user_key = ''
 
     [identifiers]
     plugins =
-    kerberos;browser
-    friendlyform;browser
-    basicauth;vigilo-api
-    auth_tkt
+        friendlyform;browser
+        basicauth;vigilo-api
+        auth_tkt
+        externalid;browser
 
     [authenticators]
     plugins =
-    kerberos;browser
-    sqlauth
+        vigilo.turbogears.repoze.plugins.sqlauth:plugin
 
     [challengers]
     plugins =
-    friendlyform;browser
-    basicauth;vigilo-api
+        friendlyform;browser
+        basicauth;vigilo-api
 
     [mdproviders]
     plugins =
-    vigilo.turbogears.repoze_plugins:md_plugin
-    vigilo.turbogears.repoze_plugins:md_group_plugin
+        ldapsync
+        vigilo.turbogears.repoze.plugins.mduser:plugin
+        vigilo.turbogears.repoze.plugins.mdgroups:plugin
 
-Les lignes 22 à 33 chargent le module de Vigilo permettant de gérer
-l'authentification par Kerberos, en lui associant le nom « kerberos ». Les
-paramètres associés à ce module sont listés ci-dessous :
+Le module ``ldapsync`` (classe
+``vigilo.turbogears.repoze.plugins.mdldapsync:VigiloLdapSync``) défini aux
+lignes 19 à 31 est responsable de la récupération des informations depuis
+l'annuaire LDAP à partir de l'identité Kerberos de l'utilisateur.
+
+Les paramètres du module ``ldapsync`` sont les suivants :
 
 ``ldap_url``
     Emplacement de l'annuaire LDAP, sous la forme d'une URL. Exemple :
     ``ldap://ldap.example.com``.
 
 ``ldap_base``
-    Requête LDAP permettant d'obtenir le Distinguished Name de l'utilisateur
-    qui se connecte dans l'annuaire. Exemple :
-    ``uid=%s,dc=ldap,dc=example,dc=com``.
-
-    Cette chaîne de caractères peut contenir la variable de substitution « %s »
-    qui sera remplacée par l'identifiant Kerberos (principal) de l'utilisateur,
-    privé du nom du domaine (par exemple : « vigilo » si le principal Kerberos
-    est « vigilo@EXAMPLE.COM »).
-
-    La variable ne peut être utilisée qu'une seule fois.
+    Base de recherche de l'utilisateur dans l'annuaire LDAP, sous la forme
+    d'un Distinguished Name. Exemple : ``ou=People,dc=ldap,dc=example,dc=com``.
 
 ``filterstr``
-    Chaine de filtrage des résultats obtenus par la recherche. Exemple :
-    ``sAMAccountName=%``.
+    Chaine de filtrage des résultats obtenus par la recherche.
+    Exemple : ``sAMAccountName=%``.
 
     Cette chaîne de caractères peut contenir la variable de substitution « %s »
     qui sera remplacée par l'identifiant Kerberos (principal) de l'utilisateur,
     privé du nom du domaine (par exemple : « vigilo » si le principal Kerberos
-    est « vigilo@EXAMPLE.COM »).
+    est « vigilo\@EXAMPLE.COM »).
 
-    La variable ne peut être utilisée qu'une seule fois. Par défaut, le filtre
-    utilisé est « ``(objectClass=*)`` ».
+    La variable du substitution ne peut être utilisée qu'une seule fois.
+    Par défaut, le filtre utilisé est ``(objectClass=*)``.
 
 ``ldap_charset``
     Encodage des caractères utilisé par l'annuaire. Cet encodage sera utilisé
     afin de décoder correctement les valeurs transmises par l'annuaire. Les
-    noms d'encodages valides sont ceux définis par Python.
+    noms d'encodages valides sont ceux définis par Python [#]_.
 
-    Par défaut, l'encodage utilisé est « utf-8 ». Par exemple : ``cp1252``.
+    Par défaut, l'encodage utilisé est ``utf-8``.
 
 ``http_charset``
     Ce paramètre est similaire au paramètre « ldap_charset » mais s'applique au
-    serveur Web. Il est utilisé afin de décoder correctement le principal
+    serveur web. Il est utilisé afin de décoder correctement le principal
     Kerberos.
 
     Par défaut, l'encodage utilisé est « utf-8 ».
 
-``rememberer_name``
-    Nom du module d'identification qui sera utilisé pour mémoriser l'identité
-    de l'utilisateur. Exemple : ``auth_tkt``.
+.. _`cache_name`:
+
+``cache_name``
+    Nom d'une clé qui sera définie dans la session de l'utilisateur afin de
+    stocker son identité [#]_. Cette clé est ensuite utilisée par la classe
+    ``vigilo.turbogears.repoze.plugins.externalid:ExternalIdentification``
+    pour authentifier automatiquement l'utilisateur lors des accès suivants.
 
 ``binddn``
     DN (optionnel) à utiliser pour se connecter à l'annuaire LDAP (bind). Si ce
@@ -488,63 +523,72 @@ paramètres associés à ce module sont listés ci-dessous :
     dont l'utilisateur est membre. La valeur par défaut est « memberOf », ce
     qui correspond au nom de cet attribut dans un schéma LDAP classique.
 
-L'ajout de la ligne « ``remote_user_key`` » permet d'éviter que les
-applications ignorent purement et simplement les informations
-d'authentification transmises par le serveur Web (comportement par défaut du
-framework repoze.who lorsque cette clé est absente ou positionnée à
-« ``REMOTE_USER`` »).
 
-Les lignes 42 et 49 indiquent au framework d'authentification d'utiliser le
-module d'authentification « kerberos » défini plus haut, à la fois pour
-l'identification de l'utilisateur et pour son authentification.
+Le module ``externalid`` (classe
+``vigilo.turbogears.repoze.plugins.externalid:ExternalIdentification``) défini
+aux lignes 33 à 35 est quant à lui utilisé pour mémoriser le fait que
+l'utilisateur s'est authentifié à l'aide d'un mécanisme d'authentification
+externe (ici, Kerberos) afin d'authentifier automatiquement cet utilisateur
+lorsqu'il tente d'accéder à une page dont l'accès est restreint.
 
-Notez que le reste de la configuration des « ``[identifiers]`` » et
-« ``[authenticators]`` » n'a pas été modifiée, mais que le module « kerberos »
-apparaît en premier dans la liste des modules à utiliser. Ceci permet de
-revenir à un mécanisme d'authentification local (via la base de données de
-Vigilo) en cas d'échec de l'authentification Kerberos, permettant ainsi un mode
-de repli gracieux.
+Les paramètres du modules ``externalid`` sont les suivants :
 
-Configuration des interfaces graphiques
----------------------------------------
-Le fonctionnement normal des interfaces graphiques veut que celles-ci gèrent
-elles-mêmes l'authentification des utilisateurs. Dans le cas où un mécanisme
-externe d'authentification est utilisé, il est nécessaire de position l'option
-« ``external_auth`` » de la section « ``[app:main]`` » du fichier settings.ini
-de chacune des interfaces utilisées par les exploitants (VigiMap, VigiGraph et
-VigiBoard) à la valeur « True ».
+``cache_name``
+    Nom d'une clé dans la session contenant l'identité de l'utilisateur.
+    Il doit s'agir de la même valeur que pour l'option `cache_name`_
+    du module ``ldapsync`` (de la classe
+    ``vigilo.turbogears.repoze.plugins.mdldapsync:VigiloLdapSync``).
 
-Dans ce mode de fonctionnement, les applications utilisent les informations
-d'authentification transmises par le serveur Web (variable CGI
-« ``REMOTE_USER`` ») pour déterminer l'identité de l'utilisateur connecté.
 
-Configuration du navigateur Web des exploitants
+La ligne 46 indique au framework d'authentification d'utiliser le
+module d'authentification ``externalid`` défini plus haut, afin
+d'authentifier automatiquement l'utilisateur s'il s'était identifié
+au préalable auprès du serveur via Kerberos.
+
+La ligne 59 permet quant à elle d'utiliser le module ``ldapsync`` afin de
+synchroniser automatiquement la base de données Vigilo avec les informations
+issues de l'annuaire LDAP lorsque l'utilisateur s'authentifie via un
+mécanisme d'authentification externe (ici, Kerberos).
+
+.. [#] http://docs.python.org/library/codecs.html#standard-encodings
+.. [#] Pour le moment, seule la valeur ``vigilo`` est fonctionnelle.
+   Les interfaces de Vigilo supposent qu'il s'agit du nom de cette clé
+   et ne fonctionneront pas correctement si une autre valeur est utilisée ici.
+
+Configuration du navigateur web des exploitants
 -----------------------------------------------
+
 Mozilla Firefox
 ^^^^^^^^^^^^^^^
 L'activation de l'authentification par Kerberos dans Firefox se fait en
 modifiant 2 options dans la configuration. La configuration actuelle de Firefox
-peut être affichée en ouvrant un nouvel onglet, en tapant « ``about:config`` »
+peut être affichée en ouvrant un nouvel onglet, en tapant ``about:config``
 dans la barre d'adresse et en validant.
 
-Un message de mise en garde s'affiche, comme sur l'illustration .
+Un message de mise en garde s'affiche, comme sur l'illustration intitulée
+`Avertissement de Mozilla Firefox`_.
 
+.. _`Avertissement de Mozilla Firefox`:
 .. figure:: img/firefox-warn.png
 
    Avertissement de Mozilla Firefox
 
 Après prise en compte de l'avertissement (« Je ferai attention, promis ! »), la
-configuration actuelle de Firefox s'affiche, comme sur l'illustration .
+configuration actuelle de Firefox s'affiche, comme sur l'illustration intitulée
+`Options de configuration de Firefox`_.
 
+.. _`Options de configuration de Firefox`:
 .. figure:: img/firefox-options.png
 
    Options de configuration de Firefox
 
-Dans la barre de filtrage des options (encadrée en rouge sur l'illustration ),
-saisir « negotiate-auth ». Les paramètres actuels relatifs à l'authentification
-Kerberos (via le protocole GSSAPI) s'affichent dans la zone de résultats, comme
-sur l'illustration .
+Dans la barre de filtrage des options (encadrée en rouge sur l'illustration
+intitulée `Options de configuration de Firefox`_), saisir « negotiate-auth ».
+Les paramètres actuels relatifs à l'authentification Kerberos (via le protocole
+GSSAPI) s'affichent dans la zone de résultats, comme sur l'illustration
+intitulée `Options relatives à l'authentification Kerberos`_.
 
+.. _`Options relatives à l'authentification Kerberos`:
 .. figure:: img/firefox-kerberos.png
 
    Options relatives à l'authentification Kerberos
@@ -559,7 +603,7 @@ network.negotiate-auth.delegation-uris
 
     Exemple : ``https://,vigilo.example.com``. Cette valeur autorise la
     délégation du ticket pour les sites utilisant une connexion chiffrée
-    (HTTPS) *ou* à destination du serveur « ``vigilo.example.com`` ».
+    (HTTPS) *ou* à destination du serveur ``vigilo.example.com``.
 
 network.negotiate-auth.trusted-uris
     Liste les adresses Internet pour lesquelles un ticket Kerberos doit être
@@ -567,10 +611,13 @@ network.negotiate-auth.trusted-uris
 
     Exemple : ``https://,localhost,vigilo.example.com``. Cette valeur autorise
     la transmission du ticket aux sites utilisant une connexion chiffrée
-    (HTTPS) *ou* à destination du serveur « ``vigilo.example.com`` ».
+    (HTTPS) *ou* à destination du serveur ``vigilo.example.com``.
 
-L'illustration suivante montre un exemple de configuration autorisant l'authentification Kerberos pour les sites hébergés par « ``vigilo.example.com`` ».
+L'illustration suivante montre un exemple de configuration autorisant
+l'authentification Kerberos pour les sites hébergés par
+``vigilo.example.com``.
 
+.. _`Configuration autorisant l'authentification Kerberos vers Vigilo`:
 .. figure:: img/firefox-kerberos-vigilo.png
 
    Configuration autorisant l'authentification Kerberos vers Vigilo
@@ -583,17 +630,22 @@ Windows.
 
 L'activation se fait en allant dans le menu « Outil » et en sélectionnant
 « Options Internet ». La boîte de dialogue des options d'Internet Explorer
-s'ouvre alors (voir illustration ).
+s'ouvre alors (voir illustration intitulée
+`Options de Microsoft Internet Explorer`_).
 
+.. _`Options de Microsoft Internet Explorer`:
 .. figure:: img/ie-options.png
 
    Options de Microsoft Internet Explorer
 
-Cliquer sur l'onglet « Avancées » (en rouge sur l'illustration ), puis faire
-défiler les options jusqu'à trouver la ligne « Activer l'authentification
-Windows intégrée » (encadrée en rouge sur l'illustration ). L'option doit être
+Cliquer sur l'onglet « Avancées » (en rouge sur l'illustration intitulée
+`Options de Microsoft Internet Explorer`_), puis faire défiler les options
+jusqu'à trouver la ligne « Activer l'authentification Windows intégrée »
+(encadrée en rouge sur l'illustration intitulée
+`Activation de la prise en charge de Kerberos`_). L'option doit être
 cochée pour que l'authentification par Kerberos soit supportée.
 
+.. _`Activation de la prise en charge de Kerberos`:
 .. figure:: img/ie-kerberos.png
 
    Activation de la prise en charge de Kerberos
@@ -602,15 +654,16 @@ Une fois la prise en charge de Kerberos activée, valider la modification en
 cliquant sur le bouton « OK » et redémarrer Internet Explorer.
 
 Vérification du bon fonctionnement
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------------
 La manière la plus simple de vérifier le bon fonctionnement de
 l'authentification Kerberos consiste simplement à se connecter à l'une des
-interfaces Web de Vigilo.
+interfaces web de Vigilo.
 
 Si vous ne disposez pas encore d'un ticket Kerberos valide et que la directive
-KrbMethodK5Passwd a été positionnée à « on » (voir le chapitre ) dans la
-configuration d'Apache, une boîte de dialogue vous invite à vous authentifier à
-l'aide de votre identifiant et de votre mot de passe.
+``KrbMethodK5Passwd`` a été positionnée à « on » sur le serveur (voir le
+chapitre `Configuration d'Apache avec Kerberos`_), une boîte de dialogue
+vous invite à vous authentifier à l'aide de votre identifiant et de votre
+mot de passe.
 
 En revanche, si cette directive a été positionnée à « off », l'authentification
 échoue et une page d'erreur apparaît dans le navigateur. Dans ce cas, vous
@@ -621,24 +674,9 @@ suivante::
 
     $ kinit -f <identifiant Kerberos>
 
-L'option « -f » indique que le ticket peut être réutilisé par les services auxquels vous vous connectez (délégation). Elle est nécessaire au bon fonctionnement des interfaces de Vigilo.
-
-Retour a une authentification interne
--------------------------------------
-Le retour a une authentification interne se déroule de la manière suivante.
-
-Dans le fichier de l'application concernée :
-``/etc/vigilo/<nom_appli>/settings.ini``, modifier le paramètre external_auth à
-``False``::
-
-    ; Indique si un mécanisme d'authentification externe
-    ; (ex : Kerberos) est en place ou non.
-    external_auth=False
-
-Ensuite, dans le fichier de configuration Apache de l'application
-``/etc/httpd/conf.d/<nom_appli>.conf``, commenter le paramètre ``Require
-valid-user``.
-
+L'option « -f » indique que le ticket peut être réutilisé par les services
+auxquels vous vous connectez (délégation). Elle est nécessaire au bon
+fonctionnement des interfaces de Vigilo.
 
 Annexes
 =======
@@ -723,11 +761,13 @@ VigiMap
     de la création ou de la modification d'une carte, au sein d'un lien de type
     « service ».  L'accès en lecture/écriture confère les mêmes droits [#]_.
 
-.. [#] Pour le moment, l'accès ro est suffisant pour ça...
-.. [#] L'accès ro ou rw devrait permettre de voir les graphes en question.
-.. [#] Pas encore implémenté.
-.. [#] Pour le moment, l'accès ro se comporte comme rw.
-.. [#] Pas encore implémenté.
+.. [#] Pour le moment, l'accès en lecture seule est suffisant pour ça...
+.. [#] L'accès en lecture seule ou en lecture/écriture devrait permettre
+   de voir les graphes en question.
+.. [#] Cette fonctionnalité n'est pas encore implémentée.
+.. [#] Pour le moment, l'accès en lecture seule se comporte comme l'accès
+   en lecture/écriture.
+.. [#] Cette fonctionnalité n'est pas encore implémentée.
 
 
 Glossaire - Terminologie
@@ -740,9 +780,9 @@ et donne une brève définition de chacun de ces termes.
 
    CGI
         Common Gateway Interface. Interface standard de communication entre un
-        serveur Web et un programme capable de générer une réponse HTTP valide.
+        serveur web et un programme capable de générer une réponse HTTP valide.
         Il s'agit par exemple de l'interface retenue par Nagios pour la
-        génération de ses pages Web.
+        génération de ses pages web.
    DN
         Distinguished Name. Identifiant unique dans le cadre d'un annuaire
         LDAP.
@@ -761,7 +801,6 @@ et donne une brève définition de chacun de ces termes.
    URL
         Uniform Resource Locator. Chaîne de caractères permettant d'identifier
         une ressource sur Internet. Exemple : http://www.projet-vigilo.org/
-
 
 
 .. vim: set tw=79 :
