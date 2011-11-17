@@ -91,6 +91,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
         par urllib2.
     @rtype: C{file-like}
     """
+    server_type = u'' + server_type.lower()
 
     if charset is None:
         charset = pylons.request.charset
