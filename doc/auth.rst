@@ -408,8 +408,8 @@ externe, tout en utilisant l'identité Kerberos obtenue depuis le serveur web :
 
     [plugin:ldapsync]
     use = vigilo.turbogears.repoze.plugins.mdldapsync:VigiloLdapSync
-    ldap_url = ldap://vigilo-dev12.si.c-s.fr
-    ldap_base = dc=vigilo,dc=si.c-s.fr
+    ldap_url = ldap://ldap.example.com
+    ldap_base = ou=people,dc=example,dc.com
     filterstr= (&(uid=%s)(objectClass=*))
     ldap_charset = cp1252
     http_charset = utf-8
