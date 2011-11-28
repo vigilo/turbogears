@@ -181,6 +181,7 @@ class VigiloLdapSync(object):
                 DBSession.flush()
                 logger and logger.info(_('New user created: %s'), remote_user)
             except SQLAlchemyError:
+                transaction.abort()
                 logger and logger.exception(
                     _('Exception during user creation'))
                 return None
@@ -200,7 +201,20 @@ class VigiloLdapSync(object):
 
         # Ajout des groupes manquants.
         for group_name in user_groups:
-            group = UserGroup.by_group_name(group_name)
+            try:
+                # Cet appel provoque un flush implicite à la 2ème
+                # itération, d'où le bloc try...except (cf. #909).
+                group = UserGroup.by_group_name(group_name)
+            except SQLAlchemyError:
+                # Si une erreur s'est produite, on effectue un ROLLBACK
+                # pour éviter de bloquer le thread avec l'erreur, mais
+                # on continue tout de même car l'utilisateur a bien été
+                # reconnu.
+                transaction.abort()
+                if 'beaker.session' in environ and self.cache_name is not None:
+                    environ['beaker.session'][self.cache_name] = remote_user
+                    environ['beaker.session'].save()
+                return
 
             # Création des groupes au besoin.
             if group is None:
