@@ -279,7 +279,7 @@ afin de gérer l'authentification Kerberos. Ce fichier se trouve dans
 
         WSGIRestrictStdout off
         WSGIPassAuthorization on
-        WSGIDaemonProcess vigiboard user=apache group=apache threads=2
+        WSGIDaemonProcess vigiboard user=apache group=apache processes=4 threads=1
         WSGIScriptAlias /vigilo/vigiboard "/etc/vigilo/vigiboard/vigiboard.wsgi"
 
         KeepAlive Off
@@ -307,6 +307,7 @@ afin de gérer l'authentification Kerberos. Ce fichier se trouve dans
 
             Order allow,deny
             Require valid-user
+            Allow from all
         </Location>
     </IfModule>
 
@@ -371,6 +372,9 @@ Kerberos, qui dépasse le cadre de ce document.
 
 La directive ``Require`` (ligne 32) indique que l'utilisateur doit dispose
 d'un compte valide dans la base Kerberos pour pouvoir accéder à l'application.
+
+Enfin, la directin ``Allow`` (ligne 33) indique que n'importe quel machine
+est autorisée à se connecter à l'application, quelle que soit son adresse IP.
 
 Adaptation du fichier who.ini
 -----------------------------
