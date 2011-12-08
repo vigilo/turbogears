@@ -18,8 +18,14 @@ class AuthController(BaseController):
     @expose('login.html')
     def login(self, came_from='/', **kw):
         """Start the user login."""
+        # Si l'utilisateur a déjà été authentifié automatiquement par un
+        # mécanisme externe, on le redirige vers la page d'origine.
+        # On prend soin de retirer le message demandant une authentification
+        # qui se trouve dans la pile de messages de la méthode flash().
         if request.identity and request.identity.get('repoze.who.userid'):
+            flash.pop_payload()
             redirect(came_from)
+
         login_counter = request.environ.get('repoze.who.logins', 0)
         if login_counter > 0:
             flash(_('Wrong credentials'), 'warning')
@@ -35,6 +41,7 @@ class AuthController(BaseController):
         if not request.identity:
             login_counter = request.environ.get('repoze.who.logins', 0) + 1
             redirect('/login',  came_from=came_from, __logins=login_counter)
+
         userid = request.identity['repoze.who.userid']
         LOGGER.info(_('"%(username)s" logged into %(app)s (from %(IP)s)') % {
                 'username': userid,
@@ -51,12 +58,14 @@ class AuthController(BaseController):
         goodbye as well.
         """
         username = None
+
         # @TODO: généraliser + traiter l'auth interne correctement.
         if not session.get('vigilo'):
             msg = _('Some user logged out from %(app)s (from %(IP)s)')
         else:
             msg = _('"%(username)s" logged out from %(app)s (from %(IP)s)')
             username = session['vigilo']
+
         LOGGER.info(msg % {
                 'username': username,
                 'IP': request.remote_addr,
