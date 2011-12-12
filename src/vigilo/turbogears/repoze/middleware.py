@@ -170,6 +170,15 @@ class VigiloAuthForgerPlugin(AuthenticationForgerPlugin):
         return super(VigiloAuthForgerPlugin, self).challenge(
                     environ, status, app_headers, forget_headers)
 
+    def authenticate(self, environ, identity):
+        res = super(VigiloAuthForgerPlugin, self).authenticate(
+                    environ, identity)
+
+        # On force l'encodage (la BDD de Vigilo utilise des champs Unicode).
+        if res is not None and not isinstance(res, unicode):
+            res = res.decode('utf-8')
+        return res
+
 class VigiloAuthForgerMiddleware(VigiloAuthMiddleware):
     """
     Un middleware inspiré de
