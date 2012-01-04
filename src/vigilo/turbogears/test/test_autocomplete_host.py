@@ -13,7 +13,6 @@ class TestAutocompleterForHost(utils.AutoCompleterTest):
 
         host = tables.Host(
             name=u'foobarbaz',
-            checkhostcmd=u'foo',
             hosttpl=u'bar',
             address=u'127.0.0.1',
             snmpcommunity=u'',

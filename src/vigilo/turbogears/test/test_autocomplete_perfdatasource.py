@@ -15,7 +15,6 @@ class TestAutocompleterForPerfDataSource(utils.AutoCompleterTest):
 
         self.host = tables.Host(
             name=u'a.b.c',
-            checkhostcmd=u'foo',
             hosttpl=u'bar',
             address=u'127.0.0.1',
             snmpcommunity=u'',
