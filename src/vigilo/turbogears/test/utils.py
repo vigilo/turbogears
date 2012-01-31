@@ -65,7 +65,7 @@ class AutoCompleterTest(DbTest):
         self.ctrl = AutoCompleteController()
 
         tg.request.identity = {
-            'repoze.who.userid': 'manager',
+            'repoze.who.userid': u'manager',
         }
 
         manager = tables.User(
@@ -113,8 +113,8 @@ class AutoCompleterTest(DbTest):
     def test_exact_item_name(self):
         """Autocomplétion avec un nom d'élément sans jokers."""
         # On doit obtenir l'élément demandé.
-        res = self._query_autocompleter('foobarbaz', False)
-        expected = {'results': ['foobarbaz']}
+        res = self._query_autocompleter(u'foobarbaz', False)
+        expected = {'results': [u'foobarbaz']}
         self.assertEqual(res, expected)
 
     def test_joker_1(self):
@@ -143,7 +143,7 @@ class AutoCompleterTest(DbTest):
 
         # On simulte un utilisateur connecté sous l'identifiant "foobar".
         tg.request.identity = {
-            'repoze.who.userid': 'foobar',
+            'repoze.who.userid': u'foobar',
         }
         tg.request.environ['repoze.what.credentials']['groups'] = []
 

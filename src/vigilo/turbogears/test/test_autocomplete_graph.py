@@ -3,41 +3,18 @@
 # Copyright (C) 2006-2011 CS-SI
 # License: GNU GPL v2 <http://www.gnu.org/licenses/gpl-2.0.html>
 
-from vigilo.models.session import DBSession
-from vigilo.models import tables
-
+from vigilo.models.demo import functions
 import utils
 
 class TestAutocompleterForGraph(utils.AutoCompleterTest):
     def setUp(self):
         super(TestAutocompleterForGraph, self).setUp()
-
-        self.host = tables.Host(
-            name=u'a.b.c',
-            hosttpl=u'bar',
-            address=u'127.0.0.1',
-            snmpcommunity=u'',
-            snmpport=4242,
-            weight=0,
-        )
-        DBSession.add(self.host)
-
-        ds = tables.PerfDataSource(
-            name=u'blahbluhbloh',
-            host=self.host,
-            type=u'',
-            factor=42,
-        )
-        DBSession.add(ds)
-
-        graph = tables.Graph(
-            name=u'foobarbaz',
-            template=u'',
-            vlabel=u'',
-        )
-        DBSession.add(graph)
-        graph.perfdatasources.append(ds)
-        DBSession.flush()
+        self.host = functions.add_host(u'a.b.c')
+        functions.add_vigiloserver(u'localhost')
+        functions.add_application(u'vigirrd')
+        ds = functions.add_perfdatasource(u'blahbluhbloh', self.host)
+        graph = functions.add_graph(u'foobarbaz')
+        functions.add_perfdatasource2graph(ds, graph)
 
     def _query_autocompleter(self, pattern, partial):
         return self.ctrl.graph(pattern, self.host.name, partial, 42)
