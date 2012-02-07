@@ -31,7 +31,7 @@ tests_require = []
 
 setup(
     name='vigilo-turbogears',
-    version='2.0.11',
+    version='2.0.13',
     author='Vigilo Team',
     author_email='contact@projet-vigilo.org',
     url='http://www.projet-vigilo.org/',
