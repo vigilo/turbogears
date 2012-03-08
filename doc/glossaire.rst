@@ -48,6 +48,21 @@ et donne une brève définition de chacun de ces termes.
         recenser les utilisateurs autorisés d'un système et les différentes
         propriétés associées à ces utilisateurs.
 
+    OS (Operating System)
+            Système d'exploitation.
+
+    Nagios
+        Composant libre de supervision système et réseau.
+
+    RRD (Round Robin Database)
+            Base de données de taille fixe utilisant des fichiers circulaires,
+            dont les données sont progressivement compressées (avec perte) au
+            fur et à mesure de leur vieillissement.
+
+    RRDtool
+        Composant libre de gestion de bases RRD (stockage, restitution,
+        génération de graphiques).
+
     SGBD(R)
         Serveur de Gestion de Bases de Données (Relationnelles). Logiciel
         permettant d'héberger une base de données sur la machine.
@@ -63,5 +78,6 @@ et donne une brève définition de chacun de ces termes.
     WSGI (Web Server Gateway Interface)
         Une interface pour la communication entre une application et un serveur
         web, similaire à CGI. Il s'agit de l'interface utilisée par Vigilo.
+
 
 .. vim: set tw=79 :
