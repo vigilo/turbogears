@@ -780,31 +780,8 @@ Glossaire - Terminologie
 Ce chapitre recense les différents termes techniques employés dans ce document
 et donne une brève définition de chacun de ces termes.
 
-.. glossary::
 
-   CGI
-        Common Gateway Interface. Interface standard de communication entre un
-        serveur web et un programme capable de générer une réponse HTTP valide.
-        Il s'agit par exemple de l'interface retenue par Nagios pour la
-        génération de ses pages web.
-   DN
-        Distinguished Name. Identifiant unique dans le cadre d'un annuaire
-        LDAP.
-
-   KDC
-        Key Distribution Center. Serveur permettant un transfert sécurisé des
-        clés de chiffrement utilisé pour les communications entre divers
-        services. Ce serveur est notamment utilisé lors des échanges initiaux
-        du protocole Kerberos.
-
-   LDAP
-        Lightweight Directory Access Protocol. Protocole pour l'interrogation
-        d'un annuaire, servant généralement à recenser les utilisateurs
-        autorisés d'un système et les différentes propriétés associées à ces
-        utilisateurs.
-   URL
-        Uniform Resource Locator. Chaîne de caractères permettant d'identifier
-        une ressource sur Internet. Exemple : http://www.projet-vigilo.org/
+..  include:: glossaire.rst
 
 
 .. vim: set tw=79 :
