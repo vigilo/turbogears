@@ -16,6 +16,12 @@ et donne une brève définition de chacun de ces termes.
         Il s'agit par exemple de l'interface retenue par Nagios (< 3.3) pour
         la génération de ses pages web.
 
+    CSS (Cascading Style Sheets)
+        Feuilles de styles permettent de modifier la représentation graphique
+        des éléments d'une page web. La version généralement supportée par les
+        navigateurs est la version 2, définie par le document disponible sur
+        http://www.w3.org/TR/CSS2/.
+
     DN (Distinguished Name)
         Identifiant unique dans le cadre d'un annuaire LDAP.
 
