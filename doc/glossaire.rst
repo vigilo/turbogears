@@ -22,6 +22,14 @@ et donne une brève définition de chacun de ces termes.
         navigateurs est la version 2, définie par le document disponible sur
         http://www.w3.org/TR/CSS2/.
 
+    CSV  (Comma-Separated Values)
+        À l'origine, désigne un format textuel de transfert de données
+        dans lequel les entrées sont séparées par des retours chariot
+        et les champs par des virgules (comma). De nos jours, désigne
+        plus généralement un format tabulé pour l'échange de données
+        en vue de leur traitement dans un logiciel de type tableur
+        ou par un traitement automatisé (scripts).
+
     DN (Distinguished Name)
         Identifiant unique dans le cadre d'un annuaire LDAP.
 
