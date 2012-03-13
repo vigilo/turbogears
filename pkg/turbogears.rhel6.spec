@@ -43,6 +43,7 @@ Requires:   python-transaction
 
 # Le plugin a été absorbé par vigilo-turbogears 2.0.8.
 Obsoletes:  vigilo-repoze.who.plugins.vigilo.kerberos <= 2.0.7
+Provides:   vigilo-repoze.who.plugins.vigilo.kerberos = %{version}-%{release}
 Conflicts:  vigilo-repoze.who.plugins.vigilo.kerberos <= 2.0.7
 
 
