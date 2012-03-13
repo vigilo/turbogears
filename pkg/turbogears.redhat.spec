@@ -65,8 +65,8 @@ make PYTHON=%{__python}
 %install
 rm -rf $RPM_BUILD_ROOT
 make install_pkg \
-	DESTDIR=$RPM_BUILD_ROOT \
-	PYTHON=%{__python}
+    DESTDIR=$RPM_BUILD_ROOT \
+    PYTHON=%{__python}
 
 %find_lang %{name}
 
@@ -87,5 +87,5 @@ rm -rf $RPM_BUILD_ROOT
 * Tue Aug 24 2010  BURGUIERE Thomas <thomas.burguiere@c-s.fr>
 - modification for traduction files
 
-* Mon Feb 08 2010 Aurelien Bompard <aurelien.bompard@c-s.fr> - 1.0-1
+* Mon Feb 08 2010 Aurelien Bompard <aurelien.bompard@c-s.fr>
 - initial package
