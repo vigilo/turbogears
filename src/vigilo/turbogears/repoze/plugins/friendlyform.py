@@ -10,6 +10,57 @@ l'encodage des caractères.
 from zope.interface import implements
 from repoze.who.interfaces import IChallenger, IIdentifier
 from repoze.who.plugins.friendlyform import FriendlyFormPlugin as FFP
+from paste.httpexceptions import HTTPFound, HTTPException
+from paste.response import remove_header, replace_header
+from paste.httpheaders import CACHE_CONTROL
+
+class HTTPFoundGrabFragment(HTTPException):
+    """
+    Une exception qui redirige l'utilisateur vers une autre page
+    (à la manière de HTTPFound), mais mais qui permet de récupérer
+    le fragment saisi par l'utilisateur dans la requête originale
+    avant d'effectuer la redirection.
+    """
+    code = 200
+    title = 'Redirecting to the login page...'
+    # Si JavaScript est activé, un script récupère le fragment
+    # et redirige l'utilisateur vers le formulaire d'authentification
+    # en propageant cette information.
+    # NB: on ne peut pas utiliser window.location.hash à cause
+    # d'un bug dans Firefox (la valeur du hash est URI-décodée
+    # lors d'une lecture de l'attribut; elle ne devrait pas).
+    #
+    # Si JavaScript est désactivé, lien permet à l'utilisateur d'accéder
+    # manuellement au formulaire. Dans ce cas, le fragment sera perdu.
+    template = '''\
+        <script type="text/javascript">
+            var hash = window.location.href.split("#")[1] || "";
+            if (hash != '') hash = '#' + hash;
+            var loc = '%(detail)s' + encodeURIComponent(hash) + hash;
+            window.location = loc;
+        </script>
+
+        <a href="%(detail)s">Click here</a> if you're not redirected
+            within 5 seconds.
+    '''
+
+    def __init__(self, location, headers=None):
+        if headers is None:
+            headers = []
+        elif not isinstance(headers, list):
+            # Les en-têtes ont été créés à l'aide de WebOb.
+            # On supprime la taille du corps de la page car elle valait
+            # zéro (il s'agissait d'une redirection), mais ce n'est plus
+            # le cas à présent (et Paste vérifie cette valeur).
+            headers.pop('Content-Length', None)
+            # Conversion du format de WebOb vers le format de Paste.
+            headers = headers.items()
+        # Supprime la redirection.
+        remove_header(headers, 'location')
+        # Empêche la mise en cache de la page intermédiaire.
+        CACHE_CONTROL.apply(headers, no_cache=True, no_store=True)
+        super(HTTPFoundGrabFragment, self).__init__(location, headers)
+
 
 class FriendlyFormPlugin(FFP):
     """
@@ -81,4 +132,30 @@ class FriendlyFormPlugin(FFP):
                 if not isinstance(res[key], unicode):
                     res[key] = res[key].decode(self.encoding)
 
+        return res
+
+    # IChallenger
+    def challenge(self, environ, status, app_headers, forget_headers):
+        res = super(FriendlyFormPlugin, self).challenge(
+            environ, status, app_headers, forget_headers)
+
+        # Si le challenger s'apprête à nous rediriger vers le formulaire
+        # d'authentification, on affiche une page web à la place qui va
+        # récupérer l'éventuel fragment de l'URL et le propager.
+        if isinstance(res, HTTPFound):
+            # L'API de Paste a changé entre les versions.
+            if isinstance(res.location, basestring):
+                location = res.location # 1.7.4+
+            else:
+                location = res.location() # 1.7.2
+
+            # Si on s'apprête à rediriger l'utilisateur vers le formulaire
+            # d'authentification, on retourne une page intermédiaire à la
+            # place qui permet de sauvegarder le fragment de l'URL courante
+            # avant de rediriger l'utilisateur vers le formulaire.
+            # Le fragment sera ensuite propagé vers la page "post_login_url".
+            login_form_url = self._get_full_path(self.login_form_url, environ)
+            if location.partition('?')[0] == login_form_url and \
+                'repoze.who.logins' not in environ:
+                return HTTPFoundGrabFragment(location, res.headers)
         return res
