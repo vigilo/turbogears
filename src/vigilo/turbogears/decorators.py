@@ -13,7 +13,7 @@ class paginate(object):
     This decorator is mainly exposing the functionality
     of :func:`webhelpers.paginate`.
 
-    Repris de http://trac.turbogears.org/ticket/2302
+    X{Backport} de la version 2.1 (U{http://trac.turbogears.org/ticket/2302})
     """
 
     def __init__(self, name, use_prefix=False,
