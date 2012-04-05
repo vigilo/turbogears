@@ -3,7 +3,7 @@ EPYDOC_PARSE := vigilo\.turbogears\.(controllers\.autocomplete|rum\.fields)
 
 all: build
 
-include buildenv/Makefile.common
+include buildenv/Makefile.common.python
 
 install: $(PYTHON) build
 	$(PYTHON) setup.py install --record=INSTALLED_FILES
