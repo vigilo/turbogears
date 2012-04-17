@@ -126,7 +126,8 @@ class VigiloAppConfig(AppConfig):
         self.use_sqlalchemy = True
 
         # version
-        self.version = get_distribution("vigilo-%s" % self.app_name).version
+        self.version = get_distribution("vigilo-%s" %
+                                        self.app_name.lower()).version
 
         # Fournisseur de variables pour les templates.
         self.variable_provider = self._variable_provider
@@ -154,14 +155,14 @@ class VigiloAppConfig(AppConfig):
         super(VigiloAppConfig, self).setup_paths()
 
         app_templates = resource_filename(
-            'vigilo.themes.templates', self.app_name)
+            'vigilo.themes.templates', self.app_name.lower())
         common_templates = resource_filename(
             'vigilo.themes.templates', 'common')
 
         self.paths['templates'] = [app_templates, common_templates]
 
         # Spécifique projets
-        for module in ["turbogears", self.app_name]:
+        for module in ["turbogears", self.app_name.lower()]:
             for entry in working_set.iter_entry_points(
                                     "vigilo.%s.templates" % module):
                 if (entry.name != "enterprise" and
