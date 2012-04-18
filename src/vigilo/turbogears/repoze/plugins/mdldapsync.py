@@ -290,10 +290,15 @@ class VigiloLdapSync(object):
                 auth_tokens = self.sasl.gssapi()
                 ldap_conn.sasl_interactive_bind_s("", auth_tokens)
 
-            logger and logger.debug(
-                _("Bound to the LDAP server as '%s'"),
-                ldap_conn.whoami_s()
-            )
+            try:
+                logger and logger.debug(
+                    _("Bound to the LDAP server as '%s'"),
+                    ldap_conn.whoami_s()
+                )
+            except self.ldap.LDAPError:
+                # 389 Directory Server (l'annuaire LDAP RedHat)
+                # ne supporte pas l'extension "Who am I?".
+                pass
 
             try:
                 filterstr = self.filterstr % login
