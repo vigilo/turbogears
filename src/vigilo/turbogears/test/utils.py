@@ -4,17 +4,18 @@
 
 import os
 import shutil
-
 import unittest
+
 import tg
+import transaction
 from webob import Request
 from paste.registry import Registry
 
 from vigilo.turbogears.controllers.autocomplete import AutoCompleteController
-from vigilo.models.session import metadata, DBSession
+from vigilo.models.demo import functions
+from vigilo.models.test.controller import setup_db, teardown_db
 from vigilo.models import tables
-from vigilo.models.tables.grouppath import GroupPath
-from vigilo.models.tables.usersupitem import UserSupItem
+from vigilo.models.session import DBSession
 
 import pylons
 from pylons import url
@@ -25,37 +26,24 @@ from pylons.util import ContextObj
 class DbTest(unittest.TestCase):
     def setUp(self):
         print "Creating the tables"
-        # La vue GroupPath dépend de Group et GroupHierarchy.
-        # SQLAlchemy ne peut pas détecter correctement la dépendance.
-        # On crée le schéma en 2 fois pour contourner ce problème.
-        # Idem pour la vue UserSupItem (6 dépendances).
-        mapped_tables = metadata.tables.copy()
-        del mapped_tables[GroupPath.__tablename__]
-        del mapped_tables[UserSupItem.__tablename__]
-        metadata.create_all(tables=mapped_tables.itervalues())
-        metadata.create_all(
-            tables=[GroupPath.__table__, UserSupItem.__table__])
-
-        DBSession.add(tables.StateName(statename=u'OK', order=1))
-        DBSession.add(tables.StateName(statename=u'UNKNOWN', order=2))
-        DBSession.add(tables.StateName(statename=u'WARNING', order=3))
-        DBSession.add(tables.StateName(statename=u'CRITICAL', order=4))
-        DBSession.add(tables.StateName(statename=u'UP', order=1))
-        DBSession.add(tables.StateName(statename=u'UNREACHABLE', order=2))
-        DBSession.add(tables.StateName(statename=u'DOWN', order=4))
-        DBSession.flush()
+        setup_db()
 
     def tearDown(self):
-        DBSession.expunge_all()
         print "Dropping all tables"
-        metadata.drop_all()
+        transaction.abort()
+        DBSession.expunge_all()
+        teardown_db()
 
 class AutoCompleterTest(DbTest):
+    check_permissions = True
+
     def setUp(self):
         super(AutoCompleterTest, self).setUp()
-        environ = {
-            'repoze.what.credentials': {
-                'groups': ['managers'],
+        # Création d'un environnement WSGI pour les tests.
+        # Par défaut, l'utilisateur n'est pas identifé
+        # et n'appartient donc à aucun groupe.
+        environ = {'repoze.what.credentials': {
+                'groups': [],
             }
         }
         request = Request(environ)
@@ -64,26 +52,36 @@ class AutoCompleterTest(DbTest):
         registry.register(tg.request, request)
         self.ctrl = AutoCompleteController()
 
-        tg.request.identity = {
-            'repoze.who.userid': u'manager',
-        }
+        # Par défaut, l'utilisateur n'est pas identifé.
+        tg.request.identity = {'repoze.who.userid': None}
 
-        manager = tables.User(
-            user_name=u'manager',
-            fullname=u'',
-            email=u'manager@test',
+        self.accounts = (
+            (u'manager', u'managers'),  # Accès à tout (manager)
+            (u'nobody', u'nobody'),     # Accès à rien.
+            (u'direct', u'direct'),     # Permissions directe sur l'objet.
+            (u'indirect', u'indirect'), # Permissions indirectes sur l'objet.
         )
-        DBSession.add(manager)
 
-        managers = tables.UserGroup(
-            group_name=u'managers',
-        )
-        DBSession.add(managers)
-        manager.usergroups.append(managers)
+        # Création des comptes utilisateurs.
+        for username, group in self.accounts:
+            functions.add_user(username, u'%s@test' % username,
+                               u'', u'', group)
+
+        # Création de l'arborescence des objets.
+        self.create_deps()
+
+        # Positionnement des permissions.
+
 
     def tearDown(self):
-        self.ctrl
+        self.ctrl # suspect
         super(AutoCompleterTest, self).tearDown()
+
+    def _change_user(self, user, groups):
+        tg.request.identity['repoze.who.userid'] = unicode(user)
+        tg.request.environ['repoze.what.credentials']['groups'] = [
+            unicode(g) for g in groups
+        ]
 
     def shortDescription(self):
         desc = DbTest.shortDescription(self)
@@ -96,81 +94,73 @@ class AutoCompleterTest(DbTest):
 
     def test_no_such_item(self):
         """Autocomplétion sur un élément inexistant."""
-        # Aucun élément dans la base ne porte ce nom,
-        # dont le résultat doit être vide.
-        res = self._query_autocompleter(u'no_such_graph', False)
+        # L'élément n'existe pas : on attend une liste de résultats vide.
         expected = {'results': []}
-        self.assertEqual(res, expected)
+        for username, group in self.accounts:
+            self._change_user(username, [group])
 
-    def test_no_such_item_partial(self):
-        """Autocomplétion sur un élément inexistant (partial)."""
-        # Aucun élément dans la base ne porte ce nom,
-        # dont le résultat doit être vide.
-        res = self._query_autocompleter(u'no_such_graph', True)
-        expected = {'results': []}
-        self.assertEqual(res, expected)
+            # On test une première fois en effectuant une recherche exacte.
+            res = self._query_autocompleter(u'no_such_graph', False)
+            self.assertEqual(res, expected,
+                u"Element inexistant/recherche exacte pour %s" % username)
 
-    def test_exact_item_name(self):
-        """Autocomplétion avec un nom d'élément sans jokers."""
-        # On doit obtenir l'élément demandé.
-        res = self._query_autocompleter(u'foobarbaz', False)
-        expected = {'results': [u'foobarbaz']}
-        self.assertEqual(res, expected)
+            # Puis une seconde fois avec une recherche partielle.
+            res = self._query_autocompleter(u'no_such_graph', True)
+            self.assertEqual(res, expected,
+                u"Element inexistant/recherche partielle pour %s" % username)
 
-    def test_joker_1(self):
-        """Autocomplétion sur un nom d'élément avec point d'interrogation."""
-        # On doit obtenir l'élément "foobarbaz"
-        # qui correspond au motif donné.
-        res = self._query_autocompleter(u'f?ob?rb?z', False)
-        expected = {'results': [u'foobarbaz']}
-        self.assertEqual(res, expected)
+    def test_with_or_without_wildcards(self):
+        """Autocomplétion sur nom d'élément avec ou sans jokers."""
+        for username, group in self.accounts:
+            self._change_user(username, [group])
+            if (not self.check_permissions) or \
+                username in (u'manager', u'direct', u'indirect'):
+                # Ces utilisateurs doivent voir l'élément.
+                expected = {'results': [u'foobarbaz']}
+            else:
+                # Les autres ne voient rien.
+                expected = {'results': []}
 
-    def test_joker_n(self):
-        """Autocomplétion sur un nom d'élément avec astérisque."""
-        # On doit obtenir l'élément "foobarbaz"
-        # qui correspond au motif donné.
-        res = self._query_autocompleter(u'foo*baz', False)
-        expected = {'results': [u'foobarbaz']}
-        self.assertEqual(res, expected)
-
-    def test_without_access(self):
-        """Autocomplétion sur un nom d'élément, sans les permissions."""
-        DBSession.add(tables.User(
-            user_name=u'foobar',
-            fullname=u'',
-            email=u'foobar@test',
-        ))
-
-        # On simulte un utilisateur connecté sous l'identifiant "foobar".
-        tg.request.identity = {
-            'repoze.who.userid': u'foobar',
-        }
-        tg.request.environ['repoze.what.credentials']['groups'] = []
-
-        # On NE doit PAS obtenir l'élément demandé car nous n'avons
-        # pas les permissions dessus.
-        res = self._query_autocompleter(u'foobarbaz', False)
-        expected = {'results': []}
-        self.assertEqual(res, expected)
-
-        res = self._query_autocompleter(u'*', False)
-        expected = {'results': []}
-        self.assertEqual(res, expected)
+            # Recherche sur le nom exact.
+            res = self._query_autocompleter(u'foobarbaz', False)
+            self.assertEqual(res, expected,
+                u"Nom exact en tant que %s" % username)
+            # Recherche en utilisant le joker '?'.
+            res = self._query_autocompleter(u'f?ob?rb?z', False)
+            self.assertEqual(res, expected,
+                u"Joker '?' en tant que %s" % username)
+            # Recherche en utilisant le joker '*'.
+            res = self._query_autocompleter(u'foo*baz', False)
+            self.assertEqual(res, expected,
+                u"Joker '*' en tant que %s" % username)
+            # Recherche en utilisant uniquement le joker '*'.
+            res = self._query_autocompleter(u'*', False)
+            self.assertEqual(res, expected,
+                u"Uniquement '*' en tant que %s" % username)
 
     def test_partial(self):
-        """Autocomplétion sur un nom d'élément partiel."""
-        # La correspondance partielle ne se fait qu'en fin de nom.
-        res = self._query_autocompleter(u'foobar', True)
-        expected = {'results': [u'foobarbaz']}
-        self.assertEqual(res, expected)
+        """Autocomplétion sur un nom d'élément en recherche partielle."""
+        for username, group in self.accounts:
+            self._change_user(username, [group])
+            if (not self.check_permissions) or \
+                username in (u'manager', u'direct', u'indirect'):
+                # Ces utilisateurs doivent voir l'élément.
+                expected = {'results': [u'foobarbaz']}
+            else:
+                # Les autres ne voient rien.
+                expected = {'results': []}
 
-        res = self._query_autocompleter(u'bar', True)
-        expected = {'results': []}
-        self.assertEqual(res, expected)
-
-        res = self._query_autocompleter(u'barbaz', True)
-        expected = {'results': []}
-        self.assertEqual(res, expected)
+            # La correspondance partielle se fait par rapport à un préfixe.
+            res = self._query_autocompleter(u'foobar', True)
+            self.assertEqual(res, expected,
+                u"Recherche partielle avec prefixe en tant que %s" % username)
+            expected = {'results': []}
+            res = self._query_autocompleter(u'bar', True)
+            self.assertEqual(res, expected,
+                u"Recherche partielle avec infixe en tant que %s" % username)
+            res = self._query_autocompleter(u'barbaz', True)
+            self.assertEqual(res, expected,
+                u"Recherche partielle avec suffixe en tant que %s" % username)
 
 
 data_dir = os.path.dirname(os.path.abspath(__file__))
