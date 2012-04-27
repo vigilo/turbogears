@@ -274,7 +274,6 @@ class AutoCompleteController(BaseController):
         @rtype: C{dict}
         """
         ds = sql_escape_like(ds)
-        host = sql_escape_like(host)
         user = get_current_user()
         if not user:
             return dict(results=[])
@@ -325,7 +324,6 @@ class AutoCompleteController(BaseController):
         @rtype: C{dict}
         """
         graphname = sql_escape_like(graphname)
-        host = sql_escape_like(host)
         user = get_current_user()
         if not user:
             return dict(results=[])
