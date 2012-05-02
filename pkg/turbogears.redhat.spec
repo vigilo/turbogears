@@ -3,8 +3,9 @@
 %define pyver 26
 %define pybasever 2.6
 %define __python /usr/bin/python%{pybasever}
-%define __os_install_post %{__python26_os_install_post}
-%{!?python26_sitelib: %define python26_sitelib %(python26 -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+# Turn off the brp-python-bytecompile script
+%define __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
 Name:       vigilo-%{module}
 Summary:    @SUMMARY@
@@ -79,14 +80,6 @@ rm -rf $RPM_BUILD_ROOT
 %files -f %{name}.lang
 %defattr(644,root,root,755)
 %doc COPYING.txt
-%{python26_sitelib}/vigilo
-%{python26_sitelib}/*.egg-info
-%{python26_sitelib}/*-nspkg.pth
-
-
-%changelog
-* Tue Aug 24 2010  BURGUIERE Thomas <thomas.burguiere@c-s.fr>
-- modification for traduction files
-
-* Mon Feb 08 2010 Aurelien Bompard <aurelien.bompard@c-s.fr>
-- initial package
+%{python_sitelib}/vigilo
+%{python_sitelib}/*.egg-info
+%{python_sitelib}/*-nspkg.pth
