@@ -11,7 +11,9 @@ import utils
 
 class TestAutocompleterForPerfDataSource(utils.AutoCompleterTest):
     def create_deps(self):
-        self.host = functions.add_host(u'a.b.c')
+        # Les caractères "_" & "%" sont spéciaux en SQL.
+        # Leur usage permet de détecter les échappements abusifs (#943).
+        self.host = functions.add_host(u'a.b.c_d%e')
         functions.add_vigiloserver(u'localhost')
         functions.add_application(u'vigirrd')
         functions.add_perfdatasource(u'foobarbaz', self.host)
@@ -29,7 +31,9 @@ class TestAutocompleterForPerfDataSource(utils.AutoCompleterTest):
 
 class TestAutocompleterForGraph(utils.AutoCompleterTest):
     def create_deps(self):
-        self.host = functions.add_host(u'a.b.c')
+        # Les caractères "_" & "%" sont spéciaux en SQL.
+        # Leur usage permet de détecter les échappements abusifs (#943).
+        self.host = functions.add_host(u'a.b.c_d%e')
         functions.add_vigiloserver(u'localhost')
         functions.add_application(u'vigirrd')
         ds = functions.add_perfdatasource(u'blahbluhbloh', self.host)
@@ -86,7 +90,9 @@ class TestAutocompleterForHost(utils.AutoCompleterTest):
 
 class TestAutocompleterForServiceWithoutHost(utils.AutoCompleterTest):
     def create_deps(self):
-        self.host = functions.add_host(u'a.b.c')
+        # Les caractères "_" & "%" sont spéciaux en SQL.
+        # Leur usage permet de détecter les échappements abusifs (#943).
+        self.host = functions.add_host(u'a.b.c_d%e')
         self.service = functions.add_lowlevelservice(self.host, u'foobarbaz')
         # L'hôte appartient au groupe "Child".
         parent = functions.add_supitemgroup(u'Parent')
@@ -156,7 +162,6 @@ class TestAutocompleterForSupItemGroup(utils.AutoCompleterTest):
             res = self._query_autocompleter(u'*', False)
             self.assertEqual(res, expected,
                 u"Uniquement '*' en tant que %s" % username)
-
 
     def _query_autocompleter(self, pattern, partial):
         return self.ctrl.supitemgroup(pattern, partial, 42)
