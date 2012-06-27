@@ -12,6 +12,8 @@ except ImportError:
 
 import os, sys
 
+sysconfdir = os.getenv("SYSCONFDIR", "/etc")
+
 def install_i18n(i18ndir, destdir):
     data_files = []
     langs = []
@@ -93,5 +95,11 @@ setup(
         ],
     },
     package_dir={'': 'src'},
-    data_files=install_i18n("i18n", os.path.join(sys.prefix, 'share', 'locale')),
+    data_files= \
+        install_i18n("i18n", os.path.join(sys.prefix, 'share', 'locale')) + [
+        (
+            os.path.join(sysconfdir, 'cron.daily'),
+            [os.path.join('pkg', 'vigilo-clean-turbogears-sessions.sh')]
+        ),
+    ],
 )

@@ -75,6 +75,7 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/vigilo
 %{python_sitelib}/*.egg-info
 %{python_sitelib}/*-nspkg.pth
+%config(noreplace) /etc/cron.daily/*
 
 
 %changelog

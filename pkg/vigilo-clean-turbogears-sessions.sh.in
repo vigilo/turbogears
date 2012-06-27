@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Les sessions qui n'ont pas été modifiées depuis plus de EXPIRATION jours
+# seront automatiquement supprimées.
+EXPIRATION=7
+find @LOCALSTATEDIR@/cache/vigilo/sessions -type f -mtime +$EXPIRATION -delete
