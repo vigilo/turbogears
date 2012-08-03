@@ -80,6 +80,15 @@ rm -rf $RPM_BUILD_ROOT
 %files -f %{name}.lang
 %defattr(644,root,root,755)
 %doc COPYING.txt
-%{python_sitelib}/vigilo
-%{python_sitelib}/*.egg-info
-%{python_sitelib}/*-nspkg.pth
+%{python26_sitelib}/vigilo
+%{python26_sitelib}/*.egg-info
+%{python26_sitelib}/*-nspkg.pth
+%config(noreplace) /etc/cron.daily/*
+
+
+%changelog
+* Tue Aug 24 2010  BURGUIERE Thomas <thomas.burguiere@c-s.fr>
+- modification for traduction files
+
+* Mon Feb 08 2010 Aurelien Bompard <aurelien.bompard@c-s.fr> - 1.0-1
+- initial package
