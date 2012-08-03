@@ -9,6 +9,7 @@ include buildenv/Makefile.common.python
 
 pkg/vigilo-clean-turbogears-sessions.sh: pkg/vigilo-clean-turbogears-sessions.sh.in
 	sed -e 's,@LOCALSTATEDIR@,$(LOCALSTATEDIR),g' $^ > $@
+	chmod a+x $@
 
 install: build install_python install_data
 install_pkg: build install_python_pkg install_data
