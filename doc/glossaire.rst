@@ -71,9 +71,9 @@ et donne une brève définition de chacun de ces termes.
         Composant libre de gestion de bases RRD (stockage, restitution,
         génération de graphiques).
 
-    :abbr:`SGBD[R] (Serveur de Gestion de Bases de Données [Relationnelles]).`
-        Logiciel permettant d'héberger une base de données [relationnelle]
-        sur la machine.
+    :abbr:`SGBD[R] (Serveur de Gestion de Bases de Données [Relationnelles])`
+        Logiciel permettant d'héberger des bases de données [relationnelles]
+        sur une machine.
 
     :abbr:`SQL (Structured Query Language)`
         Langage de requêtes structuré pour l'interrogation d'une base de données
