@@ -47,6 +47,7 @@ Requires:   python26-kerberos python26-urllib2-kerberos
 Requires:   python26-rum-policy python26-rum-component python26-rum-generic
 Requires:   python26-ldap
 Requires:   python26-transaction
+Requires:   findutils
 
 # Le plugin a été absorbé par vigilo-turbogears 2.0.8.
 Obsoletes:  vigilo-repoze.who.plugins.vigilo.kerberos <= 2.0.7
@@ -68,6 +69,8 @@ make PYTHON=%{__python}
 rm -rf $RPM_BUILD_ROOT
 make install_pkg \
     DESTDIR=$RPM_BUILD_ROOT \
+    PREFIX=%{_prefix} \
+    LOCALSTATEDIR=%{_localstatedir} \
     PYTHON=%{__python}
 
 %find_lang %{name}
@@ -83,7 +86,8 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/vigilo
 %{python_sitelib}/*.egg-info
 %{python_sitelib}/*-nspkg.pth
-%config(noreplace) /etc/cron.daily/*
+%attr(755,root,root) %{_sysconfdir}/cron.daily/*
+%config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 
 
 %changelog

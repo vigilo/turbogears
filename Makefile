@@ -8,8 +8,9 @@ build: $(SUBST_FILES)
 include buildenv/Makefile.common.python
 
 pkg/vigilo-clean-turbogears-sessions.sh: pkg/vigilo-clean-turbogears-sessions.sh.in
-	sed -e 's,@LOCALSTATEDIR@,$(LOCALSTATEDIR),g' $^ > $@
-	chmod a+x $@
+	sed -e 's,@LOCALSTATEDIR@,$(LOCALSTATEDIR),g' \
+		-e 's,@INITCONFDIR@,$(INITCONFDIR),g' \
+		-e 's,@BINDIR@,$(BINDIR),g' $^ > $@
 
 install: build install_python install_data
 install_pkg: build install_python_pkg install_data
@@ -19,7 +20,10 @@ install_python: $(PYTHON) $(SUBST_FILES)
 install_python_pkg: $(PYTHON) $(SUBST_FILES)
 	$(PYTHON) setup.py install --single-version-externally-managed --root=$(DESTDIR) --record=INSTALLED_FILES
 
-install_data: $(SUBST_FILES)
+install_data: $(SUBST_FILES) pkg/initconf
+	# Configuration de la tâche cron.
+	install -p -m 644 -D pkg/initconf $(DESTDIR)$(INITCONFDIR)/$(PKGNAME)
+	echo $(INITCONFDIR)/$(PKGNAME) >> INSTALLED_FILES
 	# Cache
 	mkdir -p $(DESTDIR)$(LOCALSTATEDIR)/cache/vigilo/sessions
 	chmod 750 $(DESTDIR)$(LOCALSTATEDIR)/cache/vigilo/sessions

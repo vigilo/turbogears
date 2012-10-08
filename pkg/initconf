@@ -1,0 +1,6 @@
+# Configuration de la tâche cron de vigilo-turbogears.
+
+# Les sessions qui n'ont pas été modifiées depuis plus de EXPIRATION jours
+# seront automatiquement supprimées.
+EXPIRATION=7
+
