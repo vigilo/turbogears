@@ -33,6 +33,6 @@ lint: lint_pylint
 tests: tests_nose
 doc: apidoc sphinxdoc
 clean: clean_python
-	rm -f $(INFILES)
+	rm -f $(SUBST_FILES)
 
 .PHONY: install install_pkg install_python install_python_pkg install_data
