@@ -21,6 +21,9 @@ from tg.configuration import AppConfig, config
 from tg.i18n import get_lang
 from tg.render import render_genshi
 
+from pkg_resources import parse_version
+from genshi import __version__ as genshi_version
+from pylons import config as pylons_config
 from genshi.template import TemplateLoader
 from genshi.filters import Translator
 from vigilo.turbogears.js_codec import backslash_search
@@ -182,7 +185,13 @@ class VigiloAppConfig(AppConfig):
         def template_loaded(template):
             """Appelé lorsqu'un modèle finit son chargement."""
             import pylons
-            template.filters.insert(0, Translator(pylons.c.l_.ugettext))
+            # L'API pour Genshi a changé avec la version 0.6:
+            # désormais, l'instance de traduction complète doit
+            # être passée lors de la création du Translator.
+            if parse_version(genshi_version) >= parse_version('0.6a1'):
+                template.filters.insert(0, Translator(pylons.c.l_))
+            else:
+                template.filters.insert(0, Translator(pylons.c.l_.ugettext))
 
         def my_render_genshi(template_name, template_vars, **kwargs):
             """Ajoute une fonction l_ dans les modèles pour les traductions."""
@@ -299,3 +308,16 @@ class VigiloAppConfig(AppConfig):
             environ['toscawidgets.resources_expire'] = 3600
             return wrapped_app(environ, start_response)
         return _wrapper
+
+    def init_config(self, global_conf, app_conf):
+        """
+        Dans Pylons 0.10, la pile WSGI n'est plus initialisée
+        pour permettre l'utilisation du rendu Mako par défaut.
+        De ce fait, les modules de rendu Buffet ne sont pas
+        initialisés et l'affichage de contenu les nécessitant
+        (ex: requêtes JSON) échoue.
+        On force l'initialisation comme si on utilisait Mako
+        pour toutes ces raisons.
+        """
+        super(VigiloAppConfig, self).init_config(global_conf, app_conf)
+        pylons_config.set_defaults('mako')
