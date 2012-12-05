@@ -11,10 +11,11 @@ Documentation disponible :
    :maxdepth: 2
 
    auth
+   dev
 
 
 .. : Le glossaire est inclus et ne doit donc pas apparaître dans la table
-.. : des matières. Mais, on le référence dans une table des matière cachée
+.. : des matières. Mais, on le référence dans une table des matières cachée
 .. : afin d'éviter un avertissement de Sphinx.
 
 .. toctree::
