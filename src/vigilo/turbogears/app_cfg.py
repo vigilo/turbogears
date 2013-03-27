@@ -27,6 +27,7 @@ from pylons import config as pylons_config
 from genshi.template import TemplateLoader
 from genshi.filters import Translator
 from vigilo.turbogears.js_codec import backslash_search
+from vigilo.turbogears.controllers.util import patch_tg_url
 
 from webob import Response
 from tw.core.resources import _FileIter
@@ -34,7 +35,7 @@ from tw.core.resources import _FileIter
 # Middleware d'authentification adapté à nos besoins.
 from vigilo.turbogears.repoze.middleware import make_middleware_with_config
 
-# Enregistre le codec pour l'encodage des textes dans le code JavaScript.
+# Enregistrement du codec pour l'encodage des textes dans le code JavaScript.
 codecs.register(backslash_search)
 
 # Ajoute le support de la mise en cache par le navigateur
@@ -87,6 +88,9 @@ class VigiloAppConfig(AppConfig):
 
     def __init__(self, app_name):
         """Crée une nouvelle configuration."""
+        # Application de nos divers patches.
+        patch_tg_url()
+
         super(VigiloAppConfig, self).__init__()
         self.app_name = app_name
         self.__tpl_translator = None
