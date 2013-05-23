@@ -86,7 +86,7 @@ def get_readable_metro_value(pds):
     except urllib2.HTTPError:
         logging.warning(_("Failed to get URL: %s"),
                         url("/vigirrd/%s/%s" % (host, usage_url),
-                            qualified=True))
+                        qualified=True))
         raise
     usage = simplejson.load(usage_req)['lastvalue']
     try:

@@ -43,7 +43,7 @@ class AuthController(BaseController):
         """
         if not request.identity:
             login_counter = request.environ.get('repoze.who.logins', 0) + 1
-            redirect('/login', {'came_from': came_from, '__logins': login_counter})
+            redirect('/login',  came_from=came_from, __logins=login_counter)
 
         userid = request.identity['repoze.who.userid']
         LOGGER.info(_('"%(username)s" logged into %(app)s (from %(IP)s)') % {
