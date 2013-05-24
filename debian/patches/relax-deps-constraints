@@ -1,8 +1,8 @@
 Description: remove some of the version constraints on dependencies.
 Forwarded: not-needed.
---- a/setup.py
-+++ b/setup.py
-@@ -54,19 +54,13 @@
+--- a/setup.py	2013-05-24 19:38:56.727950539 +0200
++++ b/setup.py	2013-05-24 19:50:23.341961891 +0200
+@@ -54,21 +54,14 @@
          "TurboGears2 >= 2.0b7",
          "TurboGears2 < 2.1dev",
          "sqlalchemy-migrate",
@@ -20,5 +20,7 @@ Forwarded: not-needed.
 -        "rum < 0.4dev",
 -        "TgRum",
          "python-ldap",
+-        "WebHelpers >= 1.0b4",
      ],
      paster_plugins=[
+         'PasteScript',

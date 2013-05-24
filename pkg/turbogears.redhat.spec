@@ -40,6 +40,7 @@ Requires:   python26-genshi >= 0.5.1
 Requires:   python26-webflash >= 0.1-0.1.a8
 Requires:   python26-toscawidgets >= 0.9.4
 Requires:   python26-weberror >= 0.10.1
+Requires:   python26-webhelpers >= 1.0-0.2.b7
 Requires:   python26-repoze-what-pylons
 Requires:   python26-repoze-tm2 >= 1.0-0.1.a4
 Requires:   python26-turbojson >= 1.2.1

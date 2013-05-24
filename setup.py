@@ -68,6 +68,7 @@ setup(
         "rum < 0.4dev",
         "TgRum",
         "python-ldap",
+        "WebHelpers >= 1.0b4",
     ],
     paster_plugins=[
         'PasteScript',

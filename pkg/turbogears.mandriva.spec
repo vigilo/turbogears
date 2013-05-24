@@ -35,6 +35,7 @@ Requires:   python-genshi >= 0.5.1
 Requires:   python-webflash >= 0.1a8
 Requires:   python-toscawidgets >= 0.9.4
 Requires:   python-weberror >= 0.10.1
+Requires:   python-webhelpers >= 1.0b4
 Requires:   python-repoze.what-pylons
 Requires:   python-repoze.tm2 >= 1.0a4
 Requires:   python-turbojson >= 1.2.1
