@@ -13,9 +13,11 @@ X-Python-Version: >= 2.5
 Package: vigilo-turbogears
 Architecture: all
 Suggests: vigilo-turbogears-doc
-Depends: ${misc:Depends}, ${python:Depends}
+#La contrainte sur la version de pylons devra etre supprimee lors du
+#traitement du bug de routes (#1149)
+Depends: python-pylons (= 0.9.7), ${misc:Depends}, ${python:Depends}
 Description: Vigilo extensions for TurboGears2
- This library provides the Vigilo extensions 
+ This library provides the Vigilo extensions
  for TurboGears2.
 
 Package: vigilo-turbogears-doc
@@ -23,7 +25,7 @@ Architecture: all
 Section: doc
 Depends: ${sphinxdoc:Depends} ${misc:Depends}
 Description: Vigilo extensions for TurboGears2 (documentation)
- This library provides the Vigilo extensions 
+ This library provides the Vigilo extensions
  for TurboGears2.
  .
  This package contains documentation about the vigilo-turbogears package.
