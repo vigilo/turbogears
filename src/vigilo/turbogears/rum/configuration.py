@@ -8,12 +8,14 @@ from tg.i18n import get_lang
 from tg import config, request
 
 from rum.templating.genshi_renderer import GenshiRenderer, add_lang_attrs
+from genshi import __version__ as genshi_version
 from genshi.template import TemplateLoader
 from genshi.filters import Translator
 from tw import framework as tw_framework
 from paste.deploy.converters import asbool
 
-from pkg_resources import resource_filename, resource_listdir, resource_isdir
+from pkg_resources import resource_filename, resource_listdir, \
+                          resource_isdir, parse_version
 import gettext
 import os.path
 
@@ -74,7 +76,12 @@ class RumGenshiRenderer(GenshiRenderer):
         # Insertion des filtres dans Genshi :
         # - un filtre pour gérer les traductions dans les templates,
         # - un filtre pour ajouter l'attribut xml:lang aux pages.
-        tpl.filters.insert(0, Translator(self.__tpl_translator.ugettext))
+        # Pour les traductions, on tient compte d'un changement d'API
+        # survenu dans Genshi 0.6.0.
+        if parse_version(genshi_version) > parse_version('0.6a1'):
+            tpl.filters.insert(0, Translator(self.__tpl_translator))
+        else:
+            tpl.filters.insert(0, Translator(self.__tpl_translator.ugettext))
         tpl.filters.insert(1, add_lang_attrs)
 
     def render(self, data, possible_templates=[]):
