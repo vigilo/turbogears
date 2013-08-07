@@ -1,15 +1,15 @@
 # English translations for vigilo-turbogears.
-# Copyright (C) 2012 ORGANIZATION
+# Copyright (C) 2013 ORGANIZATION
 # This file is distributed under the same license as the vigilo-turbogears
 # project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2012.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2013.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: vigilo-turbogears 3.0.0\n"
+"Project-Id-Version: vigilo-turbogears 3.2\n"
 "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
-"POT-Creation-Date: 2012-12-06 09:57+0100\n"
-"PO-Revision-Date: 2012-12-06 09:57+0100\n"
+"POT-Creation-Date: 2013-08-08 14:20+0200\n"
+"PO-Revision-Date: 2013-08-08 14:20+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: en <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -60,12 +60,12 @@ msgstr "\"%(username)s\" logged out from %(app)s (from %(IP)s)"
 msgid "We hope to see you soon!"
 msgstr "We hope to see you soon!"
 
-#: src/vigilo/turbogears/controllers/custom.py:39
+#: src/vigilo/turbogears/controllers/custom.py:40
 #, python-format
 msgid "Not a valid controller name: %s"
 msgstr "Not a valid controller name: %s"
 
-#: src/vigilo/turbogears/controllers/custom.py:48
+#: src/vigilo/turbogears/controllers/custom.py:51
 #, python-format
 msgid "%(entry)s is not a subclass of %(base)s"
 msgstr "%(entry)s is not a subclass of %(base)s"
@@ -129,9 +129,20 @@ msgstr "Basic authentification to the website."
 msgid "Digest authentification to the website."
 msgstr "Digest authentification to the website."
 
+#: src/vigilo/turbogears/controllers/selfmonitoring.py:38
 #: src/vigilo/turbogears/controllers/api/root.py:63
 msgid "You need to be authenticated"
 msgstr "You need to be authenticated"
+
+#: src/vigilo/turbogears/controllers/selfmonitoring.py:42
+#, python-format
+msgid "You don't have access to %s"
+msgstr "You don't have access to %s"
+
+#: src/vigilo/turbogears/controllers/selfmonitoring.py:53
+#, python-format
+msgid "Vigilo has detected a breakdown on the following collector(s): %s"
+msgstr "Vigilo has detected a breakdown on the following collector(s): %s"
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:130
 #, python-format

@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: vigilo-turbogears 2.0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2010-11-19 12:48+0100\n"
-"PO-Revision-Date: 2012-12-06 09:57+0100\n"
+"PO-Revision-Date: 2013-08-08 14:20+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: de <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -60,12 +60,12 @@ msgstr ""
 msgid "We hope to see you soon!"
 msgstr "Bis bald!"
 
-#: src/vigilo/turbogears/controllers/custom.py:39
+#: src/vigilo/turbogears/controllers/custom.py:40
 #, python-format
 msgid "Not a valid controller name: %s"
 msgstr ""
 
-#: src/vigilo/turbogears/controllers/custom.py:48
+#: src/vigilo/turbogears/controllers/custom.py:51
 #, python-format
 msgid "%(entry)s is not a subclass of %(base)s"
 msgstr ""
@@ -127,9 +127,20 @@ msgstr ""
 msgid "Digest authentification to the website."
 msgstr ""
 
+#: src/vigilo/turbogears/controllers/selfmonitoring.py:38
 #: src/vigilo/turbogears/controllers/api/root.py:63
 msgid "You need to be authenticated"
 msgstr "Sie müssen sich authentifizieren"
+
+#: src/vigilo/turbogears/controllers/selfmonitoring.py:42
+#, python-format
+msgid "You don't have access to %s"
+msgstr ""
+
+#: src/vigilo/turbogears/controllers/selfmonitoring.py:53
+#, python-format
+msgid "Vigilo has detected a breakdown on the following collector(s): %s"
+msgstr ""
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:130
 #, python-format
@@ -192,6 +203,9 @@ msgstr ""
 msgid "Groups of maps"
 msgstr ""
 
-#~ msgid "Not a subclass of %(base)s: %(entry)s"
+#~ msgid "You don't have access to VigiBoard"
+#~ msgstr ""
+
+#~ msgid "Vigilo has detected a breakdown on the following collector(s) : %s"
 #~ msgstr ""
 
