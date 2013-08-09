@@ -6,10 +6,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: vigilo-turbogears 3.2\n"
+"Project-Id-Version: vigilo-turbogears 3.3\n"
 "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
-"POT-Creation-Date: 2013-08-08 14:20+0200\n"
-"PO-Revision-Date: 2013-08-08 14:20+0200\n"
+"POT-Creation-Date: 2013-08-09 16:51+0200\n"
+"PO-Revision-Date: 2013-08-09 16:51+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: en <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -129,20 +129,20 @@ msgstr "Basic authentification to the website."
 msgid "Digest authentification to the website."
 msgstr "Digest authentification to the website."
 
-#: src/vigilo/turbogears/controllers/selfmonitoring.py:38
+#: src/vigilo/turbogears/controllers/selfmonitoring.py:37
 #: src/vigilo/turbogears/controllers/api/root.py:63
 msgid "You need to be authenticated"
 msgstr "You need to be authenticated"
 
-#: src/vigilo/turbogears/controllers/selfmonitoring.py:42
+#: src/vigilo/turbogears/controllers/selfmonitoring.py:41
 #, python-format
 msgid "You don't have access to %s"
 msgstr "You don't have access to %s"
 
-#: src/vigilo/turbogears/controllers/selfmonitoring.py:53
+#: src/vigilo/turbogears/controllers/selfmonitoring.py:50
 #, python-format
-msgid "Vigilo has detected a breakdown on the following collector(s): %s"
-msgstr "Vigilo has detected a breakdown on the following collector(s): %s"
+msgid "Vigilo has detected a breakdown on the following collector(s): %(list)s"
+msgstr "Vigilo has detected a breakdown on the following collector(s): %(list)s"
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:130
 #, python-format

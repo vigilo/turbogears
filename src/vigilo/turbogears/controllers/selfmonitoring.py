@@ -49,8 +49,9 @@ class SelfMonitoringController(BaseController):
         if failures:
             flash(_(
                     'Vigilo has detected a breakdown on the following '
-                    'collector(s): %s' % (', ').join(failures)
-                ), 'error'
+                    'collector(s): %(list)s'
+                  ) % {'list': ', '.join(failures)},
+                  'error'
             )
 
         # Dans les 2 cas (liste vide ou non), on la retourne au format JSON

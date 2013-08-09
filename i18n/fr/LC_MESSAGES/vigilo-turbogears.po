@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: vigilo-turbogears 2.0.0\n"
 "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
 "POT-Creation-Date: 2010-07-26 13:47+0200\n"
-"PO-Revision-Date: 2013-08-08 14:20+0200\n"
+"PO-Revision-Date: 2013-08-09 16:51+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_FR <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -131,20 +131,20 @@ msgstr "Authentification de type Basic auprès du site distant."
 msgid "Digest authentification to the website."
 msgstr "Authentification de type Digest auprès du site distant."
 
-#: src/vigilo/turbogears/controllers/selfmonitoring.py:38
+#: src/vigilo/turbogears/controllers/selfmonitoring.py:37
 #: src/vigilo/turbogears/controllers/api/root.py:63
 msgid "You need to be authenticated"
 msgstr "Vous devez vous authentifier"
 
-#: src/vigilo/turbogears/controllers/selfmonitoring.py:42
+#: src/vigilo/turbogears/controllers/selfmonitoring.py:41
 #, python-format
 msgid "You don't have access to %s"
 msgstr "Vous n'avez les permissions suffisantes pour accéder à %s"
 
-#: src/vigilo/turbogears/controllers/selfmonitoring.py:53
+#: src/vigilo/turbogears/controllers/selfmonitoring.py:50
 #, python-format
-msgid "Vigilo has detected a breakdown on the following collector(s): %s"
-msgstr "Vigilo a détecté une panne sur le(s) collecteur(s) suivant(s) : %s"
+msgid "Vigilo has detected a breakdown on the following collector(s): %(list)s"
+msgstr "Vigilo a détecté une panne sur le(s) collecteur(s) suivant(s) : %(list)s"
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:130
 #, python-format
@@ -206,7 +206,4 @@ msgstr "Groupes d'éléments supervisés"
 #: src/vigilo/turbogears/rum/fields/group_relation.py:155
 msgid "Groups of maps"
 msgstr "Groupes de cartes"
-
-#~ msgid "You don't have access to VigiBoard"
-#~ msgstr ""
 
