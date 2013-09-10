@@ -128,12 +128,14 @@ class VigiloLdapSync(object):
             d'accéder à l'application.
         @type identity: C{dict}
         """
-        if not environ.get('REMOTE_USER'):
+        remote_user_key = environ.get('repoze.who.remote_user_key')
+        if not remote_user_key:
             return
-        if 'REMOTE_USER' not in environ:
+        remote_user = environ.get(remote_user_key)
+        if not remote_user:
             return
 
-        remote_user = environ['REMOTE_USER'].decode(self.http_charset)
+        remote_user = remote_user.decode(self.http_charset)
         logger = environ.get('repoze.who.logger')
         logger and logger.info(_('Remote user: %s'), remote_user)
 
@@ -166,7 +168,6 @@ class VigiloLdapSync(object):
         try:
             (user_fullname, user_email, user_groups) = \
                 self.retrieve_user_ldap_info(environ, remote_user)
-            logger and logger.info("fullname = %r, email = %r, groups = %r", user_fullname, user_email, user_groups)
         except:
             logger and logger.exception(_(
                 'Exception while contacting LDAP server'))

@@ -47,6 +47,7 @@ class VigiloAuthMiddleware(PluggableAuthenticationMiddleware):
         environ['repoze.who.plugins'] = self.name_registry
         environ['repoze.who.logger'] = self.logger
         environ['repoze.who.application'] = self.app
+        environ['repoze.who.remote_user_key'] = self.remote_user_key
         environ['vigilo.external_auth'] = False
 
         logger = self.logger
