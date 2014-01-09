@@ -11,6 +11,8 @@ import transaction
 from webob import Request
 from paste.registry import Registry
 
+import vigilo.turbogears as vigilo_tg
+from vigilo.turbogears.app_cfg import VigiloAppConfig
 from vigilo.turbogears.controllers.autocomplete import AutoCompleteController
 from vigilo.models.demo import functions
 from vigilo.models.test.controller import setup_db, teardown_db
@@ -47,9 +49,12 @@ class AutoCompleterTest(DbTest):
             }
         }
         request = Request(environ)
+        config = VigiloAppConfig('TurboGears')
+        config.init_managers_predicate()
         registry = Registry()
         registry.prepare()
         registry.register(tg.request, request)
+        registry.register(tg.config, config)
         self.ctrl = AutoCompleteController()
 
         # Par défaut, l'utilisateur n'est pas identifé.

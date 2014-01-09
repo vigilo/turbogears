@@ -11,7 +11,6 @@ import urlparse
 import tg
 from tg.exceptions import HTTPNotFound, HTTPBadRequest, HTTPForbidden
 from sqlalchemy.sql.expression import or_
-from repoze.what.predicates import in_group
 
 from vigilo.models import tables
 from vigilo.models.session import DBSession
@@ -55,8 +54,7 @@ def get_all_hosts():
                 servicegroup.c.idsupitem == tables.LowLevelService.idservice),
         )
     # ACLs
-    is_manager = in_group('managers').is_met(tg.request.environ)
-    if not is_manager:
+    if not tg.config.is_manager.is_met(tg.request.environ):
         user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
         hosts = hosts.filter(or_(
             hostgroup.c.idgroup.in_(user_groups),
@@ -107,8 +105,7 @@ def get_all_services(model_class):
                     servicegroup.c.idsupitem == model_class.idservice),
                 )
     # ACLs
-    is_manager = in_group('managers').is_met(tg.request.environ)
-    if not is_manager:
+    if not tg.config.is_manager.is_met(tg.request.environ):
         user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
         services = services.filter(servicegroup.c.idgroup.in_(user_groups))
     return services.all()

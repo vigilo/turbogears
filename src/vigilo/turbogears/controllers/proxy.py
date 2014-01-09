@@ -13,7 +13,6 @@ import tg, pylons
 from tg import request, expose, config, response
 from tg.controllers import CUSTOM_CONTENT_TYPE
 import tg.exceptions as http_exc
-from repoze.what.predicates import in_group
 from vigilo.turbogears.helpers import ugettext as _
 from sqlalchemy import or_, and_
 from paste.deploy.converters import asbool
@@ -152,8 +151,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
             raise http_exc.HTTPNotFound(message)
 
         # On regarde si l'utilisateur a accès à l'hôte demandé.
-        is_manager = in_group('managers').is_met(request.environ)
-        if not is_manager:
+        if not config.is_manager.is_met(request.environ):
             if service_name:
                 service = DBSession.query(
                         LowLevelService

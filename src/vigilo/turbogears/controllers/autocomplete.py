@@ -6,9 +6,8 @@
 Module permettant de mettre en commun le contrôleur d'auto-complétion
 entre les différentes applications de Vigilo.
 """
-from tg import expose, request, validate
+from tg import expose, request, validate, config
 from sqlalchemy.sql.expression import or_
-from repoze.what.predicates import in_group
 
 from vigilo.models.tables import Host, SupItemGroup, PerfDataSource, Graph, \
                                     LowLevelService, HighLevelService
@@ -80,8 +79,7 @@ class AutoCompleteController(BaseController):
                     LowLevelService.idservice),
             ).filter(Host.name.ilike(host))
 
-        is_manager = in_group('managers').is_met(request.environ)
-        if not is_manager:
+        if not config.is_manager.is_met(request.environ):
             user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
             hostnames = hostnames.filter(or_(
                 hostgroup.c.idgroup.in_(user_groups),
@@ -143,8 +141,7 @@ class AutoCompleteController(BaseController):
             ).filter(LowLevelService.servicename.ilike(service)
             ).order_by(LowLevelService.servicename)
 
-        is_manager = in_group('managers').is_met(request.environ)
-        if not is_manager:
+        if not config.is_manager.is_met(request.environ):
             user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
             services = services.filter(or_(
                 hostgroup.c.idgroup.in_(user_groups),
@@ -197,8 +194,7 @@ class AutoCompleteController(BaseController):
             ).filter(HighLevelService.servicename.ilike(service)
             ).order_by(HighLevelService.servicename)
 
-#        is_manager = in_group('managers').is_met(request.environ)
-#        if not is_manager:
+#        if not config.is_manager.is_met(request.environ):
 #            user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
 #            services = services.join(
 #                    (SUPITEM_GROUP_TABLE, SUPITEM_GROUP_TABLE.c.idsupitem == \
@@ -241,8 +237,7 @@ class AutoCompleteController(BaseController):
             ).distinct(
             ).filter(SupItemGroup.name.ilike(supitemgroup))
 
-        is_manager = in_group('managers').is_met(request.environ)
-        if not is_manager:
+        if not config.is_manager.is_met(request.environ):
             user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
             supitemgroups = supitemgroups.filter(
                 SupItemGroup.idgroup.in_(user_groups),
@@ -290,8 +285,7 @@ class AutoCompleteController(BaseController):
             ).filter(Host.name == host
             ).order_by(PerfDataSource.name)
 
-        is_manager = in_group('managers').is_met(request.environ)
-        if not is_manager:
+        if not config.is_manager.is_met(request.environ):
             user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
             perfdatasources = perfdatasources.join(
                     (SUPITEM_GROUP_TABLE, SUPITEM_GROUP_TABLE.c.idsupitem == \
@@ -344,8 +338,7 @@ class AutoCompleteController(BaseController):
             ).filter(Host.name == host
             ).order_by(Graph.name)
 
-        is_manager = in_group('managers').is_met(request.environ)
-        if not is_manager:
+        if not config.is_manager.is_met(request.environ):
             user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
             graphs = graphs.join(
                     (SUPITEM_GROUP_TABLE, SUPITEM_GROUP_TABLE.c.idsupitem == \

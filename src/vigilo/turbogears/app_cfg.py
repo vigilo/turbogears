@@ -7,6 +7,7 @@
 Definit la classe chargée de gérer la configuration des applications
 utilisant Turbogears sur Vigilo.
 """
+from __future__ import absolute_import
 
 import os
 import gettext
@@ -20,6 +21,7 @@ from beaker.middleware import SessionMiddleware, CacheMiddleware
 from tg.configuration import AppConfig, config
 from tg.i18n import get_lang
 from tg.render import render_genshi
+from repoze.what.predicates import in_any_group
 
 from pkg_resources import parse_version
 from genshi import __version__ as genshi_version
@@ -321,3 +323,30 @@ class VigiloAppConfig(AppConfig):
         """
         super(VigiloAppConfig, self).init_config(global_conf, app_conf)
         pylons_config.set_defaults('mako')
+        self.init_managers_predicate()
+
+    def init_managers_predicate(self):
+        """
+        Initialise le prédicat permettant de vérifier
+        si un utilisateur est privilégié ou non.
+        """
+        admin_groups = pylons_config.get('admin_groups', 'managers')
+        if admin_groups.strip():
+            groups_list = [s.strip() for s in admin_groups.split(',')]
+        else:
+            # Si la valeur dans le fichier de configuration
+            # est vide (ou ne contient que des blancs),
+            # alors il n'y a aucun groupe d'utilisateurs
+            # privilégiés.
+            groups_list = []
+
+        # Cette affectation permet aux applications d'utiliser
+        # le prédicat via `tg.config.is_manager`.
+        # La liste est transformée en arguments pour la fonction,
+        # ie. in_any_group(groups_list[0], groups_list[1], ...)
+        config.is_manager = in_any_group(*groups_list)
+
+        # Celle-ci permet aux tests unitaires de vigilo.turbogears
+        # d'utiliser le prédicat elles-aussi.
+        self.is_manager = config.is_manager
+

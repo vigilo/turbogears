@@ -14,8 +14,7 @@ import logging
 from datetime import datetime, timedelta
 from pylons.i18n import ugettext as _
 from tg import expose, flash, config, request
-from repoze.what.predicates import Any, \
-    All, in_group, has_permission, not_anonymous
+from repoze.what.predicates import Any, All, has_permission, not_anonymous
 from vigilo.turbogears.controllers import BaseController
 from vigilo.models.session import DBSession
 from vigilo.models.tables import Host, LowLevelService, State, StateName
@@ -36,7 +35,7 @@ class SelfMonitoringController(BaseController):
         All(
             not_anonymous(msg=_("You need to be authenticated")),
             Any(
-                in_group('managers'),
+                config.is_manager,
                 has_permission('%s-access' % config.app_name.lower()),
                 msg=_("You don't have access to %s") % config.app_name
             )
