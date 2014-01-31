@@ -253,10 +253,10 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
             proxy_auth_password)
         if proxy_auth_method == 'basic':
             opener.add_handler(urllib2.ProxyBasicAuthHandler(proxy_pass_manager))
-            LOGGER.debug(_('Basic authentification to the proxy.'))
+            LOGGER.debug(_('Basic authentication to the proxy.'))
         elif proxy_auth_method == 'digest':
             opener.add_handler(urllib2.ProxyDigestAuthHandler(proxy_pass_manager))
-            LOGGER.debug(_('Digest authentification to the proxy.'))
+            LOGGER.debug(_('Digest authentication to the proxy.'))
 
     # Configuration de l'authentification
     # vers le site final (Nagios, VigiRRD, ...).
@@ -273,10 +273,10 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
             final_auth_password)
         if final_auth_method == 'basic':
             opener.add_handler(urllib2.HTTPBasicAuthHandler(final_pass_manager))
-            LOGGER.debug(_('Basic authentification to the website.'))
+            LOGGER.debug(_('Basic authentication to the website.'))
         elif final_auth_method == 'digest':
             opener.add_handler(urllib2.HTTPDigestAuthHandler(final_pass_manager))
-            LOGGER.debug(_('Digest authentification to the website.'))
+            LOGGER.debug(_('Digest authentication to the website.'))
 
     try:
         res = opener.open(req)
