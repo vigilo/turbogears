@@ -211,7 +211,8 @@ msgstr "L'utilisateur \"%s\" est introuvable sur le serveur LDAP"
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:359
 #, python-format
 msgid "Could not retrieve groups from LDAP server for \"%s\""
-msgstr ""
+msgstr "Impossible de récupérer les groupes depuis l'annuaire LDAP pour "
+"\"%s\""
 
 #: src/vigilo/turbogears/rum/fields/group_relation.py:126
 #: src/vigilo/turbogears/rum/fields/group_relation.py:150

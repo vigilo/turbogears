@@ -77,7 +77,8 @@ class AutoCompleteController(BaseController):
                 (LowLevelService, LowLevelService.idhost == Host.idhost),
                 (servicegroup, servicegroup.c.idsupitem == \
                     LowLevelService.idservice),
-            ).filter(Host.name.ilike(host))
+            ).filter(Host.name.ilike(host)
+            ).order_by(Host.name)
 
         if not config.is_manager.is_met(request.environ):
             user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]

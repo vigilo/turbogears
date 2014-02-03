@@ -699,6 +699,10 @@ vigiboard-update
 vigiboard-admin
     Autorise l'utilisateur à forcer l'état d'un événement du bac à « OK ».
 
+vigiboard-silence
+    Autorise l'utilisateur à consulter et à éditer les règles de mise en
+    silence du bac à événements.
+
 vigigraph-access
     Autorise l'utilisateur à se connecter à VigiGraph.
 
