@@ -19,7 +19,6 @@ endif
 
 override_dh_auto_clean:
 	dh_auto_clean -- buildclean
-	rm -f pkg/vigilo-clean-turbogears-sessions.sh
 ifneq "$(NOPY)" ""
 	-rm -f $(CURDIR)/debian/docs $(CURDIR)/debian/copyright
 endif
