@@ -95,7 +95,7 @@ class VigiloAuthMiddleware(PluggableAuthenticationMiddleware):
         # Même si un mécanisme externe d'authentification a été utilisé,
         # on fait appel aux "mdproviders" pour peupler les méta-données.
         if identity:
-            identity = Identity(identity) # dont show contents at print
+            identity = Identity(identity) # don't show contents at print
 
             # allow IMetadataProvider plugins to scribble on the identity
             self.add_metadata(environ, classification, identity)
@@ -105,8 +105,6 @@ class VigiloAuthMiddleware(PluggableAuthenticationMiddleware):
             # as necessary, e.g. identity['login'] = 'foo',
             # identity['password'] = 'bar'
             environ['repoze.who.identity'] = identity
-            # set the REMOTE_USER
-            environ[self.remote_user_key] = userid
 
         # allow identifier plugins to replace the downstream
         # application (to do redirection and unauthorized themselves
