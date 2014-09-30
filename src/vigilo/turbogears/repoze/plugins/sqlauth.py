@@ -14,6 +14,20 @@ from repoze.who.plugins.sa import SQLAlchemyAuthenticatorPlugin
 from vigilo.models import tables, session
 from .translation import translations
 
+class VigiloSAAuthenticatorPlugin(SQLAlchemyAuthenticatorPlugin):
+    def authenticate(self, environ, identity):
+        res = super(VigiloSAAuthenticatorPlugin, self).authenticate(
+                environ, identity)
+        if 'login' in identity and res is None:
+            logger = environ.get('repoze.who.logger')
+            logger and logger.warn(
+                'Wrong credentials for user "%(user_login)" '
+                '(from %u(user_ip)s)', {
+                'user_login': identity['login'],
+                'user_ip': environ['REMOTE_ADDR'],
+            })
+        return res
+
 # Authentification.
-plugin = SQLAlchemyAuthenticatorPlugin(tables.User, session.DBSession)
+plugin = VigiloSAAuthenticatorPlugin(tables.User, session.DBSession)
 plugin.translations.update(translations['authenticator'])

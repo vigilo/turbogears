@@ -136,6 +136,21 @@ class FriendlyFormPlugin(FFP):
 
     # IChallenger
     def challenge(self, environ, status, app_headers, forget_headers):
+        if environ['PATH_INFO'] == self.logout_handler_path:
+            logger = environ.get('repoze.who.logger')
+            logger and logger.info(
+                'User "%(user_login)s" logged out (from %(user_ip)s)', {
+                'user_login': \
+                    environ['repoze.who.identity']['repoze.who.userid'],
+                # vigilo.common.logging ne pourra pas déterminer l'identité de
+                # l'utilisateur car il aura déjà été déconnecté (et oublié).
+                # On fournit "user_fullname" explicitement pour écraser
+                # la valeur "???" auto-déterminée.
+                'user_fullname': \
+                    environ['repoze.who.identity']['user'].fullname,
+                'user_ip': environ['REMOTE_ADDR'],
+            })
+
         res = super(FriendlyFormPlugin, self).challenge(
             environ, status, app_headers, forget_headers)
 

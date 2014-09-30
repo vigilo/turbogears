@@ -12,7 +12,7 @@ principal de celui-ci.
 
 import logging
 from pylons.i18n import ugettext as _
-from tg import session, request, expose, flash, redirect, session, config
+from tg import request, expose, flash, redirect, config
 from vigilo.turbogears.controllers import BaseController
 
 LOGGER = logging.getLogger(__name__)
@@ -45,11 +45,22 @@ class AuthController(BaseController):
             login_counter = request.environ.get('repoze.who.logins', 0) + 1
             redirect('/login',  came_from=came_from, __logins=login_counter)
 
+        # On enregistre les connexions dans le logger des authentifications.
+        # Voir aussi vigilo.turbogears.repoze.plugins.friendlyform
+        # et vigilo.turbogears.repoze.plugins.sqlauth qui enregistrent
+        # des logs pour des cas similaires (déconnexion et échec de
+        # l'authentification).
+        logger = logging.getLogger('auth')
         userid = request.identity['repoze.who.userid']
-        LOGGER.info(_('"%(username)s" logged into %(app)s (from %(IP)s)') % {
-                'username': userid,
-                'IP': request.remote_addr,
-                'app': config.app_name,
+        logger.info(
+            'User "%(user_login)s" logged in (from %(user_ip)s)', {
+                'user_login': userid,
+                # vigilo.common.logging ne pourra pas déterminer l'identité de
+                # l'utilisateur car l'authentification n'est pas complètement
+                # finie. On fournit "user_fullname" explicitement pour écraser
+                # la valeur "???" auto-déterminée.
+                'user_fullname': request.identity['user'].fullname,
+                'user_ip': request.remote_addr,
             })
         flash(_('Welcome back, %s!') % userid)
         redirect(came_from)
@@ -60,20 +71,5 @@ class AuthController(BaseController):
         Redirect the user to the initially requested page on logout and say
         goodbye as well.
         """
-        username = None
-
-        # @TODO: généraliser + traiter l'auth interne correctement.
-        if not session.get('vigilo'):
-            msg = _('Some user logged out from %(app)s (from %(IP)s)')
-        else:
-            msg = _('"%(username)s" logged out from %(app)s (from %(IP)s)')
-            username = session['vigilo']
-
-        LOGGER.info(msg % {
-                'username': username,
-                'IP': request.remote_addr,
-                'app': config.app_name,
-            })
         flash(_('We hope to see you soon!'))
-        session.delete()
         redirect(came_from)
