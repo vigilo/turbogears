@@ -102,8 +102,8 @@ msgstr "Accès refusé à l'hôte \"%s\""
 #, python-format
 msgid "No server configured to monitor \"%(host)s\" for application \"%(app)s\""
 msgstr ""
-"Aucun serveur configuré pour superviser \"%(host)s\" pour \"\n"
-"\"l'application \"%(app)s\""
+"Aucun serveur configuré pour superviser \"%(host)s\" pour l'application "
+"\"%(app)s\""
 
 #: src/vigilo/turbogears/controllers/proxy.py:227
 #, python-format
