@@ -21,8 +21,8 @@ class VigiloSAAuthenticatorPlugin(SQLAlchemyAuthenticatorPlugin):
         if 'login' in identity and res is None:
             logger = environ.get('repoze.who.logger')
             logger and logger.warn(
-                'Wrong credentials for user "%(user_login)" '
-                '(from %u(user_ip)s)', {
+                'Wrong credentials for user "%(user_login)s" '
+                '(from %(user_ip)s)', {
                 'user_login': identity['login'],
                 'user_ip': environ['REMOTE_ADDR'],
             })
