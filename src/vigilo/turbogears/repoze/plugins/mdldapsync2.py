@@ -346,7 +346,7 @@ class VigiloLdapSync(object):
 
             user_attributes = user_attributes[0][1]
 
-            # Récupération des groupe de l'utilisateur
+            # Récupération des groupes de l'utilisateur
             group_attributes = ldap_conn.search_s(
                 self.group_tree.encode('utf-8'),
                 self.ldap.SCOPE_SUBTREE,
@@ -383,9 +383,18 @@ class VigiloLdapSync(object):
             try:
                 group = group_attribute[1][self.attr_member_cn][0].decode(
                     self.ldap_charset).strip().lower()
-            except IndexError:
+                user_groups.append(group)
+            except (IndexError, TypeError):
+                # Certains annuaires (ex: Active Directory) envoient des
+                # références dans leurs résultats qui ont un format différent:
+                # (None, ['ldap://ForestDnsZones.hst/ =ForestDnsZones,DC=hst'])
+                #
+                # Ces références lèvent une exception TypeError lorsqu'on y
+                # accède comme s'il s'agissait de résultats standards.
+                #
+                # cf. https://mail.python.org/pipermail/python-ldap/
+                #       2005q2/001616.html
                 pass
-            user_groups.append(group)
 
         # On retourne un tuple contenant ces trois informations :
         return (user_fullname, user_email, user_groups)
