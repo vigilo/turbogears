@@ -7,9 +7,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: vigilo-turbogears 3.5\n"
+"Project-Id-Version: vigilo-turbogears 3.6.0\n"
 "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
-"POT-Creation-Date: 2015-04-24 18:17+0200\n"
+"POT-Creation-Date: 2015-05-21 11:47+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,14 +18,29 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.4\n"
 
-#: src/vigilo/turbogears/helpers.py:87
+#: src/vigilo/turbogears/helpers.py:89
 #, python-format
 msgid "Failed to get URL: %s"
 msgstr ""
 
-#: src/vigilo/turbogears/helpers.py:100
+#: src/vigilo/turbogears/helpers.py:102
 #, python-format
 msgid "Failed to convert DS %(ds)s on %(host)s: value was %(value)s (max: %(max)s)"
+msgstr ""
+
+#: src/vigilo/turbogears/helpers.py:133
+#, python-format
+msgid "high-level service \"%s\""
+msgstr ""
+
+#: src/vigilo/turbogears/helpers.py:135
+#, python-format
+msgid "host \"%s\""
+msgstr ""
+
+#: src/vigilo/turbogears/helpers.py:137
+#, python-format
+msgid "service \"%(service)s\" on host \"%(host)s\""
 msgstr ""
 
 #: src/vigilo/turbogears/controllers/auth.py:34

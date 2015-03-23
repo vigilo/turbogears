@@ -17,6 +17,8 @@ from vigilo.models.tables import User
 import pkg_resources
 
 from vigilo.turbogears.units import convert_with_unit
+from vigilo.models.session import DBSession
+from vigilo.models import tables
 
 
 __all__ = ('get_current_user', 'get_readable_metro_value', )
@@ -116,3 +118,24 @@ def ugettext(message):
 _ = ugettext
 
 lazy_ugettext = lazify(ugettext)
+
+def describe_supitem(idsupitem):
+    """
+    Retourne une description humaine d'un objet supervisé.
+
+    @param idsupitem: Identifiant de l'objet supervisé.
+    @type idsupitem: C{int}
+    @return: Description humaine, dans la langue de l'utilisateur.
+    @rtype: C{unicode}
+    """
+    supitem = DBSession.query(tables.SupItem).get(idsupitem)
+    if isinstance(supitem, tables.HighLevelService):
+        return _('high-level service "%s"') % supitem.servicename
+    if isinstance(supitem, tables.Host):
+        return _('host "%s"') % supitem.name
+    if isinstance(supitem, tables.LowLevelService):
+        return _('service "%(service)s" on host "%(host)s"') % {
+            'host': supitem.host.name,
+            'service': supitem.servicename,
+        }
+    raise ValueError('Invalid argument')
