@@ -42,15 +42,18 @@ class VigiloLdapSync(object):
         http_charset='utf-8',
         cache_name=None,
         binddn=None,
-        bindpw=None,
+        bindpw='',
         attr_cn='cn',
         attr_mail='mail',
         attr_member_cn='cn',
-        use_dn=True):
+        use_dn=True,
+        timeout=0):
         """
         Initialise le plugin de synchronisation LDAP.
 
-        @param ldap_url: L'url de connexion à l'annuaire LDAP.
+        @param ldap_url: Liste d'URLs de connexion à l'annuaire LDAP,
+            séparées par des espaces. Le greffon tentera de se connecter
+            à chacune des URLs dans l'ordre jusqu'à aboutir.
         @type ldap_url: C{basestring}
         @param ldap_base: le DN (Distinguished Name) de l'entrée
             à partir de laquelle effectuer la recherche LDAP.
@@ -68,31 +71,48 @@ class VigiloLdapSync(object):
             a lieu via le protocole GSSAPI.
         @type binddn: C{basestring} or C{None}
         @param bindpw: Mot de passe associé au DN donné par L{binddn}.
-        @type bindpw: C{basestring} or C{None}
+        @type bindpw: C{basestring}
+        @param attr_cn: Attribut contenant le nom commun (CN) de l'utilisateur.
+        @type attr_cn: C{basestring}
+        @param attr_mail: Attribut contenant l'email de l'utilisateur.
+        @type attr_mail: C{basestring}
+        @param attr_member_cn: Attribut des groupes contenant
+            la liste des CNs des membres du groupe.
+        @type attr_member_cn: C{basestring}
+        @param use_dn: Indique si le nom distingué (DN) de l'utilisateur
+            doit être utilisé lors de la recherche des groupes ou juste
+            son nom commun.
+        @type use_dn: C{bool}
+        @param timeout: Indique le délai maximum pour les opérations réseau.
+            Utiliser la valeur 0 pour désactiver les limites.
+        @type timeout: C{int}
         """
         super(VigiloLdapSync, self).__init__()
-        self.ldap_url = unicode(ldap_url)
+        self.ldap_url = filter(None, unicode(ldap_url).split(' '))
         self.user_tree = unicode(user_tree)
         self.user_filter = unicode(user_filter)
         self.group_tree = unicode(group_tree)
         self.group_filter = unicode(group_filter)
 
+        if not len(self.ldap_url):
+            raise ValueError("ldap_url should contain at least one URL")
+
         if binddn is None or isinstance(binddn, basestring):
             self.binddn = binddn
         else:
-            raise TypeError, "binddn must be a string or None"
+            raise TypeError("binddn must be a string or None")
 
-        if bindpw is None or isinstance(bindpw, basestring):
+        if isinstance(bindpw, basestring):
             self.bindpw = bindpw
         else:
-            raise TypeError, "bindpw must be a string or None"
+            raise TypeError("bindpw must be a string")
 
         if cache_name is None or not cache_name.strip():
             self.cache_name = None
         elif isinstance(cache_name, basestring):
             self.cache_name = cache_name
         else:
-            raise TypeError, "cache_name must be a string or None"
+            raise TypeError("cache_name must be a string or None")
 
         self.ldap_charset = unicode(ldap_charset)
         self.http_charset = unicode(http_charset)
@@ -100,6 +120,7 @@ class VigiloLdapSync(object):
         self.attr_mail = attr_mail
         self.attr_member_cn = attr_member_cn
         self.use_dn = use_dn
+        self.timeout = max(0, int(timeout)) or self.ldap.NO_LIMIT
 
     # IMetadataProvider
     def add_metadata(self, environ, identity):
@@ -263,6 +284,62 @@ class VigiloLdapSync(object):
             environ['beaker.session'].save()
         return
 
+    def connect(self, environ):
+        """
+        Ouvre la connexion au serveur LDAP.
+
+        Les différentes URLs fournies dans la configuration sont testées
+        (par ordre d'apparition dans la liste) jusqu'à ce que la connexion
+        soit établie ou jusqu'à épuisement des possibilités.
+        Une exception de type C{ldap.SERVER_DOWN} si chacune des tentatives
+        de connexion échoue.
+
+        @param environ: Environnement WSGI de la requête.
+        @type environ: C{dict}
+        @return: Connexion au serveur LDAP.
+        @rtype: C{LDAPObject}
+        """
+        logger = environ.get('repoze.who.logger')
+        for ldap_url in self.ldap_url:
+            try:
+                # Connexion à l'annuaire LDAP
+                logger and logger.debug(_('Attempting connection to "%s"'),
+                                        ldap_url)
+                ldap_conn = self.ldap.initialize(ldap_url)
+                ldap_conn.set_option(self.ldap.OPT_NETWORK_TIMEOUT, self.timeout)
+                ldap_conn.set_option(self.ldap.OPT_TIMEOUT, self.timeout)
+                ldap_conn.set_option(self.ldap.OPT_TIMELIMIT, self.timeout)
+
+                # Si un utilisateur particulier a été configuré pour le bind,
+                # on l'utilise.
+                if self.binddn:
+                    # Les .encode() sont nécessaires car python-ldap ne supporte
+                    # pas l'utilisation du type natif "unicode" dans son API.
+                    ldap_conn.bind_s(
+                        self.binddn.encode('utf-8'),
+                        self.bindpw.encode('utf-8'),
+                        self.ldap.AUTH_SIMPLE
+                    )
+                # Sinon on tente plutôt une authentification par Kerberos.
+                else:
+                    if 'KRB5CCNAME' in environ:
+                        os.environ['KRB5CCNAME'] = environ['KRB5CCNAME']
+                        auth_tokens = self.sasl.gssapi()
+                        ldap_conn.sasl_interactive_bind_s("", auth_tokens)
+                    else:
+                        ldap_conn.simple_bind()
+                return ldap_conn
+            except self.ldap.LDAPError:
+                logger and logger.exception(
+                    _("Could not connect to LDAP server '%s', "
+                      "trying next server") % ldap_url)
+                continue
+
+        # On a épuisé toutes les URLs sans parvenir à se connecter.
+        msg = _("No more LDAP servers to try")
+        logger and logger.error(msg)
+        raise self.ldap.SERVER_DOWN(msg)
+
     def retrieve_user_ldap_info(self, environ, login):
         """
         Récupère dans l'annuaire LDAP les informations suivantes :
@@ -279,29 +356,11 @@ class VigiloLdapSync(object):
         @rtype: C{tuple} of C{mixed} or C{None}
         """
         logger = environ.get('repoze.who.logger')
+        user_attributes = {}
+        group_attributes = []
 
-        # Connexion à l'annuaire LDAP
+        ldap_conn = self.connect(environ)
         try:
-            ldap_conn = self.ldap.initialize(self.ldap_url)
-            # Si un utilisateur particulier a été configuré pour le bind,
-            # on l'utilise.
-            if self.binddn:
-                # Les .encode() sont nécessaires car python-ldap ne supporte
-                # pas l'utilisation du type natif "unicode" dans son API.
-                ldap_conn.bind_s(
-                    self.binddn.encode('utf-8'),
-                    self.bindpw.encode('utf-8'),
-                    self.ldap.AUTH_SIMPLE
-                )
-            # Sinon on tente plutôt une authentification par Kerberos.
-            else:
-                if 'KRB5CCNAME' in environ:
-                    os.environ['KRB5CCNAME'] = environ['KRB5CCNAME']
-                    auth_tokens = self.sasl.gssapi()
-                    ldap_conn.sasl_interactive_bind_s("", auth_tokens)
-                else:
-                    ldap_conn.simple_bind()
-
             try:
                 logger and logger.debug(
                     _("Bound to the LDAP server as '%s'"),

@@ -53,7 +53,7 @@ class FakeLdapConnection(object):
         """ Simule la méthode unbind mais ne fait rien """
         pass
 
-    def sasl_interactive_bind_s(self, *args, **kwargs):
+    def bind_s(self, *args, **kwargs):
         """ Simule la méthode sasl_interactive_bind_s mais ne fait rien """
         pass
 
@@ -65,13 +65,25 @@ class FakeLdapConnection(object):
         self._result = result
 
     def search_s(self, *args, **kwargs):
-        """ Remplace la méthode search_s usuelle."""
+        """Remplace la méthode search_s usuelle."""
         return self._result
+
+    def set_option(self, *args, **kwargs):
+        """Simule la méthode set_option mais ne fait rien."""
+        pass
+
 
 class FakeLdap(object):
     """ Classe simulant le comportement de la classe ldap """
 
     SCOPE_SUBTREE = None
+    NO_LIMIT = 0
+    SERVER_DOWN = Exception
+    LDAPError = Exception
+    OPT_NETWORK_TIMEOUT = 0
+    OPT_TIMEOUT = 0
+    OPT_TIMELIMIT = 0
+    AUTH_SIMPLE = 0
 
     def __init__(self, *args, **kwargs):
         self._connection = FakeLdapConnection()
@@ -83,12 +95,14 @@ class FakeLdap(object):
     def set_return_value(self, result):
         return self._connection.set_return_value(result)
 
+
 class FakeSasl(object):
     """ Classe simulant le comportement de la classe ldap.sasl """
 
     def gssapi(self):
         """ Simule la méthode gssapi mais ne fait rien """
         return None
+
 
 class VigiloLdapSyncTest(VigiloLdapSync):
     """
@@ -105,6 +119,7 @@ class VigiloLdapSyncTest(VigiloLdapSync):
         self.ldap = FakeLdap()
         self.sasl = FakeSasl()
         super(VigiloLdapSyncTest, self).__init__(*args, **kwargs)
+
 
 class TestKerberosAuthentication(unittest.TestCase):
     """ Teste la classe VigiloLdapSync """
@@ -130,8 +145,10 @@ class TestKerberosAuthentication(unittest.TestCase):
         # remplaçant la classe VigiloLdapSync pour les tests.
         print "Instanciating Kerberos authentication module..."
         self.plugin = VigiloLdapSyncTest(
-            '', '',
-            ldap_charset='iso-8859-1'
+            ldap_url='ldap://ldap.example.com',
+            ldap_base='',
+            ldap_charset='iso-8859-1',
+            binddn='binddn',
         )
 
         #
@@ -140,8 +157,6 @@ class TestKerberosAuthentication(unittest.TestCase):
             'KRB5CCNAME': 'johndoe',
         }
 
-        import logging
-        logging.basicConfig()
 
     def tearDown(self):
         """ Nettoyage entre les tests """

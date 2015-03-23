@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: vigilo-turbogears 2.0.0\n"
 "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
 "POT-Creation-Date: 2010-07-26 13:47+0200\n"
-"PO-Revision-Date: 2014-01-31 09:16+0100\n"
+"PO-Revision-Date: 2015-04-24 18:17+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_FR <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -36,27 +36,12 @@ msgstr ""
 msgid "Wrong credentials"
 msgstr "Identifiant ou mot de passe incorrect"
 
-#: src/vigilo/turbogears/controllers/auth.py:49
-#, python-format
-msgid "\"%(username)s\" logged into %(app)s (from %(IP)s)"
-msgstr "\"%(username)s\" s'est connecté à %(app)s (depuis %(IP)s)"
-
-#: src/vigilo/turbogears/controllers/auth.py:54
+#: src/vigilo/turbogears/controllers/auth.py:65
 #, python-format
 msgid "Welcome back, %s!"
 msgstr "Bienvenue %s !"
 
-#: src/vigilo/turbogears/controllers/auth.py:67
-#, python-format
-msgid "Some user logged out from %(app)s (from %(IP)s)"
-msgstr "Un utilisateur s'est déconnecté de %(app)s (depuis %(IP)s)"
-
-#: src/vigilo/turbogears/controllers/auth.py:69
-#, python-format
-msgid "\"%(username)s\" logged out from %(app)s (from %(IP)s)"
-msgstr "\"%(username)s\" s'est déconnecté de %(app)s (depuis %(IP)s)"
-
-#: src/vigilo/turbogears/controllers/auth.py:77
+#: src/vigilo/turbogears/controllers/auth.py:74
 msgid "We hope to see you soon!"
 msgstr "Nous espérons vous revoir bientôt !"
 
@@ -146,73 +131,90 @@ msgstr "Vous n'avez les permissions suffisantes pour accéder à %s"
 msgid "Vigilo has detected a breakdown on the following collector(s): %(list)s"
 msgstr "Vigilo a détecté une panne sur le(s) collecteur(s) suivant(s) : %(list)s"
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:130
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:140
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:147
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:161
 #, python-format
 msgid "Remote user: %s"
 msgstr "Utilisateur externe : %s"
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:148
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:158
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:165
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:179
 msgid "Beaker must be present in the WSGI middleware stack for the cache to work"
 msgstr "Beaker doit être présent dans la pile WSGI pour que le cache fonctionne"
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:162
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:172
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:179
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:193
 msgid "Exception while contacting LDAP server"
 msgstr "Exception lors de la communication avec le serveur LDAP"
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:182
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:192
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:199
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:213
 #, python-format
 msgid "New user created: %s"
 msgstr "Nouveau utilisateur créé : %s"
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:186
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:196
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:203
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:217
 msgid "Exception during user creation"
 msgstr "Exception lors de la création de l'utilisateur"
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:195
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:205
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:212
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:226
 #, python-format
 msgid "Removing user \"%(user)s\" from group \"%(group)s\""
 msgstr "Retrait de l'utilisateur \"%(user)s\" du groupe \"%(group)s\""
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:222
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:232
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:239
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:253
 #, python-format
 msgid "Creating group \"%s\""
 msgstr "Création du groupe \"%s\""
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:230
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:240
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:247
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:261
 #, python-format
 msgid "Adding user \"%(user)s\" to group \"%(group)s\""
 msgstr "Ajout de l'utilisateur \"%(user)s\" au groupe \"%(group)s\""
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:247
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:257
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:264
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:278
 msgid "Exception during groups creation"
 msgstr "Exception lors de la création des groupes"
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:295
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:307
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:292
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:306
 #, python-format
-msgid "Bound to the LDAP server as '%s'"
-msgstr "Lié au serveur LDAP en tant que '%s'"
+msgid "Attempting connection to \"%s\""
+msgstr "Tentative de connexion à \"%s\""
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:323
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:320
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:334
+#, python-format
+msgid "Could not connect to LDAP server '%s', trying next server"
+msgstr ""
+"Impossible de se connecter au serveur LDAP '%s', essai avec le serveur "
+"suivant"
+
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:325
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:339
+msgid "No more LDAP servers to try"
+msgstr "Plus aucun serveur LDAP à tester"
+
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:369
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:393
 #, python-format
 msgid "User \"%s\" not found in the LDAP server"
 msgstr "L'utilisateur \"%s\" est introuvable sur le serveur LDAP"
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:359
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:366
+#, python-format
+msgid "Bound to the LDAP server as '%s'"
+msgstr "Lié au serveur LDAP en tant que '%s'"
+
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:418
 #, python-format
 msgid "Could not retrieve groups from LDAP server for \"%s\""
-msgstr "Impossible de récupérer les groupes depuis l'annuaire LDAP pour "
-"\"%s\""
+msgstr "Impossible de récupérer les groupes depuis l'annuaire LDAP pour \"%s\""
 
 #: src/vigilo/turbogears/rum/fields/group_relation.py:126
 #: src/vigilo/turbogears/rum/fields/group_relation.py:150
