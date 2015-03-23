@@ -6,10 +6,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: vigilo-turbogears 2.0.0\n"
+"Project-Id-Version: vigilo-turbogears 3.5.1\n"
 "Report-Msgid-Bugs-To: contact@projet-vigilo.org\n"
 "POT-Creation-Date: 2010-07-26 13:47+0200\n"
-"PO-Revision-Date: 2014-01-31 09:16+0100\n"
+"PO-Revision-Date: 2015-05-21 11:47+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr_FR <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -18,12 +18,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.4\n"
 
-#: src/vigilo/turbogears/helpers.py:87
+#: src/vigilo/turbogears/helpers.py:89
 #, python-format
 msgid "Failed to get URL: %s"
 msgstr "Impossible d'obtenir le contenu de l'URL: %s"
 
-#: src/vigilo/turbogears/helpers.py:100
+#: src/vigilo/turbogears/helpers.py:102
 #, python-format
 msgid ""
 "Failed to convert DS %(ds)s on %(host)s: value was %(value)s (max: "
@@ -31,6 +31,21 @@ msgid ""
 msgstr ""
 "Impossible de convertir la DS %(ds)s sur %(host)s: la valeur était "
 "%(value)s (max : %(max)s)"
+
+#: src/vigilo/turbogears/helpers.py:133
+#, python-format
+msgid "high-level service \"%s\""
+msgstr "service de haut niveau \"%s\""
+
+#: src/vigilo/turbogears/helpers.py:135
+#, python-format
+msgid "host \"%s\""
+msgstr "hôte \"%s\""
+
+#: src/vigilo/turbogears/helpers.py:137
+#, python-format
+msgid "service \"%(service)s\" on host \"%(host)s\""
+msgstr "service \"%(service)s\" de l'hôte \"%(host)s\""
 
 #: src/vigilo/turbogears/controllers/auth.py:34
 msgid "Wrong credentials"
