@@ -41,7 +41,6 @@ def get_all_hosts():
     Retourne tous les hôtes (C{tables.Host}) auxquels l'utilisateur à accès
     """
     user = get_current_user()
-    #user = tables.User.by_user_name(u"editor") # debug
     if not user:
         raise HTTPForbidden("You must be logged in")
     hostgroup = tables.secondary_tables.SUPITEM_GROUP_TABLE.alias()
@@ -79,7 +78,6 @@ def get_host(idhost):
         raise HTTPNotFound("Can't find the host: %s" % idhost)
     # ACLs
     user = get_current_user()
-    #user = tables.User.by_user_name(u"editor") # debug
     if not user:
         raise HTTPForbidden("You must be logged in")
     if not host.is_allowed_for(user):
@@ -96,18 +94,18 @@ def get_all_services(model_class):
     @type  model_class: sous-classe de C{tables.Service}
     """
     user = get_current_user()
-    #user = tables.User.by_user_name(u"editor") # debug
     if not user:
         raise HTTPForbidden("You must be logged in")
-    servicegroup = tables.secondary_tables.SUPITEM_GROUP_TABLE.alias()
-    services = DBSession.query(model_class).distinct().outerjoin(
-                (servicegroup,
-                    servicegroup.c.idsupitem == model_class.idservice),
-                )
+    services = DBSession.query(model_class)
     # ACLs
-    if not tg.config.is_manager.is_met(tg.request.environ):
-        user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
-        services = services.filter(servicegroup.c.idgroup.in_(user_groups))
+    # Rappel :  il n'y a pas de permission spécifique
+    #           donnant accès aux services de haut niveau.
+    if model_class is tables.LowLevelService and \
+        not tg.config.is_manager.is_met(tg.request.environ):
+        services = services.join(
+                (tables.UserSupItem,
+                    tables.UserSupItem.idsupitem == model_class.idsupitem)
+            )
     return services.all()
 
 def get_service(idservice, service_type, idhost=None):
@@ -184,7 +182,6 @@ def check_map_access(m):
     @type  m: C{tables.Map}
     """
     user = get_current_user()
-    #user = tables.User.by_user_name(u"editor") # debug
     if not user:
         raise HTTPForbidden("You must be logged in")
     allowed_mapgroups = user.mapgroups(only_id=True, only_direct=True)
