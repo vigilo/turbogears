@@ -80,7 +80,7 @@ class HostsV1(RestController):
         for group in host.groups:
             groups.append({
                 "id": group.idgroup,
-                "name": group.name,
+                "name": group.path,
                 "href": tg.url("/api/v%s/supitemgroups/%s"
                                % (self.apiver, group.idgroup)),
                 })
