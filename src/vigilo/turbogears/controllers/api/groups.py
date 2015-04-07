@@ -12,7 +12,7 @@ import tg
 from tg import expose
 from tg.decorators import with_trailing_slash
 from tg.controllers import RestController
-from tg.exceptions import HTTPNotFound, HTTPForbidden
+from tg.exceptions import HTTPNotFound, HTTPForbidden, HTTPBadRequest
 
 from vigilo.models.tables import MapGroup, GraphGroup, SupItemGroup
 from vigilo.models.tables.group import Group
@@ -94,7 +94,7 @@ class GroupsV1(RestController):
                 continue
             groups.append({
                 "id": group.idgroup,
-                "name": group.name,
+                "name": group.path,
                 "href": tg.url("/api/v%s/%sgroups/%s"
                                % (self.apiver, self.type, group.idgroup)),
                 })
@@ -107,7 +107,14 @@ class GroupsV1(RestController):
         # Suppression du message "missing docstring", c'est une méthode
         # standard du contrôlleur REST
         # pylint:disable-msg=C0111
-        group = DBSession.query(self.model_class).get(idgroup)
+        group = None
+        try:
+            idgroup = int(idgroup)
+        except (ValueError, TypeError):
+            raise HTTPBadRequest("An integer was expected")
+        else:
+            group = DBSession.query(self.model_class).get(idgroup)
+
         if not group:
             raise HTTPNotFound("Can't find group %s" % idgroup)
         allowed_groups = self._get_allowed_groups()
@@ -115,7 +122,7 @@ class GroupsV1(RestController):
             raise HTTPForbidden("Access denied to group %s" % idgroup)
         baseurl = tg.url("/api/v%s" % self.apiver)
         result = {"id": group.idgroup,
-                  "name": group.name,
+                  "name": group.path,
                   "href": baseurl + "/%sgroups/%s" %
                                     (self.type, group.idgroup),
                   }
@@ -126,7 +133,7 @@ class GroupsV1(RestController):
                 continue
             children.append({
                 "id": subgroup.idgroup,
-                "name": subgroup.name,
+                "name": subgroup.path,
                 "href": baseurl + "/%sgroups/%s" %
                                   (self.type, subgroup.idgroup),
                 })
