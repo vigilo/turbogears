@@ -118,7 +118,9 @@ def get_rum_config(model):
         'rum.translator': {
             'use': VigiloRumTranslator,
             'locales': locales,
-        }
+        },
+        'default_page_size': int(config.get('default_page_size', 100)),
+        'max_page_size': int(config.get('max_page_size', 250)),
     }
 
     return rum_config
