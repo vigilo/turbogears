@@ -64,15 +64,6 @@ class ServicesV1(RestController):
         else:
             LOGGER.warning("Unknown service type: %s", self.type)
 
-    #def __before__(self, *args, **kw):
-    #    if request.url.endswith("/"):
-    #        idhost = request.url.split('/')[-3]
-    #    else:
-    #        idhost = request.url.split('/')[-2]
-    #    print "="*20, idhost
-    #    # pylons.c: le contexte du template
-    #    pylons.c.host = DBSession.query(tables.Host).get(idhost)
-
 
     @with_trailing_slash
     @expose("api/services-all.xml",
