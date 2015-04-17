@@ -237,6 +237,13 @@ class VigiloAuthForgerMiddleware(VigiloAuthMiddleware):
         # externe. Par défaut, on utilise l'authentification interne.
         if 'vigilo.external_auth' not in environ:
             environ['vigilo.external_auth'] = False
+
+        # Le plugin d'authentification a besoin d'une adresse IP
+        # pour enregistrer certaines actions dans les logs.
+        # Pour les tests unitaires, on simule une connexion locale.
+        if 'REMOTE_ADDR' not in environ:
+            environ['REMOTE_ADDR'] = '127.0.0.1'
+
         return super(VigiloAuthForgerMiddleware, self).__call__(
                     environ, start_response)
 
