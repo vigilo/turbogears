@@ -169,21 +169,10 @@ class VigiloAuthForgerPlugin(AuthenticationForgerPlugin):
         """
         remove_header(app_headers, 'content-length')
         remove_header(forget_headers, 'content-length')
-
-        # On a besoin d'une adresse IP pour l'inscrire dans les logs.
-        # Pour les tests unitaires, on simule une connexion locale.
-        if 'REMOTE_ADDR' not in environ:
-            environ['REMOTE_ADDR'] = '127.0.0.1'
-
         return super(VigiloAuthForgerPlugin, self).challenge(
                     environ, status, app_headers, forget_headers)
 
     def authenticate(self, environ, identity):
-        # On a besoin d'une adresse IP pour l'inscrire dans les logs.
-        # Pour les tests unitaires, on simule une connexion locale.
-        if 'REMOTE_ADDR' not in environ:
-            environ['REMOTE_ADDR'] = '127.0.0.1'
-
         res = super(VigiloAuthForgerPlugin, self).authenticate(
                     environ, identity)
 
