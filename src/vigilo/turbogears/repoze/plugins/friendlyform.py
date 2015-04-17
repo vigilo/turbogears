@@ -148,7 +148,7 @@ class FriendlyFormPlugin(FFP):
                 # la valeur "???" auto-déterminée.
                 'user_fullname': \
                     environ['repoze.who.identity']['user'].fullname,
-                'user_ip': environ['REMOTE_ADDR'],
+                'user_ip': environ.get('REMOTE_ADDR') or '0.0.0.0',
             })
 
         res = super(FriendlyFormPlugin, self).challenge(

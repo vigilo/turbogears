@@ -24,7 +24,7 @@ class VigiloSAAuthenticatorPlugin(SQLAlchemyAuthenticatorPlugin):
                 'Wrong credentials for user "%(user_login)s" '
                 '(from %(user_ip)s)', {
                 'user_login': identity['login'],
-                'user_ip': environ['REMOTE_ADDR'],
+                'user_ip': environ.get('REMOTE_ADDR') or '0.0.0.0',
             })
         return res
 
