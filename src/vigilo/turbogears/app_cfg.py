@@ -160,14 +160,14 @@ class VigiloAppConfig(AppConfig):
         super(VigiloAppConfig, self).setup_paths()
 
         app_templates = resource_filename(
-            'vigilo.themes.templates', self.app_name.lower())
+            'vigilo.themes.templates', self.app_name.lower().replace('-', '_'))
         common_templates = resource_filename(
             'vigilo.themes.templates', 'common')
 
         self.paths['templates'] = [app_templates, common_templates]
 
         # Spécifique projets
-        for module in ["turbogears", self.app_name.lower()]:
+        for module in ["turbogears", self.app_name.lower().replace('-', '_')]:
             for entry in working_set.iter_entry_points(
                                     "vigilo.%s.templates" % module):
                 if (entry.name != "enterprise" and

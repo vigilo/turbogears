@@ -110,8 +110,8 @@ def get_rum_config(model):
         'templating': {
             'renderer': 'vigilo',
             'search_path': [
-                os.path.join(base_tpl_dir, config.app_name.lower(), 'admin'),
-                os.path.join(base_tpl_dir, config.app_name.lower()),
+                os.path.join(base_tpl_dir, config.app_name.lower().replace('-', '_'), 'admin'),
+                os.path.join(base_tpl_dir, config.app_name.lower().replace('-', '_')),
                 os.path.join(base_tpl_dir, 'common'),
             ],
         },
