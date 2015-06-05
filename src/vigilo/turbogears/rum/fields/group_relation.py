@@ -24,20 +24,20 @@ from vigilo.models.tables import SupItemGroup, MapGroup
 class GroupSelector(forms.InputField):
     javascript = [
         # Frameworks dont le widget dépend.
-        JSLink(link=url('/js/lib/mootools.js')),
-        JSLink(link=url('/js/lib/mootools-more.js')),
-        JSLink(link=url('/js/lib/jxlib.js')),
+        JSLink(link=lambda: url('/js/lib/mootools.js')),
+        JSLink(link=lambda: url('/js/lib/mootools-more.js')),
+        JSLink(link=lambda: url('/js/lib/jxlib.js')),
 
         # Traductions.
-        JSLink(link=url('/js/lib/babel.js')),
-        JSLink(link=url('/js/lib/babelThemes.js')),
-        JSLink(link=url('/i18n')),
+        JSLink(link=lambda: url('/js/lib/babel.js')),
+        JSLink(link=lambda: url('/js/lib/babelThemes.js')),
+        JSLink(link=lambda: url('/i18n')),
 
         # Code JavaScript du widget à proprement parler.
-        JSLink(link=url('/js/grouptree.js')),
+        JSLink(link=lambda: url('/js/grouptree.js')),
     ]
     css = [
-        CSSLink(link=url('/css/jxlib/jxtheme.uncompressed.css')),
+        CSSLink(link=lambda: url('/css/jxlib/jxtheme.uncompressed.css')),
     ]
     params = ["choose_text", "text_value", "clear_text", "groups_url", "field"]
     choose_text = 'Choose'
@@ -131,7 +131,7 @@ window.addEvent('load', function () {
             d.value = str(d.value.idgroup)
         d.groups_url = d.field.groups_url
         d.path_url = d.field.path_url
-        d.app_url = url('/images');
+        d.app_url = url('/images')
 
 class GroupRelation(Relation):
     def __init__(self, groups_url, path_url, single_type=False,
