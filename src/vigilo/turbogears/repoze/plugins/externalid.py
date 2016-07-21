@@ -5,68 +5,114 @@
 """
 Un module d'identification pour le framework repoze.who
 qui permet de pré-authentifier l'utilisateur à partir
-d'une session Beaker.
-
-Ce module est généralement utilisé conjointement avec le module
-de synchronisation LDAP (qui se charge d'alimenter la session).
+d'une source externe (p.ex. authentification Apache).
 """
+
+from zope.interface import implements
+from repoze.who.interfaces import IIdentifier, IAuthenticator
+
 
 class ExternalIdentification(object):
     """
-    Cette classe agit comme un identificateur pour repoze.who
-    et pré-authentifie l'utilisateur à partir d'une session Beaker.
+    Cette classe détecte les pré-authentifications réalisées
+    à partir d'une source externe.
     """
 
-    def __init__(self, cache_name):
-        """
-        Initialisation du module d'identification.
+    implements(IIdentifier, IAuthenticator)
 
-        @param cache_name: Nom de la clé à recherche dans la session
-            et qui contient l'identifiant sous lequel l'utilisateur
-            doit être pré-authentifié.
-        @type cache_name: C{basestring}
+    def __init__(self, rememberer, strip_realm=True):
         """
-        self.cache_name = cache_name
+        Initialise le plugin de gestion des authentifications externes.
 
+        @param strip_realm: Indique si le royaume doit être supprimé ou conservé
+            lorsque l'authentification externe fournit une identité basée
+            sur un principal.Kerberos (user@REALM).
+            Par défaut, le royaume est supprimé.
+        @type strip_realm: bool
+        @param rememberer: Nom du plugin chargé de mémoriser l'identité
+            de l'utilisateur une fois celui-ci authentifié.
+        @type rememberer: str
+        """
+        strip_realm = unicode(strip_realm, 'utf-8', 'replace').lower()
+        if strip_realm in ('true', 'yes', 'on', '1'):
+            strip_realm = True
+        elif strip_realm in ('false', 'no', 'off', '0'):
+            strip_realm = False
+        else:
+            raise ValueError('A boolean value was expected for "strip_realm"')
+        self.strip_realm = strip_realm
+        self.rememberer = rememberer
+
+    def _get_rememberer(self, environ):
+        rememberer = environ['repoze.who.plugins'].get(self.rememberer)
+        return rememberer
+
+    def _get_remote_user(self, environ):
+        remote_user_key = environ.get('repoze.who.remote_user_key')
+        if not remote_user_key:
+            return None
+
+        remote_user = environ.get(remote_user_key)
+        if remote_user is None:
+            return None
+
+        if self.strip_realm:
+            remote_user = remote_user.split('@', 1)[0]
+        return remote_user
+
+    # IIdentifier
+    def remember(self, environ, identity):
+        rememberer = self._get_rememberer(environ)
+        if not rememberer:
+            return []
+        return rememberer.remember(environ, identity)
+
+    # IIdentifier
+    def forget(self, environ, identity):
+        rememberer = self._get_rememberer(environ)
+        if not rememberer:
+            return []
+        return rememberer.forget(environ, identity)
+
+    # IIdentifier
     def identify(self, environ):
         """
-        Inspecte la session Beaker en cours afin de vérifier
-        si l'utilisateur s'est déjà authentifié précédemment
-        ou non.
-
-        Dans le cas positif, l'identité précédente est réutilisée
-        pour pré-authentifier l'utilisateur.
+        Inspecte l'environnement de la requête afin de vérifier
+        si l'utilisateur a déjà été authentifié précédemment ou non.
+        En cas de concordance, l'identité précédente est réutilisée.
 
         @param environ: Environnement WSGI de la requête HTTP.
         @type environ: C{dict}
-        @return: Dictionnaire pré-authentifiant l'utilisateur ou None.
+        @return: Dictionnaire pré-authentifiant l'utilisateur ou C{None}.
         @rtype: C{dict} or C{None}
         """
-        if 'beaker.session' not in environ:
+        remote_user = self._get_remote_user(environ)
+        if remote_user is None:
             return None
-        if self.cache_name not in environ['beaker.session']:
-            return None
-        remote_user = environ['beaker.session'][self.cache_name]
-        return {'login': remote_user, 'repoze.who.userid': remote_user}
+        return {'login': remote_user, 'password': ''}
 
-    def remember(self, environ, identity):
+    # IAuthenticator
+    def authenticate(self, environ, identity):
         """
-        Cette méthode n'est pas pertinente dans le cas de ce module.
+        Inspecte l'environnement de la requête afin de vérifier
+        si l'utilisateur a déjà été authentifié précédemment ou non.
+        En cas de concordance, l'identité précédente est fait foi.
 
         @param environ: Environnement WSGI de la requête HTTP.
         @type environ: C{dict}
-        @param identity: Identité de l'utilisateur à mémoriser.
-        @type identity: C{dict}
+        @return: Identifiant de l'utilisateur (pré-)authentifié.
+        @rtype: C{str}
         """
-        pass
+        try:
+            login = identity['login']
+        except KeyError:
+            return None
 
-    def forget(self, environ, identity):
-        """
-        Cette méthode n'est pas pertinente dans le cas de ce module.
+        remote_user = self._get_remote_user(environ)
+        if not remote_user or remote_user != login:
+            return None
 
-        @param environ: Environnement WSGI de la requête HTTP.
-        @type environ: C{dict}
-        @param identity: Identité de l'utilisateur à mémoriser.
-        @type identity: C{dict}
-        """
-        pass
+        # L'utilisateur a été pré-authentifié via une source externe.
+        # On garde une trace de cette information.
+        environ['vigilo.external_auth'] = True
+        return login

@@ -28,9 +28,8 @@ def vigilo_classifier(environ):
 
     # S'il s'agit d'une requête de navigateur et qu'une authentification
     # externe a été utilisée, on l'indique ici.
-    # @TODO:    repoze.who permet de définir une autre clé que REMOTE_USER;
-    #           il faudrait réutiliser celle définie via repoze.who.
-    if default == 'browser' and environ.get('REMOTE_USER'):
+    remote_user_key = environ.get('repoze.who.remote_user_key')
+    if default == 'browser' and remote_user_key and environ.get(remote_user_key):
         return 'browser-external'
     return default
 

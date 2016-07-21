@@ -50,12 +50,9 @@ setup(
     install_requires=[
         "setuptools",
         "repoze.tm2 >= 1.0a4",
-        "repoze.what-quickstart >= 1.0",
-        "repoze.what.plugins.sql",
-        "repoze.what_pylons",
         "repoze.who_testutil",
         "repoze.who.plugins.sa",
-        "repoze.who < 2.0dev",
+        "repoze.who >= 2.0",
         "tg.devtools < 2.1dev",
         "TurboGears2 >= 2.3.1",
         "TurboGears2 < 2.4dev",
@@ -74,6 +71,7 @@ setup(
         "WebOb >= 1.0",
         "backlash",
         "tgext.crud",
+        "zope.interface",
     ],
     namespace_packages = [
         'vigilo',

@@ -39,8 +39,6 @@ class VigiloLdapSync(object):
         user_filter,
         group_filter,
         ldap_charset='utf-8',
-        http_charset='utf-8',
-        cache_name=None,
         binddn=None,
         bindpw='',
         attr_cn='cn',
@@ -63,9 +61,6 @@ class VigiloLdapSync(object):
         @type filterstr: C{basestring}
         @param ldap_charset: Encodage des caractères utilisé par l'annuaire.
         @type ldap_charset: C{basestring}
-        @param http_charset: Encodage du C{REMOTE_USER} retourné par Apache.
-        @type http_charset: C{basestring}
-        @type cache_name: C{basestring}
         @param binddn: DN à utiliser pour faire un bind() sur l'annuaire.
             Si omis, une tentative d'authentification Kerberos de l'utilisateur
             a lieu via le protocole GSSAPI.
@@ -107,15 +102,15 @@ class VigiloLdapSync(object):
         else:
             raise TypeError("bindpw must be a string")
 
-        if cache_name is None or not cache_name.strip():
-            self.cache_name = None
-        elif isinstance(cache_name, basestring):
-            self.cache_name = cache_name
+        use_dn = unicode(use_dn, 'utf-8', 'replace').lower()
+        if use_dn in ('true', 'yes', 'on', '1'):
+            use_dn = True
+        elif use_dn in ('false', 'no', 'off', '0'):
+            use_dn = False
         else:
-            raise TypeError("cache_name must be a string or None")
+            raise ValueError('A boolean value was expected for "use_dn"')
 
         self.ldap_charset = unicode(ldap_charset)
-        self.http_charset = unicode(http_charset)
         self.attr_cn = attr_cn
         self.attr_mail = attr_mail
         self.attr_member_cn = attr_member_cn
@@ -137,11 +132,6 @@ class VigiloLdapSync(object):
         Elle génère en outre des groupes d'utilisateurs dans Vigilo
         correspondant aux groupes de l'utilisateur dans LDAP.
 
-        Ces informations sont synchronisées à chaque requête HTTP
-        ou bien une seule fois par session si un cache est utilisé
-        (pour plus d'information, voir le paramètre C{cache_name} de
-        L{VigiloLdapSync.__init__}).
-
         @param environ: Environnement de la requête HTTP
             en cours de traitement.
         @type environ: C{dict}
@@ -149,40 +139,22 @@ class VigiloLdapSync(object):
             d'accéder à l'application.
         @type identity: C{dict}
         """
-        remote_user_key = environ.get('repoze.who.remote_user_key')
-        if not remote_user_key:
-            return
-        remote_user = environ.get(remote_user_key)
-        if not remote_user:
+        # Si le nom de cette classe apparait dans les tokens,
+        # la synchronisation a déjà eu lieu et il n'y a rien à faire.
+        # Ce code fonctionne uniquement si on utilise aussi auth_tkt.
+        tokens = tuple(identity.get('tokens', ()))
+        if self.__class__.__name__ in tokens:
             return
 
-        remote_user = remote_user.decode(self.http_charset)
+        # On ne synchronise la base que sur l'identité de l'utilisateur
+        # provient d'une source d'authentification externe.
+        if environ.get('vigilo.external_auth') != True:
+            return
+
+        remote_user = identity['repoze.who.userid']
         logger = environ.get('repoze.who.logger')
         logger and logger.info(_('Remote user: %s'), remote_user)
-
-        # Une identité Kerberos correspond à un "principal"
-        # de la forme "uid@realm". On ne garde que l'uid.
-        if '@' in remote_user:
-            remote_user = remote_user.split('@', 1)[0]
-
-            # On corrige l'identité trouvée par repoze.who afin que
-            # les autres mdproviders puissent trouver une correspondance
-            # dans la base de données.
-            identity['repoze.who.userid'] = remote_user
-
-        remote_user = unicode(remote_user)
         user = User.by_user_name(remote_user)
-
-        if self.cache_name is not None:
-            if 'beaker.session' not in environ:
-                logger and logger.warning(
-                    _('Beaker must be present in the WSGI middleware '
-                    'stack for the cache to work'))
-            # L'identité dans le cache doit être la même que celle
-            # pour laquelle on est en train de s'authentifier.
-            elif self.cache_name in environ['beaker.session'] and \
-                environ['beaker.session'][self.cache_name] == remote_user:
-                return
 
         # On récupère les informations concernant l'utilisateur
         # pour alimenter / mettre à jour notre base de données.
@@ -242,9 +214,6 @@ class VigiloLdapSync(object):
                 # on continue tout de même car l'utilisateur a bien été
                 # reconnu.
                 transaction.abort()
-                if 'beaker.session' in environ and self.cache_name is not None:
-                    environ['beaker.session'][self.cache_name] = remote_user
-                    environ['beaker.session'].save()
                 return
 
             # Création des groupes au besoin.
@@ -279,10 +248,9 @@ class VigiloLdapSync(object):
                 'Exception during groups creation'))
             return None
 
-        if 'beaker.session' in environ and self.cache_name is not None:
-            environ['beaker.session'][self.cache_name] = remote_user
-            environ['beaker.session'].save()
-        return
+        # On tente de se souvenir du fait qu'on a déjà synchronisé
+        # cet utilisateur en mémorisant le nom de cette classe.
+        identity['tokens'] = tokens + (self.__class__.__name__, )
 
     def connect(self, environ):
         """
@@ -432,7 +400,7 @@ class VigiloLdapSync(object):
         # - email de l'utilisateur ;
         if user_attributes.has_key(self.attr_mail):
             user_email = user_attributes[self.attr_mail][0].decode(
-                self.ldap_charset).lower()
+                self.ldap_charset)
         else:
             user_email = None
 
@@ -441,7 +409,7 @@ class VigiloLdapSync(object):
         for group_attribute in group_attributes:
             try:
                 group = group_attribute[1][self.attr_member_cn][0].decode(
-                    self.ldap_charset).strip().lower()
+                    self.ldap_charset).strip()
                 user_groups.append(group)
             except (IndexError, TypeError):
                 # Certains annuaires (ex: Active Directory) envoient des
@@ -457,7 +425,3 @@ class VigiloLdapSync(object):
 
         # On retourne un tuple contenant ces trois informations :
         return (user_fullname, user_email, user_groups)
-
-    def __repr__(self):
-        """Returns a representation of this instance."""
-        return '<%s %s>' % (self.__class__.__name__, id(self))

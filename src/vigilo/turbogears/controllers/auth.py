@@ -59,7 +59,7 @@ class AuthController(BaseController):
                 # l'utilisateur car l'authentification n'est pas complètement
                 # finie. On fournit "user_fullname" explicitement pour écraser
                 # la valeur "???" auto-déterminée.
-                'user_fullname': request.identity['user'].fullname,
+                'user_fullname': request.identity['fullname'],
                 'user_ip': request.remote_addr,
             })
         flash(_('Welcome back, %s!') % userid)

@@ -20,7 +20,7 @@ from tg.configuration import AppConfig, config
 from tg.configuration.app_config import config as tg_config
 from tg.i18n import get_lang
 from tg.util import Bunch
-from repoze.what.predicates import in_any_group
+from tg.predicates import in_any_group
 
 from pkg_resources import parse_version
 from vigilo.turbogears.js_codec import backslash_search

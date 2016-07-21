@@ -14,7 +14,7 @@ import logging
 from datetime import datetime, timedelta
 from tg.i18n import ugettext as _
 from tg import expose, flash, config, request
-from repoze.what.predicates import Any, All, has_permission, not_anonymous
+from tg.predicates import Any, All, has_permission, not_anonymous
 from vigilo.turbogears.controllers import BaseController
 from vigilo.models.session import DBSession
 from vigilo.models.tables import Host, LowLevelService, State, StateName

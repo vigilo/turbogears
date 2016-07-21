@@ -79,7 +79,7 @@ class FriendlyFormPlugin(FFP):
 
     def __init__(self, login_form_url, login_handler_path, post_login_url,
                  logout_handler_path, post_logout_url, rememberer_name,
-                 login_counter_name=None, encoding=None):
+                 login_counter_name=None, charset=None):
         """
         :param login_form_url: The URL/path where the login form is located.
         :type login_form_url: str
@@ -100,8 +100,8 @@ class FriendlyFormPlugin(FFP):
         :param login_counter_name: The name of the query string variable which
             will represent the login counter.
         :type login_counter_name: str
-        :param encoding: Name of the encoding the form values are encoded with.
-        :type encoding: str
+        :param charset: Name of the charset the form values are encoded with.
+        :type charset: str
 
         The login counter variable's name will be set to ``__logins`` if
         ``login_counter_name`` equals None.
@@ -115,7 +115,7 @@ class FriendlyFormPlugin(FFP):
             rememberer_name=rememberer_name,
             login_counter_name=login_counter_name
         )
-        self.encoding = encoding
+        self.charset = charset
 
     # IIdentifier
     def identify(self, environ):
@@ -127,10 +127,10 @@ class FriendlyFormPlugin(FFP):
 
         # Si la classe mère a réussi à identifier l'utilisateur,
         # on doit décoder les valeurs avec l'encodage fourni.
-        if isinstance(res, dict) and isinstance(self.encoding, basestring):
+        if isinstance(res, dict) and isinstance(self.charset, basestring):
             for key in res.keys():
                 if not isinstance(res[key], unicode):
-                    res[key] = res[key].decode(self.encoding)
+                    res[key] = res[key].decode(self.charset)
 
         return res
 
@@ -147,7 +147,7 @@ class FriendlyFormPlugin(FFP):
                 # On fournit "user_fullname" explicitement pour écraser
                 # la valeur "???" auto-déterminée.
                 'user_fullname': \
-                    environ['repoze.who.identity']['user'].fullname,
+                    environ['repoze.who.identity']['fullname'],
                 'user_ip': environ.get('REMOTE_ADDR') or '0.0.0.0',
             })
 

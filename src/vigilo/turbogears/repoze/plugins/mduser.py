@@ -8,15 +8,31 @@ pour le framework repoze.who.
 
 Ce plugin ajoute automatiquement l'instance correspondant à
 l'utilisateur identifié dans l'environnement de la requête.
-
-Ces différents modules sont utilisables via un fichier who.ini.
 """
 
 from repoze.who.plugins.sa import SQLAlchemyUserMDPlugin
-from repoze.what.plugins.quickstart import find_plugin_translations
 from vigilo.models import tables, session
-from .translation import translations
 
 # Fournisseur de méta-données.
-plugin = SQLAlchemyUserMDPlugin(tables.User, session.DBSession)
-plugin.translations.update(translations['mdprovider'])
+class plugin(SQLAlchemyUserMDPlugin):
+    def __init__(self):
+        super(plugin, self).__init__(tables.User, session.DBSession)
+
+    def add_metadata(self, environ, identity):
+        user = self.get_user(identity['repoze.who.userid'])
+        groups = set()
+        permissions = set()
+
+        if user:
+            identity['fullname'] = user.fullname
+            for group in user.usergroups:
+                groups.add(group.group_name)
+                for perm in group.permissions:
+                    permissions.add(perm.permission_name)
+
+        identity['groups'] = groups
+        identity['permissions'] = permissions
+
+        if 'repoze.what.credentials' not in environ:
+            environ['repoze.what.credentials'] = {}
+        environ['repoze.what.credentials'].update(identity)
