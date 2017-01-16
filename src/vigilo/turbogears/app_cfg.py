@@ -39,49 +39,6 @@ from vigilo.turbogears.repoze.middleware import make_middleware_with_config
 # Enregistre le codec pour l'encodage des textes dans le code JavaScript.
 codecs.register(backslash_search)
 
-# Ajoute le support de la mise en cache par le navigateur
-# pour les ressources statiques servies par ToscaWidgets.
-old_func = Response.cache_expires
-def cache_expires(self, seconds=0, **kw):
-    """
-    Surcharge la méthode "cache_expires" native
-    pour pouvoir envoyer un en-tête "Last-Modified"
-    qui permet d'avoir des réponses conditionnées
-    en fonction de l'en-tête "If-Modified-Since".
-
-    Cette méthode n'est appelée que par ToscaWidgets,
-    lorsque le paramètre "toscawidgets.resources_expire"
-    est positionné dans la configuration.
-    Voir L{VigiloAppConfig.add_tosca_middleware} pour plus
-    d'informations.
-
-    @param seconds: Nombre de secondes durant lequel la ressource
-        peut être réutilisée depuis le cache du navigateur.
-    """
-    # Pour garder le comportement par défaut
-    # (positionnement des en-têtes relatifs au cache).
-    old_func(self, seconds, **kw)
-
-    # On essaye de trouver un objet file-like
-    # qui servira pour déterminer la date de
-    # dernière modification de la ressource.
-    if isinstance(self.app_iter, _FileIter):
-        stream = self.app_iter.fileobj
-    else:
-        stream = self.app_iter
-
-    # Si un tel objet a été trouvé, on ajoute
-    # en en-tête sa date de dernière modification.
-    if isinstance(stream, file):
-        try:
-            self.last_modified = os.path.getmtime(stream.name)
-        except os.error:
-            pass
-Response.cache_expires = cache_expires
-# Utilisation de réponses conditionnées par défaut.
-Response.default_conditional_response = True
-
-
 __all__ = ('VigiloAppConfig', )
 
 class VigiloAppConfig(AppConfig):
