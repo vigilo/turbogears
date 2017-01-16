@@ -15,6 +15,7 @@ from rum.fields import *
 from rum.util import NoDefault
 from tw.api import JSLink, JSSource, CSSLink
 from tg import url
+from pylons.i18n.translation import LazyString
 from tw.forms import validators
 get = ViewFactory.get.im_func
 
@@ -24,20 +25,20 @@ from vigilo.models.tables import SupItemGroup, MapGroup
 class GroupSelector(forms.InputField):
     javascript = [
         # Frameworks dont le widget dépend.
-        JSLink(link=lambda: url('/js/lib/mootools.js')),
-        JSLink(link=lambda: url('/js/lib/mootools-more.js')),
-        JSLink(link=lambda: url('/js/lib/jxlib.js')),
+        JSLink(link=LazyString(url, '/js/lib/mootools.js')),
+        JSLink(link=LazyString(url, '/js/lib/mootools-more.js')),
+        JSLink(link=LazyString(url, '/js/lib/jxlib.js')),
 
         # Traductions.
-        JSLink(link=lambda: url('/js/lib/babel.js')),
-        JSLink(link=lambda: url('/js/lib/babelThemes.js')),
-        JSLink(link=lambda: url('/i18n')),
+        JSLink(link=LazyString(url, '/js/lib/babel.js')),
+        JSLink(link=LazyString(url, '/js/lib/babelThemes.js')),
+        JSLink(link=LazyString(url, '/i18n')),
 
         # Code JavaScript du widget à proprement parler.
-        JSLink(link=lambda: url('/js/grouptree.js')),
+        JSLink(link=LazyString(url, '/js/grouptree.js')),
     ]
     css = [
-        CSSLink(link=lambda: url('/css/jxlib/jxtheme.uncompressed.css')),
+        CSSLink(link=LazyString(url, '/css/jxlib/jxtheme.uncompressed.css')),
     ]
     params = ["choose_text", "text_value", "clear_text", "groups_url", "field"]
     choose_text = 'Choose'
