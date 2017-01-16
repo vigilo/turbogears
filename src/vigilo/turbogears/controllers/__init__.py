@@ -95,3 +95,17 @@ class BaseController(controllers.TGController):
         request.identity = request.environ.get('repoze.who.identity')
         tmpl_context.identity = request.identity
         return controllers.TGController.__call__(self, environ, start_response)
+
+    def _get_routing_info(self, url=None):
+        """
+        Récupère les informations de routage relatives à l'URL donnée
+        ou à l'URL stockée dans la requête courante si aucune URL n'est
+        passée explicitement à la fonction.
+
+        Par rapport à la méthode parente, cette version supprime
+        le préfixe "/" de l'URL passée en argument, pour corriger un bug
+        rencontré sous CentOS 7 avec la méthode _find_object() de TurboGears.
+        """
+        if url is not None:
+            url = url.lstrip('/')
+        return super(BaseController, self)._get_routing_info(url)
