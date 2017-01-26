@@ -69,7 +69,7 @@ setup(
         "TgRum",
         "python-ldap",
         "WebHelpers >= 1.0b4",
-        "WebOb < 1.0",
+        "WebOb < 1.2",
     ],
     paster_plugins=[
         'PasteScript',
