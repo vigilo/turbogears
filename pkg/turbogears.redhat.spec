@@ -29,6 +29,7 @@ Requires:   python-rumalchemy
 Requires:   python-tw-rum
 Requires:   python-decorator >= 3.1.2
 Requires:   python-pylons >= 0.9.7
+Requires:   python-pylons < 0.9.8
 Requires:   python-genshi >= 0.5.1
 Requires:   python-webflash >= 0.1-0.1.a8
 Requires:   python-toscawidgets >= 0.9.4
