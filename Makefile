@@ -1,5 +1,5 @@
 NAME := turbogears
-EPYDOC_PARSE := vigilo\.turbogears\.(controllers\.autocomplete|rum\.fields)
+EPYDOC_PARSE := vigilo\.turbogears\.(controllers\.autocomplete|rum|test)
 SUBST_FILES := pkg/vigilo-clean-turbogears-sessions.sh
 
 all: build

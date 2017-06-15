@@ -6,12 +6,6 @@
 
 import unittest
 
-from vigilo.common.conf import settings
-settings.load_file('settings_tests.ini')
-
-from vigilo.models.configure import configure_db
-configure_db(settings['database'], 'sqlalchemy_')
-
 from vigilo.common.logging import get_logger
 LOGGER = get_logger(__name__)
 

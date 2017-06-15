@@ -29,7 +29,13 @@ def install_i18n(i18ndir, destdir):
                 )
     return data_files
 
-tests_require = []
+tests_require = [
+    'WebTest',
+    'BeautifulSoup',
+    'lxml',
+    'coverage',
+    'gearbox',
+]
 
 setup(
     name='vigilo-turbogears',
@@ -71,12 +77,6 @@ setup(
         "WebHelpers >= 1.0b4",
         "WebOb < 1.0",
     ],
-    paster_plugins=[
-        'PasteScript',
-        'Pylons',
-        'TurboGears2',
-#        'tg.devtools', # Provides migrate & quickstart commands.
-    ],
     namespace_packages = [
         'vigilo',
         ],
@@ -92,6 +92,9 @@ setup(
         ],
     },
     entry_points={
+        'paste.app_factory': [
+            'main = vigilo.turbogears.test_stack.config:make_app',
+        ],
         'rum.renderers': [
             'vigilo = vigilo.turbogears.rum.configuration:RumGenshiRenderer',
         ],
