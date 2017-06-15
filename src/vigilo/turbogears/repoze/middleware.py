@@ -106,6 +106,7 @@ class VigiloAuthMiddleware(PluggableAuthenticationMiddleware):
             # identity['password'] = 'bar'
             environ['repoze.who.identity'] = identity
 
+
         # allow identifier plugins to replace the downstream
         # application (to do redirection and unauthorized themselves
         # mostly)
@@ -235,9 +236,7 @@ class VigiloAuthForgerMiddleware(VigiloAuthMiddleware):
         # Les tests unitaires peuvent définir cette variable
         # pour simuler l'utilisation d'un mécanisme d'authentification
         # externe. Par défaut, on utilise l'authentification interne.
-        if 'vigilo.external_auth' not in environ:
-            environ['vigilo.external_auth'] = False
-
+        environ.setdefault('vigilo.external_auth', False)
         return super(VigiloAuthForgerMiddleware, self).__call__(
                     environ, start_response)
 
