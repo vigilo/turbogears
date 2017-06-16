@@ -11,7 +11,7 @@ principal de celui-ci.
 """
 
 import logging
-from pylons.i18n import ugettext as _
+from tg.i18n import ugettext as _
 from tg import request, expose, flash, redirect, config
 from vigilo.turbogears.controllers import BaseController
 

@@ -5,13 +5,13 @@
 """Traducteur personnalisé pour Rum."""
 
 from rum.i18n import RumTranslator
-from pylons import i18n
+from tg import i18n
 
 class VigiloRumTranslator(RumTranslator):
     """
     Cette classe fournit un traducteur pour Rum.
     Ici, le traducteur se contente de récupérer les traductions
-    fournies par Pylons/TurboGears, de sorte que les traductions
+    fournies par TurboGears, de sorte que les traductions
     sont centralisées dans un seul fichier.
     """
 

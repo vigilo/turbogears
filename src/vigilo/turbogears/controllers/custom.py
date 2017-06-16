@@ -15,7 +15,7 @@ import re
 import logging
 from pkg_resources import working_set
 from tg import config
-from pylons.i18n import ugettext as _
+from tg.i18n import ugettext as _
 from vigilo.turbogears.controllers import BaseController
 
 LOGGER = logging.getLogger(__name__)

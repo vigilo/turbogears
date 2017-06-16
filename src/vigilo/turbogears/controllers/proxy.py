@@ -9,14 +9,12 @@ affiché dans Vigilo.
 """
 
 import urllib, urllib2, urlparse, logging
-import tg, pylons
+import tg
 from tg import request, expose, config, response
-from tg.controllers import CUSTOM_CONTENT_TYPE
 import tg.exceptions as http_exc
-from vigilo.turbogears.helpers import ugettext as _
+from tg.i18n import ugettext as _
 from sqlalchemy import or_, and_
 from paste.deploy.converters import asbool
-from webob.multidict import MultiDict, UnicodeMultiDict
 
 from vigilo.models.session import DBSession
 from vigilo.models.tables import VigiloServer, Host, Ventilation, Application
@@ -38,29 +36,6 @@ except:
 LOGGER = logging.getLogger(__name__)
 
 __all__ = ('make_proxy_controller', 'get_through_proxy', )
-
-def reencode_multidict(multi, charset):
-    """
-    Convertit un UnicodeMultiDict en un MultiDict
-    où les clés/valeurs sont encodées avec l'encodage
-    passé en argument.
-
-    @param multi: Dictionnaire à valeurs multiples à convertir.
-    @type multi: C{UnicodeMultiDict}
-    @param charset: Encodage pour le MultiDict résultant.
-    @type charset: C{basestring}
-    @return: Dictionnaire réencodé avec l'encodage donné.
-    @rtype: C{MultiDict}
-    """
-    res = MultiDict()
-    for key, values in multi.dict_of_lists().iteritems():
-        if isinstance(key, unicode):
-            key = key.encode(charset)
-        for value in values:
-            if isinstance(value, unicode):
-                value = value.encode(charset)
-            res.add(key, value)
-    return res
 
 def get_through_proxy(server_type, host, url, data=None, headers=None, charset=None):
     """
@@ -93,7 +68,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
     server_type = u'' + server_type.lower()
 
     if charset is None:
-        charset = pylons.request.charset
+        charset = tg.request.charset
 
     service_name = None
     service = None
@@ -103,12 +78,6 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
         service_name = data.get('service')
         if isinstance(service_name, str):
             service_name = service_name.decode(charset)
-
-        # urlencode() ne tolère que le type "str" en entrée.
-        # Ici, on manipule un UnicodeMultiDict de WebOb,
-        # un passage vers UTF-8 est nécessaire.
-        if isinstance(data, UnicodeMultiDict):
-            data = reencode_multidict(data, charset)
 
         data = urllib.urlencode(data)
 
@@ -331,8 +300,8 @@ class ProxyController(BaseController):
     # De plus, un @expose('json') engendre plus de problèmes qu'il
     # n'en résoud. Utilisez get_through_proxy() explicitement pour
     # ce cas particulier.
-    @expose(content_type=CUSTOM_CONTENT_TYPE)
-    def default(self, *args, **kwargs):
+    @expose()
+    def _default(self, *args, **kwargs):
         """
         Cette méthode capture toutes les requêtes HTTP transmises
         au contrôleur puis les redirige vers le serveur Nagios ou
@@ -365,8 +334,8 @@ class ProxyController(BaseController):
         # à partir d'une même méthode (ex: rendu HTML ou JSON).
         # On la réintègre dans les paramètres pour que les
         # fichier .css ou .js puissent être proxifiés correctement.
-        if pylons.request.response_ext and args:
-            args[-1] = args[-1] + pylons.request.response_ext
+        if tg.request.response_ext and args:
+            args[-1] = args[-1] + tg.request.response_ext
 
 
         # En-têtes qui seront envoyés au serveur distant.
@@ -394,7 +363,7 @@ class ProxyController(BaseController):
 
         # Recopie des en-têtes sûrs.
         for header in safe_headers:
-            header_value = pylons.request.headers.get(header)
+            header_value = tg.request.headers.get(header)
             if header_value is not None:
                 headers[header] = header_value
 
@@ -402,16 +371,12 @@ class ProxyController(BaseController):
         headers['X-Forwarded-For'] = request.remote_addr
 
         url = '/'.join(args)
-        if pylons.request.GET:
-            get_data = pylons.request.str_GET
+        if tg.request.GET:
+            get_data = tg.request.GET
             url = '%s?%s' % (url, urllib.urlencode(get_data))
 
-        post_data = None
-        if pylons.request.POST:
-            post_data = pylons.request.str_POST
-
         res = self.data_retriever(self.server_type,
-            host, url, post_data, headers)
+            host, url, tg.request.POST, headers)
 
         # On recopie les en-têtes de la réponse du serveur distant
         # dans notre propre réponse. Cette étape est particulièrement

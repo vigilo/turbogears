@@ -16,22 +16,17 @@ from pkg_resources import resource_filename, working_set, get_distribution
 from paste.deploy.converters import asbool
 from logging import getLogger
 
-from routes.middleware import RoutesMiddleware
-from beaker.middleware import SessionMiddleware, CacheMiddleware
 from tg.configuration import AppConfig, config
+from tg.configuration.app_config import config as tg_config
 from tg.i18n import get_lang
-from tg.render import render_genshi
+from tg.util import Bunch
 from repoze.what.predicates import in_any_group
 
 from pkg_resources import parse_version
-from genshi import __version__ as genshi_version
-from pylons import config as pylons_config
-from genshi.template import TemplateLoader
-from genshi.filters import Translator
 from vigilo.turbogears.js_codec import backslash_search
 
 from webob import Response
-from tw.core.resources import _FileIter
+from tw.core.resources import _FileIter, _JavascriptFileIter
 
 # Middleware d'authentification adapté à nos besoins.
 from vigilo.turbogears.repoze.middleware import make_middleware_with_config
@@ -48,12 +43,8 @@ class VigiloAppConfig(AppConfig):
         """Crée une nouvelle configuration."""
         super(VigiloAppConfig, self).__init__()
         self.app_name = app_name
-        self.__tpl_translator = None
-
-        # Pour gérer les thèmes, la notation "pointée" n'est pas utilisée.
-        # À la place, on indique le nom complet du template (ex: "index.html")
-        # lors de l'appel au décorateur @expose.
-        self.use_dotted_templatenames = False
+        self.use_toscawidgets = True
+        self.use_toscawidgets2 = False
 
         # On définit cette variable à False. En réalité, le comportement
         # est le même que si elle valait toujours True, sauf que l'on
@@ -72,6 +63,12 @@ class VigiloAppConfig(AppConfig):
         from webob.exc import WSGIHTTPException, Template
         WSGIHTTPException.html_template_obj = Template('''${body}''')
         WSGIHTTPException.body_template_obj = Template('''${detail}''')
+
+        # La méthode translate() sur un objet de type unicode n'accepte
+        # que des caractères unicode en guise de mapping et le chemin
+        # de la requête est en unicode dans les versions récentes de WebOb.
+        _JavascriptFileIter.TRANSLATION_TABLE = \
+            unicode(_JavascriptFileIter.TRANSLATION_TABLE)
 
         # Idem pour les messages d'erreurs internes générés via WebError.
         from weberror import errormiddleware as errorware
@@ -109,19 +106,19 @@ class VigiloAppConfig(AppConfig):
             'asbool': asbool,
         }
 
-    def setup_paths(self):
+    def _setup_package_paths(self):
         """
         Surcharge pour modifier la liste des dossiers dans lesquels Genshi
         va chercher les templates, afin de supporter un système de thèmes.
                                                     """
-        super(VigiloAppConfig, self).setup_paths()
+        super(VigiloAppConfig, self)._setup_package_paths()
 
         app_templates = resource_filename(
             'vigilo.themes.templates', self.app_name.lower().replace('-', '_'))
         common_templates = resource_filename(
             'vigilo.themes.templates', 'common')
 
-        self.paths['templates'] = [app_templates, common_templates]
+        self.paths['templates'] += [app_templates, common_templates]
 
         # Spécifique projets
         for module in ["turbogears", self.app_name.lower().replace('-', '_')]:
@@ -135,37 +132,6 @@ class VigiloAppConfig(AppConfig):
                 self.paths['templates'].insert(0, resource_filename(
                                            entry.module_name, "templates"))
 
-
-    def setup_genshi_renderer(self):
-        """
-        Surcharge pour utiliser un traducteur personnalisé dans les
-        modèles (templates).
-        """
-        def template_loaded(template):
-            """Appelé lorsqu'un modèle finit son chargement."""
-            import pylons
-            # L'API pour Genshi a changé avec la version 0.6:
-            # désormais, l'instance de traduction complète doit
-            # être passée lors de la création du Translator.
-            if parse_version(genshi_version) >= parse_version('0.6a1'):
-                template.filters.insert(0, Translator(pylons.c.l_))
-            else:
-                template.filters.insert(0, Translator(pylons.c.l_.ugettext))
-
-        def my_render_genshi(template_name, template_vars, **kwargs):
-            """Ajoute une fonction l_ dans les modèles pour les traductions."""
-            import pylons
-            template_vars['l_'] = pylons.c.l_.ugettext
-            return render_genshi(template_name, template_vars, **kwargs)
-
-        loader = TemplateLoader(search_path=self.paths.templates,
-                                auto_reload=self.auto_reload_templates,
-                                callback=template_loaded,
-                                max_cache_size=0)
-
-        config['pylons.app_globals'].genshi_loader = loader
-        self.render_functions.genshi = my_render_genshi
-
     def setup_sqlalchemy(self):
         """
         Turbogears a besoin de configurer la session de base de données.
@@ -175,11 +141,10 @@ class VigiloAppConfig(AppConfig):
         vigilo.models.session), donc cette étape n'est pas nécessaire.
         On inhibe le comportement de Turbogears ici.
         """
-        from pylons import config as pylons_config
         from vigilo.models.configure import configure_db
 
-        engine = configure_db(pylons_config, 'sqlalchemy.')
-        config['pylons.app_globals'].sa_engine = engine
+        engine = configure_db(tg_config, 'sqlalchemy.')
+        config['tg.app_globals'].sa_engine = engine
 
         from vigilo.models import session
         self.DBSession = session.DBSession
@@ -201,30 +166,12 @@ class VigiloAppConfig(AppConfig):
 
         # The name "groups" is already used for groups of hosts.
         # We use "usergroups" when referering to users to avoid confusion.
+        self.sa_auth.translations = Bunch()
         self.sa_auth.translations.groups = 'usergroups'
-
-    def add_core_middleware(self, app):
-        """
-        Ajoute les middlewares vitaux au fonctionnement de l'application.
-
-        Les middlewares relatifs à Beaker (cache et session) ne sont pas
-        instanciés à cet endroit car on veut les rendre accessibles depuis
-        le middleware d'authentification (repoze.who); ils doivent donc
-        apparaître APRÈS dans la pile.
-
-        Voir L{add_auth_middleware} pour savoir comment les middlewares
-        de Beaker sont ajoutés.
-        """
-        app = RoutesMiddleware(app, config['routes.map'])
-        return app
 
     def add_auth_middleware(self, app, skip_authentication):
         """
         Ajoute le middleware d'authentification.
-
-        Contrairement à la méthode héritée de TurboGears, celle-ci
-        ajoute en plus les middlewares de Beaker (session/cache).
-        Voir L{add_core_middleware} pour plus d'information.
         """
         # Ajout du middleware d'authentification adapté pour Vigilo.
         auth_config = config.get('auth.config')
@@ -239,55 +186,14 @@ class VigiloAppConfig(AppConfig):
             # On force l'utilisation d'un logger nommé "auth"
             # pour repoze.who (compatibilité avec TurboGears).
             app.logger = getLogger('auth')
-
-        # On ajoute les middlewares de gestion de cache/sessions.
-        # Normalement, add_core_middleware le fait, mais on veut
-        # que ces middlewares soient utilisable depuis repoze.who,
-        # donc on doit les ajouter APRÈS le middleware d'auth.
-        app = SessionMiddleware(app, config)
-        app = CacheMiddleware(app, config)
         return app
 
-    def add_tosca_middleware(self, app):
+    def after_init_config(self):
         """
-        Ajoute le middleware qui gère les ressources ToscaWidgets.
-
-        La méthode est surchargée afin d'injecter dynamiquement
-        dans la requête HTTP la configuration permettant la mise
-        en cache (pour une durée de 1h) des ressources statiques
-        de ToscaWidgets par le navigateur.
-
-        @param app: Application WSGI à laquelle on ajoute la
-            surcouche ToscaWidgets.
-        @return: Une nouvelle application WSGI avec la surcouche
-            ToscaWidgets.
+        Initialisation du prédicat permettant de vérifier l'appartenance
+        aux groupes des administrateurs.
         """
-        wrapped_app = super(VigiloAppConfig, self).add_tosca_middleware(app)
-        def _wrapper(environ, start_response):
-            environ['toscawidgets.resources_expire'] = 3600
-            return wrapped_app(environ, start_response)
-        return _wrapper
-
-    def init_config(self, global_conf, app_conf):
-        """
-        Dans Pylons 0.10, la pile WSGI n'est plus initialisée
-        pour permettre l'utilisation du rendu Mako par défaut.
-        De ce fait, les modules de rendu Buffet ne sont pas
-        initialisés et l'affichage de contenu les nécessitant
-        (ex: requêtes JSON) échoue.
-        On force l'initialisation comme si on utilisait Mako
-        pour toutes ces raisons.
-        """
-        super(VigiloAppConfig, self).init_config(global_conf, app_conf)
-        pylons_config.set_defaults('mako')
-        self.init_managers_predicate()
-
-    def init_managers_predicate(self):
-        """
-        Initialise le prédicat permettant de vérifier
-        si un utilisateur est privilégié ou non.
-        """
-        admin_groups = pylons_config.get('admin_groups', 'managers')
+        admin_groups = tg_config.get('admin_groups', 'managers')
         if admin_groups.strip():
             groups_list = [s.strip() for s in admin_groups.split(',')]
         else:

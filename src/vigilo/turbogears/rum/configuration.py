@@ -99,8 +99,14 @@ def get_rum_config(model):
     # On récupère la liste des langues supportées par l'utilisateur,
     # en éliminant les langues au format xx_YY ou xx-YY car rum ne
     # les supporte pas.
-    locales = [locale for locale in request.accept_language.best_matches()
-                if locale.find('-') < 0 and locale.find('_')]
+    try:
+        locales = [locale for locale in request.accept_language.best_matches()
+                    if locale.find('-') < 0 and locale.find('_')]
+    except AttributeError:
+        # request.accept_language vaut "NilAccept" dans les tests unitaires
+        # ou lorsque le navigateur n'a envoyé aucune préférence.
+        # L'objet "NilAccept" ne dispose pas de la méthode best_matches().
+        locales = ['en']
 
     rum_config = {
         'rum.repositoryfactory': {

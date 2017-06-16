@@ -22,7 +22,6 @@ def populate_db():
     engine = configure_db(config, 'sqlalchemy.')
 
     # Cette méthode se contente d'appeler le websetup du modèle
-    # en réutilisant la configuration de l'application stockée
-    # dans la configuration de pylons.
+    # en réutilisant la configuration de l'application déjà chargée.
     from vigilo.models import websetup
     return websetup.populate_db(engine)

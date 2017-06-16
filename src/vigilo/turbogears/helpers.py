@@ -8,11 +8,11 @@ Bibliothèque de fonctions outils pour les applications utilisant TurboGears.
 
 import logging
 import urllib2
-import pylons
-from pylons.i18n.translation import lazify
 
 import simplejson
+import tg
 from tg import request, url
+from tg.util import lazify
 from vigilo.models.tables import User
 import pkg_resources
 
@@ -108,16 +108,6 @@ def get_readable_metro_value(pds):
                          })
         usage = percent = None
     return (usage, percent)
-
-def ugettext(message):
-    # Lors du passage des tests unitaires,
-    # le code qui définit le traducteur n'est pas exécuté.
-    if not pylons.c.vigilo_turbogears:
-        return message
-    return pylons.c.vigilo_turbogears.ugettext(message)
-_ = ugettext
-
-lazy_ugettext = lazify(ugettext)
 
 def describe_supitem(idsupitem):
     """

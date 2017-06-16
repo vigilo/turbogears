@@ -13,5 +13,5 @@ def setup_app(command, conf, variables):
     # implicitement par la classe TestController et il ne faut pas
     # en recréer une nouvelle (car la base est stockée en RAM).
     # On se contente de peupler la base via la connexion existante.
-    engine = config['pylons.app_globals'].sa_engine
+    engine = config['tg.app_globals'].sa_engine
     populate_db(engine)

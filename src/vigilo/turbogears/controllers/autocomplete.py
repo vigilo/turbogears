@@ -43,7 +43,7 @@ class AutoCompleteController(BaseController):
 
     @validate(validators=HostSchema())
     @expose('json')
-    def host(self, host, partial, noCache):
+    def host(self, host, partial=False, noCache=None):
         """
         Auto-compléteur pour les noms d'hôtes.
 
@@ -101,7 +101,7 @@ class AutoCompleteController(BaseController):
 
     @validate(validators=ServiceSchema())
     @expose('json')
-    def service(self, service, host, partial, noCache):
+    def service(self, service, host=None, partial=False, noCache=None):
         """
         Auto-compléteur pour les noms des services d'un hôte.
 
@@ -165,7 +165,7 @@ class AutoCompleteController(BaseController):
 
     @validate(validators=HlsSchema())
     @expose('json')
-    def hls(self, service, partial, noCache):
+    def hls(self, service, partial=False, noCache=None):
         """
         Auto-compléteur pour les noms des services de haut niveau.
 
@@ -213,7 +213,7 @@ class AutoCompleteController(BaseController):
 
     @validate(validators=SupItemGroupSchema())
     @expose('json')
-    def supitemgroup(self, supitemgroup, partial, noCache):
+    def supitemgroup(self, supitemgroup, partial=False, noCache=None):
         """
         Auto-compléteur pour les noms des groupes d'éléments supervisés.
 
@@ -256,7 +256,7 @@ class AutoCompleteController(BaseController):
 
     @validate(validators=PerfDataSourceSchema())
     @expose('json')
-    def perfdatasource(self, ds, host, partial, noCache):
+    def perfdatasource(self, ds, host, partial=False, noCache=None):
         """
         Auto-compléteur pour les noms des indicateurs de performance.
 
@@ -305,7 +305,7 @@ class AutoCompleteController(BaseController):
 
     @validate(validators=GraphSchema())
     @expose('json')
-    def graph(self, graphname, host, partial, noCache):
+    def graph(self, graphname, host, partial=False, noCache=None):
         """
         Auto-compléteur pour les noms des graphes.
 

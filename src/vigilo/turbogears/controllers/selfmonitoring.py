@@ -12,7 +12,7 @@ principal de celui-ci.
 
 import logging
 from datetime import datetime, timedelta
-from pylons.i18n import ugettext as _
+from tg.i18n import ugettext as _
 from tg import expose, flash, config, request
 from repoze.what.predicates import Any, All, has_permission, not_anonymous
 from vigilo.turbogears.controllers import BaseController

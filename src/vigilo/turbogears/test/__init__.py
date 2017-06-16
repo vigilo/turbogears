@@ -22,13 +22,13 @@ __all__ = ['setup_db', 'teardown_db', 'TestController']
 def setup_db():
     """Method used to build a database"""
     print "Creating model"
-    engine = config['pylons.app_globals'].sa_engine
+    engine = config['tg.app_globals'].sa_engine
     metadata.create_all(engine)
 
 def teardown_db():
     """Method used to destroy a database"""
     print "Destroying model"
-    engine = config['pylons.app_globals'].sa_engine
+    engine = config['tg.app_globals'].sa_engine
     metadata.drop_all(engine)
 
 class SetupApp(SetupAppCommand):

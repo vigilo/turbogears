@@ -6,7 +6,7 @@
 
 import re
 from tg import request, expose
-from vigilo.turbogears.helpers import ugettext as _
+from tg.i18n import ugettext as _
 
 __all__ = ['ErrorController']
 
@@ -26,7 +26,7 @@ class ErrorController(object):
     @expose('error.html')
     def document(self, *args, **kwargs):
         """Render the error document"""
-        resp = request.environ.get('pylons.original_response')
+        resp = request.environ.get('tg.original_response')
         default_message = _("We're sorry but we weren't "
                            "able to process this request.")
         if resp and resp.unicode_body:

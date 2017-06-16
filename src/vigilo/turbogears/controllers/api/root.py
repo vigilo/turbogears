@@ -13,7 +13,7 @@ pourrait mieux utiliser le langage de templates.
 import tg
 from tg import expose
 from tg.decorators import with_trailing_slash
-from pylons.i18n import lazy_ugettext as l_
+from tg.i18n import lazy_ugettext as l_
 from repoze.what.predicates import not_anonymous
 
 from vigilo.turbogears.controllers import BaseController

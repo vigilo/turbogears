@@ -19,7 +19,7 @@ from tg import url
 from tw.forms import validators
 get = ViewFactory.get.im_func
 
-from pylons.i18n import ugettext as _
+from tg.i18n import ugettext as _
 
 class CitedRelation(Relation):
     """
