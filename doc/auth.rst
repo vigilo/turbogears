@@ -277,6 +277,7 @@ afin de gérer l'authentification Kerberos. Ce fichier se trouve dans
 
     <IfModule mod_wsgi.c>
 
+        WSGISocketPrefix /var/run/wsgi
         WSGIRestrictStdout off
         WSGIPassAuthorization on
         WSGIDaemonProcess vigiboard user=apache group=apache processes=4 threads=1
@@ -285,13 +286,23 @@ afin de gérer l'authentification Kerberos. Ce fichier se trouve dans
         KeepAlive Off
 
         <Directory "/etc/vigilo/vigiboard/">
+            <IfModule mod_headers.c>
+                Header set X-UA-Compatible "IE=edge"
+            </IfModule>
+
             <Files "vigiboard.wsgi">
                 WSGIProcessGroup vigiboard
                 WSGIApplicationGroup %{GLOBAL}
+                <IfModule mod_authz_core.c>
+                    # Apache 2.4
+                    Require all granted
+                </IfModule>
+                <IfModule !mod_authz_core.c>
+                    # Apache 2.2
+                    Order Deny,Allow
+                    Allow from all
+                </IfModule>
             </Files>
-
-            Order deny,allow
-            Allow from all
         </Directory>
 
         <Location "/vigilo/vigiboard/login">
@@ -304,11 +315,9 @@ afin de gérer l'authentification Kerberos. Ce fichier se trouve dans
             KrbMethodK5Passwd off
             KrbSaveCredentials on
             KrbVerifyKDC on
-
-            Order allow,deny
             Require valid-user
-            Allow from all
         </Location>
+
     </IfModule>
 
 Avec cette configuration, seule l'URL
@@ -423,6 +432,7 @@ externe, tout en utilisant l'identité Kerberos obtenue depuis le serveur web :
     attr_cn = cn
     attr_mail = mail
     attr_member_of = memberOf
+    timeout = 3
 
     [plugin:externalid]
     use = vigilo.turbogears.repoze.plugins.externalid:ExternalIdentification
