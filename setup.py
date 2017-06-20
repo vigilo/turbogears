@@ -64,19 +64,16 @@ setup(
         "ToscaWidgets >= 0.9.7.1",
         "Routes < 1.12",
         "tw.forms",
-        "tw.rum < 0.3dev-20101203",
         "PasteDeploy",
         "Paste",
         "decorator != 3.1.0", # Blacklist bad version
         "vigilo-models",
         "vigilo-themes-default",
-        "RumAlchemy < 0.4dev",
-        "rum < 0.4dev",
-        "TgRum",
         "python-ldap",
         "WebHelpers >= 1.0b4",
         "WebOb >= 1.0",
         "backlash",
+        "tgext.crud",
     ],
     namespace_packages = [
         'vigilo',
@@ -95,9 +92,6 @@ setup(
     entry_points={
         'paste.app_factory': [
             'main = vigilo.turbogears.test_stack.config:make_app',
-        ],
-        'rum.renderers': [
-            'vigilo = vigilo.turbogears.rum.configuration:RumGenshiRenderer',
         ],
     },
     package_dir={'': 'src'},
