@@ -9,8 +9,6 @@ utilisant Turbogears sur Vigilo.
 """
 from __future__ import absolute_import
 
-import os
-import gettext
 import codecs
 from pkg_resources import resource_filename, working_set, get_distribution
 from paste.deploy.converters import asbool
@@ -18,15 +16,11 @@ from logging import getLogger
 
 from tg.configuration import AppConfig, config
 from tg.configuration.app_config import config as tg_config
-from tg.i18n import get_lang
 from tg.util import Bunch
 from tg.predicates import in_any_group
+from tw.core.resources import _JavascriptFileIter
 
-from pkg_resources import parse_version
 from vigilo.turbogears.js_codec import backslash_search
-
-from webob import Response
-from tw.core.resources import _FileIter, _JavascriptFileIter
 
 # Middleware d'authentification adapté à nos besoins.
 from vigilo.turbogears.repoze.middleware import make_middleware_with_config
@@ -45,6 +39,7 @@ class VigiloAppConfig(AppConfig):
         self.app_name = app_name
         self.use_toscawidgets = True
         self.use_toscawidgets2 = False
+        self.is_manager = None
 
         # On définit cette variable à False. En réalité, le comportement
         # est le même que si elle valait toujours True, sauf que l'on

@@ -10,9 +10,8 @@ import logging
 import urllib2
 
 import simplejson
-import tg
 from tg import request, url
-from tg.util import lazify
+from tg.i18n import ugettext as _
 from vigilo.models.tables import User
 import pkg_resources
 
@@ -86,7 +85,7 @@ def get_readable_metro_value(pds):
     try:
         usage_req = get_through_proxy("vigirrd", host, usage_url)
     except urllib2.HTTPError:
-        logging.warning(_("Failed to get URL: %s"),
+        logging.warning("Failed to get URL: %s",
                         url("/vigirrd/%s/%s" % (host, usage_url),
                         qualified=True))
         raise
@@ -99,8 +98,8 @@ def get_readable_metro_value(pds):
             percent = None
         usage = convert_with_unit(usage)
     except (ValueError, TypeError):
-        LOGGER.warning(_("Failed to convert DS %(ds)s on %(host)s: "
-                         "value was %(value)s (max: %(max)s)"), {
+        LOGGER.warning("Failed to convert DS %(ds)s on %(host)s: "
+                         "value was %(value)s (max: %(max)s)", {
                             'ds': pds.name,
                             'host': host,
                             'value': usage,
