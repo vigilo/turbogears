@@ -15,39 +15,29 @@ BuildRequires:   python-distribute
 
 Requires:   python-distribute
 Requires:   vigilo-models vigilo-themes
-Requires:   python-repoze-what-quickstart
-Requires:   python-tg-devtools
-Requires:   python-turbogears2
+Requires:   TurboGears2 >= 2.3.1
 Requires:   python-toscawidgets
 Requires:   python-paste
 Requires:   python-paste-deploy
 Requires:   python-tw-forms
-Requires:   python-rum >= 0.3
-Requires:   python-rum < 0.4
-Requires:   python-tgrum
-Requires:   python-rumalchemy
-Requires:   python-tw-rum
 Requires:   python-decorator >= 3.1.2
-Requires:   python-pylons >= 0.9.7
-Requires:   python-pylons < 0.9.8
 Requires:   python-genshi >= 0.5.1
 Requires:   python-webflash >= 0.1-0.1.a8
 Requires:   python-toscawidgets >= 0.9.4
 Requires:   python-weberror >= 0.10.1
 Requires:   python-webhelpers >= 1.0-0.2.b7
-Requires:   python-repoze-what-pylons
 Requires:   python-repoze-tm2 >= 1.0-0.1.a4
-Requires:   python-turbojson >= 1.2.1
 Requires:   python-kerberos python-urllib2-kerberos
-Requires:   python-rum-policy python-rum-component python-rum-generic
 Requires:   python-ldap
 Requires:   python-transaction
+Requires:   python-repoze-who >= 2.1
+Requires:   python-zope-interface >= 4.0.0
+Requires:   python-tgext-crud >= 0.8.2
+Requires:   python-formencode >= 1.3.1
+Requires:   python-weberror >= 0.10.3
+Requires:   python-repoze-who-friendlyform
+Requires:   mod_wsgi
 Requires:   findutils
-
-# Le plugin a été absorbé par vigilo-turbogears 2.0.8.
-Obsoletes:  vigilo-repoze.who.plugins.vigilo.kerberos <= 2.0.7
-Provides:   vigilo-repoze.who.plugins.vigilo.kerberos = %{version}-%{release}
-Conflicts:  vigilo-repoze.who.plugins.vigilo.kerberos <= 2.0.7
 
 
 %description

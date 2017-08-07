@@ -22,38 +22,29 @@ BuildRequires:   python26-distribute
 
 Requires:   python26-distribute
 Requires:   vigilo-models vigilo-themes
-Requires:   python26-repoze-what-quickstart
-Requires:   python26-tg-devtools
-Requires:   python26-turbogears2
+Requires:   python26-turbogears2 >= 2.3.1
 Requires:   python26-toscawidgets
 Requires:   python26-paste
 Requires:   python26-paste-deploy
 Requires:   python26-tw-forms
-Requires:   python26-rum >= 0.3
-Requires:   python26-rum < 0.4
-Requires:   python26-tgrum
-Requires:   python26-rumalchemy
-Requires:   python26-tw-rum
 Requires:   python26-decorator3 >= 3.1.2
-Requires:   python26-pylons >= 0.9.7
 Requires:   python26-genshi >= 0.5.1
 Requires:   python26-webflash >= 0.1-0.1.a8
 Requires:   python26-toscawidgets >= 0.9.4
 Requires:   python26-weberror >= 0.10.1
 Requires:   python26-webhelpers >= 1.0-0.2.b7
-Requires:   python26-repoze-what-pylons
 Requires:   python26-repoze-tm2 >= 1.0-0.1.a4
-Requires:   python26-turbojson >= 1.2.1
 Requires:   python26-kerberos python26-urllib2-kerberos
-Requires:   python26-rum-policy python26-rum-component python26-rum-generic
 Requires:   python26-ldap
 Requires:   python26-transaction
+Requires:   python26-repoze-who >= 2.1
+Requires:   python26-zope-interface >= 4.0.0
+Requires:   python26-tgext-crud >= 0.8.2
+Requires:   python26-formencode >= 1.3.1
+Requires:   python26-weberror >= 0.10.3
+Requires:   python26-repoze-who-friendlyform
+Requires:   python26-mod_wsgi
 Requires:   findutils
-
-# Le plugin a été absorbé par vigilo-turbogears 2.0.8.
-Obsoletes:  vigilo-repoze.who.plugins.vigilo.kerberos <= 2.0.7
-Provides:   vigilo-repoze.who.plugins.vigilo.kerberos = %{version}-%{release}
-Conflicts:  vigilo-repoze.who.plugins.vigilo.kerberos <= 2.0.7
 
 
 %description

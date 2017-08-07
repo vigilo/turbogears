@@ -23,21 +23,16 @@ La bibliothèque Vigilo-TurboGears a besoin des modules Python suivants :
 - setuptools (ou distribute)
 - vigilo-models
 - vigilo-themes-default
-- TurboGears >= 2.0b7 et < 2.1 (à patcher)
+- TurboGears >= 2.3.1
 - repoze.tm2
-- repoze.what-quickstart
-- repoze.what.plugins.sql
 - repoze.who_testutil
 - repoze.who.plugins.sa
-- tg.devtools
 - ToscaWidgets >= 0.9.7.1
 - tw.forms
 - PasteDeploy
 - Paste
 - decorator (pas la version 3.1.0)
-- rum < 0.4
-- TgRum
-- ToscaWidgets.rum
+- FormEncode >= 1.3.0
 
 Des patches sont nécessaires pour les modules TurboGears et Pylons , ils se
 trouvent dans le dossier "patches".
