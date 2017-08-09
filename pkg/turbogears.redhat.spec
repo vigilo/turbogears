@@ -36,6 +36,7 @@ Requires:   python-tgext-crud >= 0.8.2
 Requires:   python-formencode >= 1.3.1
 Requires:   python-weberror >= 0.10.3
 Requires:   python-repoze-who-friendlyform
+Requires:   python-repoze-who-testutil
 Requires:   mod_wsgi
 Requires:   findutils
 
