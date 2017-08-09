@@ -45,7 +45,8 @@ class VigiloLdapSync(object):
         attr_mail='mail',
         attr_member_cn='cn',
         use_dn=True,
-        timeout=0):
+        timeout=0,
+        normalize_groups=True):
         """
         Initialise le plugin de synchronisation LDAP.
 
@@ -110,12 +111,21 @@ class VigiloLdapSync(object):
         else:
             raise ValueError('A boolean value was expected for "use_dn"')
 
+        normalize_groups = unicode(normalize_groups, 'utf-8', 'replace').lower()
+        if normalize_groups in ('true', 'yes', 'on', '1'):
+            normalize_groups = True
+        elif normalize_groups in ('false', 'no', 'off', '0'):
+            normalize_groups = False
+        else:
+            raise ValueError('A boolean value was expected for "normalize_groups"')
+
         self.ldap_charset = unicode(ldap_charset)
         self.attr_cn = attr_cn
         self.attr_mail = attr_mail
         self.attr_member_cn = attr_member_cn
         self.use_dn = use_dn
         self.timeout = max(0, int(timeout)) or self.ldap.NO_LIMIT
+        self.normalize_groups = normalize_groups
 
     # IMetadataProvider
     def add_metadata(self, environ, identity):
@@ -410,6 +420,8 @@ class VigiloLdapSync(object):
             try:
                 group = group_attribute[1][self.attr_member_cn][0].decode(
                     self.ldap_charset).strip()
+                if self.normalize_groups:
+                    group = group.lower()
                 user_groups.append(group)
             except (IndexError, TypeError):
                 # Certains annuaires (ex: Active Directory) envoient des
