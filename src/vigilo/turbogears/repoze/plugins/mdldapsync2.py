@@ -103,6 +103,8 @@ class VigiloLdapSync(object):
         else:
             raise TypeError("bindpw must be a string")
 
+        if isinstance(use_dn, bool):
+            use_dn = str(use_dn)
         use_dn = unicode(use_dn, 'utf-8', 'replace').lower()
         if use_dn in ('true', 'yes', 'on', '1'):
             use_dn = True
@@ -111,6 +113,8 @@ class VigiloLdapSync(object):
         else:
             raise ValueError('A boolean value was expected for "use_dn"')
 
+        if isinstance(normalize_groups, bool):
+            normalize_groups = str(normalize_groups)
         normalize_groups = unicode(normalize_groups, 'utf-8', 'replace').lower()
         if normalize_groups in ('true', 'yes', 'on', '1'):
             normalize_groups = True

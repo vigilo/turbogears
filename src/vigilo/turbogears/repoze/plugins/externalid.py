@@ -33,6 +33,8 @@ class ExternalIdentification(object):
             de l'utilisateur une fois celui-ci authentifié.
         @type rememberer: str
         """
+        if isinstance(strip_realm, bool):
+            strip_realm = str(strip_realm)
         strip_realm = unicode(strip_realm, 'utf-8', 'replace').lower()
         if strip_realm in ('true', 'yes', 'on', '1'):
             strip_realm = True
