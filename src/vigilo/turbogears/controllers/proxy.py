@@ -376,7 +376,7 @@ class ProxyController(BaseController):
             url = '%s?%s' % (url, urllib.urlencode(get_data))
 
         res = self.data_retriever(self.server_type,
-            host, url, tg.request.POST, headers)
+            host, url, tg.request.POST or None, headers)
 
         # On recopie les en-têtes de la réponse du serveur distant
         # dans notre propre réponse. Cette étape est particulièrement
