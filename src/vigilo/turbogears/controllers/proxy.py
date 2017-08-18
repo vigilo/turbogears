@@ -249,7 +249,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
 
     try:
         res = opener.open(req)
-    except urllib2.HTTPError, e:
+    except urllib2.HTTPError as e:
         # Permet d'associer les erreurs levées par urllib2
         # à des erreurs reconnues par TurboGears2.
         # On obtient ainsi une page d'erreur plus sympathique.

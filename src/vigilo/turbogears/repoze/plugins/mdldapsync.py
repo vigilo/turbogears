@@ -348,7 +348,7 @@ class VigiloLdapSync(object):
         try:
             try:
                 filterstr = self.filterstr % login
-            except TypeError, e:
+            except TypeError as e:
                 if unicode(e) != u'not all arguments converted ' \
                                  u'during string formatting':
                     raise

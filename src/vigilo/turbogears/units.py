@@ -82,7 +82,6 @@ def _get_value_suffix(value):
         return SUFFIXES[index - 1]
 
 def _get_digits(value, digits=3):
-    #print "in:", value
     if len(str(abs(value))) <= digits:
         return value
     if abs(value) < 1:
@@ -93,5 +92,4 @@ def _get_digits(value, digits=3):
         main = str(abs(value))[:digits]
     if value < 0:
         main = "-%s" % main
-    #print "out:", main
     return main

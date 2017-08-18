@@ -4,6 +4,7 @@
 
 """Unit and functional test suite for vigiboard."""
 
+from __future__ import print_function
 import os
 import sys
 import unittest
@@ -21,13 +22,13 @@ __all__ = ['setup_db', 'teardown_db', 'TestController']
 
 def setup_db():
     """Method used to build a database"""
-    print "Creating model"
+    print("Creating model")
     engine = config['tg.app_globals'].sa_engine
     metadata.create_all(engine)
 
 def teardown_db():
     """Method used to destroy a database"""
-    print "Destroying model"
+    print("Destroying model")
     engine = config['tg.app_globals'].sa_engine
     metadata.drop_all(engine)
 
@@ -69,8 +70,8 @@ class TestController(unittest.TestCase):
         """Method called by nose before running each test"""
         # Loading the application:
         conf_dir = '.'
-        print "Testing the application using this profile: %s" % \
-            self.application_under_test
+        print("Testing the application using this profile: %s" %
+              self.application_under_test)
         wsgiapp = loadapp('config:test.ini#%s' %
             self.application_under_test, relative_to=conf_dir)
         self.app = TestApp(wsgiapp)

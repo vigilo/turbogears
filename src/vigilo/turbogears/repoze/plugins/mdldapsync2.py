@@ -355,7 +355,7 @@ class VigiloLdapSync(object):
 
             try:
                 filter = self.user_filter % login
-            except TypeError, e:
+            except TypeError as e:
                 if unicode(e) != u'not all arguments converted ' \
                                  u'during string formatting':
                     raise
@@ -379,7 +379,7 @@ class VigiloLdapSync(object):
                 filter = self.group_filter % (self.use_dn and
                                               user_attributes[0][0].decode(self.ldap_charset) or
                                               login)
-            except TypeError, e:
+            except TypeError as e:
                 if unicode(e) != u'not all arguments converted ' \
                                  u'during string formatting':
                     raise

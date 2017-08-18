@@ -4,6 +4,7 @@
 
 """ Suite de tests du module d'authentification Kerberos"""
 
+from __future__ import print_function
 import unittest
 
 from vigilo.common.logging import get_logger
@@ -122,7 +123,7 @@ class TestKerberosAuthentication(unittest.TestCase):
         """ Préparation des tests """
 
         # Préparation de la base de données
-        print "Setting up the database..."
+        print("Setting up the database...")
 
         # La vue GroupPath dépend de Group et GroupHierarchy.
         # SQLAlchemy ne peut pas détecter correctement la dépendance.
@@ -137,7 +138,7 @@ class TestKerberosAuthentication(unittest.TestCase):
 
         # Instanciation de la classe VigiloLdapSyncTest
         # remplaçant la classe VigiloLdapSync pour les tests.
-        print "Instanciating Kerberos authentication module..."
+        print("Instanciating Kerberos authentication module...")
         self.plugin = VigiloLdapSyncTest(
             ldap_url='ldap://ldap.example.com',
             ldap_base='',
@@ -155,7 +156,7 @@ class TestKerberosAuthentication(unittest.TestCase):
     def tearDown(self):
         """ Nettoyage entre les tests """
 
-        print "Dropping the database..."
+        print("Dropping the database...")
         DBSession.expunge_all()
         metadata.drop_all()
 
@@ -309,6 +310,6 @@ class TestKerberosAuthentication(unittest.TestCase):
         # On s'assure qu'aucun groupe n'a été créé/associé
         # pour cet utilisateur.
         for ug in user.usergroups:
-            print ug.group_name
+            print(ug.group_name)
 
         self.assertEqual(0, len(user.usergroups))
