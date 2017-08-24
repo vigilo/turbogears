@@ -41,6 +41,11 @@ class VigiloAppConfig(AppConfig):
         self.use_toscawidgets2 = False
         self.is_manager = None
 
+        # On désactive la recherche de template basée sur les modules Python.
+        # Ceci évite que TurboGears ne s'y perde lorsqu'on demande à charger
+        # un template non-HTML comme "get_all.xml".
+        self.use_dotted_templatenames = False
+
         # On définit cette variable à False. En réalité, le comportement
         # est le même que si elle valait toujours True, sauf que l'on
         # met en place les middlewares nous même pour pouvoir gérer les
