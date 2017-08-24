@@ -10,6 +10,7 @@ from tgext.crud import EasyCrudRestController
 
 from vigilo.turbogears.sprox.provider import ProviderSelector
 from vigilo.turbogears.sprox.tablefiller import TableFiller
+from vigilo.turbogears.controllers import BaseController
 
 
 __all__ = ['BaseSproxController']
@@ -21,7 +22,7 @@ class MarkupWrapper(object):
     def __unicode__(self):
         return self.markup
 
-class BaseSproxController(EasyCrudRestController):
+class BaseSproxController(EasyCrudRestController, BaseController):
     title = l_('Administration')
     pagination = {"items_per_page": 25}
     provider_type_selector_type = ProviderSelector
@@ -76,7 +77,8 @@ class BaseSproxController(EasyCrudRestController):
     def _before(self, *args, **kw):
         tmpl_context.readonly = getattr(self, 'readonly', False)
         tmpl_context.model_label = getattr(self, 'model_label', self.model.__name__)
-        return super(BaseSproxController, self)._before(*args, **kw)
+        BaseController._before(self, *args, **kw)
+        EasyCrudRestController._before(self, *args, **kw)
 
     def __init__(self, session, menu_items=None):
         # Personnalise les liens associés aux actions (ajout de traductions).
