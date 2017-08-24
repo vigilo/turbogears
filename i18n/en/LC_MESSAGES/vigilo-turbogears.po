@@ -1,15 +1,15 @@
 # English translations for vigilo-turbogears.
-# Copyright (C) 2015 ORGANIZATION
+# Copyright (C) 2017 ORGANIZATION
 # This file is distributed under the same license as the vigilo-turbogears
 # project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: vigilo-turbogears 3.6.0\n"
+"Project-Id-Version: vigilo-turbogears 4.1.0rc2\n"
 "Report-Msgid-Bugs-To: contact.vigilo@c-s.fr\n"
-"POT-Creation-Date: 2015-05-21 11:47+0200\n"
-"PO-Revision-Date: 2015-05-21 11:47+0200\n"
+"POT-Creation-Date: 2017-08-24 14:39+0200\n"
+"PO-Revision-Date: 2017-08-24 14:39+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: en <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -18,31 +18,17 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.4\n"
 
-#: src/vigilo/turbogears/helpers.py:89
-#, python-format
-msgid "Failed to get URL: %s"
-msgstr "Failed to get URL: %s"
-
-#: src/vigilo/turbogears/helpers.py:102
-#, python-format
-msgid ""
-"Failed to convert DS %(ds)s on %(host)s: value was %(value)s (max: "
-"%(max)s)"
-msgstr ""
-"Failed to convert DS %(ds)s on %(host)s: value was %(value)s (max: "
-"%(max)s)"
-
-#: src/vigilo/turbogears/helpers.py:133
+#: src/vigilo/turbogears/helpers.py:122
 #, python-format
 msgid "high-level service \"%s\""
 msgstr "high-level service \"%s\""
 
-#: src/vigilo/turbogears/helpers.py:135
+#: src/vigilo/turbogears/helpers.py:124
 #, python-format
 msgid "host \"%s\""
 msgstr "host \"%s\""
 
-#: src/vigilo/turbogears/helpers.py:137
+#: src/vigilo/turbogears/helpers.py:126
 #, python-format
 msgid "service \"%(service)s\" on host \"%(host)s\""
 msgstr "service \"%(service)s\" on host \"%(host)s\""
@@ -74,7 +60,7 @@ msgstr "%(entry)s is not a subclass of %(base)s"
 msgid "We're sorry but we weren't able to process this request."
 msgstr "We're sorry but we weren't able to process this request."
 
-#: src/vigilo/turbogears/controllers/proxy.py:134
+#: src/vigilo/turbogears/controllers/proxy.py:103
 #, python-format
 msgid ""
 "No server configured to monitor high-level services for application "
@@ -83,49 +69,49 @@ msgstr ""
 "No server configured to monitor high-level services for application "
 "\"%(app)s\""
 
-#: src/vigilo/turbogears/controllers/proxy.py:149
+#: src/vigilo/turbogears/controllers/proxy.py:118
 #, python-format
 msgid "No such monitored host: %s"
 msgstr "No such monitored host: %s"
 
-#: src/vigilo/turbogears/controllers/proxy.py:168
+#: src/vigilo/turbogears/controllers/proxy.py:137
 #, python-format
 msgid "Access denied to host \"%(host)s\" and service \"%(service)s\""
 msgstr "Access denied to host \"%(host)s\" and service \"%(service)s\""
 
-#: src/vigilo/turbogears/controllers/proxy.py:174
+#: src/vigilo/turbogears/controllers/proxy.py:143
 #, python-format
 msgid "Access denied to host \"%s\""
 msgstr "Access denied to host \"%s\""
 
-#: src/vigilo/turbogears/controllers/proxy.py:192
+#: src/vigilo/turbogears/controllers/proxy.py:161
 #, python-format
 msgid "No server configured to monitor \"%(host)s\" for application \"%(app)s\""
 msgstr "No server configured to monitor \"%(host)s\" for application \"%(app)s\""
 
-#: src/vigilo/turbogears/controllers/proxy.py:227
+#: src/vigilo/turbogears/controllers/proxy.py:196
 #, python-format
 msgid "Invalid value for app_redirect.%s, not redirecting."
 msgstr "Invalid value for app_redirect.%s, not redirecting."
 
-#: src/vigilo/turbogears/controllers/proxy.py:233
+#: src/vigilo/turbogears/controllers/proxy.py:202
 #, python-format
 msgid "Fetching '%s' through the proxy"
 msgstr "Fetching '%s' through the proxy"
 
-#: src/vigilo/turbogears/controllers/proxy.py:256
+#: src/vigilo/turbogears/controllers/proxy.py:225
 msgid "Basic authentication to the proxy."
 msgstr "Basic authentication to the proxy."
 
-#: src/vigilo/turbogears/controllers/proxy.py:259
+#: src/vigilo/turbogears/controllers/proxy.py:228
 msgid "Digest authentication to the proxy."
 msgstr "Digest authentication to the proxy."
 
-#: src/vigilo/turbogears/controllers/proxy.py:276
+#: src/vigilo/turbogears/controllers/proxy.py:245
 msgid "Basic authentication to the website."
 msgstr "Basic authentication to the website."
 
-#: src/vigilo/turbogears/controllers/proxy.py:279
+#: src/vigilo/turbogears/controllers/proxy.py:248
 msgid "Digest authentication to the website."
 msgstr "Digest authentication to the website."
 
@@ -144,96 +130,127 @@ msgstr "You don't have access to %s"
 msgid "Vigilo has detected a breakdown on the following collector(s): %(list)s"
 msgstr "Vigilo has detected a breakdown on the following collector(s): %(list)s"
 
+#: src/vigilo/turbogears/controllers/sprox.py:25
+msgid "Administration"
+msgstr "Administration"
+
+#: src/vigilo/turbogears/controllers/sprox.py:43
+msgid "Are you sure?"
+msgstr "Are you sure?"
+
+#: src/vigilo/turbogears/controllers/sprox.py:44
+msgid "Edit"
+msgstr "Edit"
+
+#: src/vigilo/turbogears/controllers/sprox.py:45
+msgid "Delete"
+msgstr "Delete"
+
+#: src/vigilo/turbogears/controllers/sprox.py:91
+msgid "Submit"
+msgstr "Submit"
+
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:147
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:161
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:170
 #, python-format
 msgid "Remote user: %s"
 msgstr "Remote user: %s"
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:165
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:179
 msgid "Beaker must be present in the WSGI middleware stack for the cache to work"
 msgstr "Beaker must be present in the WSGI middleware stack for the cache to work"
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:179
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:193
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:179
 msgid "Exception while contacting LDAP server"
 msgstr "Exception while contacting LDAP server"
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:199
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:213
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:199
 #, python-format
 msgid "New user created: %s"
 msgstr "New user created: %s"
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:203
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:217
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:203
 msgid "Exception during user creation"
 msgstr "Exception during user creation"
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:212
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:226
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:212
 #, python-format
 msgid "Removing user \"%(user)s\" from group \"%(group)s\""
 msgstr "Removing user \"%(user)s\" from group \"%(group)s\""
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:239
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:253
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:236
 #, python-format
 msgid "Creating group \"%s\""
 msgstr "Creating group \"%s\""
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:247
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:261
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:244
 #, python-format
 msgid "Adding user \"%(user)s\" to group \"%(group)s\""
 msgstr "Adding user \"%(user)s\" to group \"%(group)s\""
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:264
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:278
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:261
 msgid "Exception during groups creation"
 msgstr "Exception during groups creation"
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:292
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:306
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:288
 #, python-format
 msgid "Attempting connection to \"%s\""
 msgstr "Attempting connection to \"%s\""
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:320
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:334
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:316
 #, python-format
 msgid "Could not connect to LDAP server '%s', trying next server"
 msgstr "Could not connect to LDAP server '%s', trying next server"
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:325
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:339
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:321
 msgid "No more LDAP servers to try"
 msgstr "No more LDAP servers to try"
 
 #: src/vigilo/turbogears/repoze/plugins/mdldapsync.py:369
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:393
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:375
 #, python-format
 msgid "User \"%s\" not found in the LDAP server"
 msgstr "User \"%s\" not found in the LDAP server"
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:366
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:348
 #, python-format
 msgid "Bound to the LDAP server as '%s'"
 msgstr "Bound to the LDAP server as '%s'"
 
-#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:418
+#: src/vigilo/turbogears/repoze/plugins/mdldapsync2.py:400
 #, python-format
 msgid "Could not retrieve groups from LDAP server for \"%s\""
 msgstr "Could not retrieve groups from LDAP server for \"%s\""
 
-#: src/vigilo/turbogears/rum/fields/group_relation.py:126
-#: src/vigilo/turbogears/rum/fields/group_relation.py:150
-msgid "Groups of monitored items"
-msgstr "Groups of monitored items"
+#: src/vigilo/turbogears/sprox/fields.py:17
+#: src/vigilo/turbogears/sprox/fields.py:24
+msgid "Read-only"
+msgstr "Read-only"
 
-#: src/vigilo/turbogears/rum/fields/group_relation.py:129
-#: src/vigilo/turbogears/rum/fields/group_relation.py:155
-msgid "Groups of maps"
-msgstr "Groups of maps"
+#: src/vigilo/turbogears/sprox/fields.py:17
+#: src/vigilo/turbogears/sprox/fields.py:24
+msgid "Read/write"
+msgstr "Read/write"
+
+#: src/vigilo/turbogears/sprox/fields.py:98
+msgid "Monitoring groups"
+msgstr "Monitoring groups"
+
+#: src/vigilo/turbogears/sprox/fields.py:101
+msgid "Map groups"
+msgstr "Map groups"
+
+#: src/vigilo/turbogears/sprox/fields.py:104
+msgid "Graph groups"
+msgstr "Graph groups"
 
