@@ -55,6 +55,8 @@ def get_all_hosts():
     # ACLs
     if not tg.config.is_manager.is_met(tg.request.environ):
         user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
+        if not user_groups:
+            return []
         hosts = hosts.filter(or_(
             hostgroup.c.idgroup.in_(user_groups),
             servicegroup.c.idgroup.in_(user_groups),

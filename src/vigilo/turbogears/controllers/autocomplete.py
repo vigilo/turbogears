@@ -82,6 +82,8 @@ class AutoCompleteController(BaseController):
 
         if not config.is_manager.is_met(request.environ):
             user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
+            if not user_groups:
+                return dict(results=[])
             hostnames = hostnames.filter(or_(
                 hostgroup.c.idgroup.in_(user_groups),
                 servicegroup.c.idgroup.in_(user_groups),
@@ -144,6 +146,8 @@ class AutoCompleteController(BaseController):
 
         if not config.is_manager.is_met(request.environ):
             user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
+            if not user_groups:
+                return dict(results=[])
             services = services.filter(or_(
                 hostgroup.c.idgroup.in_(user_groups),
                 servicegroup.c.idgroup.in_(user_groups),
@@ -240,6 +244,8 @@ class AutoCompleteController(BaseController):
 
         if not config.is_manager.is_met(request.environ):
             user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
+            if not user_groups:
+                return dict(results=[])
             supitemgroups = supitemgroups.filter(
                 SupItemGroup.idgroup.in_(user_groups),
             )
@@ -288,6 +294,8 @@ class AutoCompleteController(BaseController):
 
         if not config.is_manager.is_met(request.environ):
             user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
+            if not user_groups:
+                return dict(results=[])
             perfdatasources = perfdatasources.join(
                     (SUPITEM_GROUP_TABLE, SUPITEM_GROUP_TABLE.c.idsupitem == \
                         Host.idhost),
@@ -341,6 +349,8 @@ class AutoCompleteController(BaseController):
 
         if not config.is_manager.is_met(request.environ):
             user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
+            if not user_groups:
+                return dict(results=[])
             graphs = graphs.join(
                     (SUPITEM_GROUP_TABLE, SUPITEM_GROUP_TABLE.c.idsupitem == \
                         Host.idhost),
