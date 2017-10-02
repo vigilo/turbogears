@@ -211,19 +211,19 @@ class TestKerberosAuthentication(unittest.TestCase):
         # On vérifie que l'utilisateur a bien été créé
         # et que les données enregistrées sont correctes.
         user = tables.User.by_user_name(u'johndoeé')
-        self.failIfEqual(user, None, 'User not created')
+        self.assertNotEqual(user, None, 'User not created')
 
         # On s'assure que les groupes indiqués on bien été créés
         # et que l'utilisateur y appartient bien.
         for ug in usergroups:
             usergroup = tables.UserGroup.by_group_name(unicode(ug))
-            self.failIfEqual(usergroup, None,
+            self.assertNotEqual(usergroup, None,
                 u'Missing usergroup (%s)' % ug)
 
         # On s'assure qu'il n'y a pas de groupes supplémentaires
         # par rapport à ceux demandés.
         for ug in user.usergroups:
-            self.failIf(ug.group_name not in usergroups,
+            self.assertFalse(ug.group_name not in usergroups,
                 u'Unexpected usergroup (%s)' % ug.group_name)
 
     def test_update(self):
@@ -263,19 +263,19 @@ class TestKerberosAuthentication(unittest.TestCase):
         # On vérifie que l'utilisateur a bien été créé
         # et que les données enregistrées sont correctes.
         user = tables.User.by_user_name(identity['login'])
-        self.failIfEqual(user, None, 'User not created')
+        self.assertNotEqual(user, None, 'User not created')
 
         # On s'assure que les groupes indiqués ont bien été créés
         # et que l'utilisateur y appartient bien.
         for ug in usergroups:
             usergroup = tables.UserGroup.by_group_name(unicode(ug))
-            self.failIfEqual(usergroup, None,
+            self.assertNotEqual(usergroup, None,
                 u'Missing usergroup (%s)' % ug)
 
         # On s'assure qu'il n'y a pas de groupes supplémentaires
         # par rapport à ceux demandés.
         for ug in user.usergroups:
-            self.failIf(ug.group_name not in usergroups,
+            self.assertFalse(ug.group_name not in usergroups,
                 u'Unexpected usergroup (%s)' % ug.group_name)
 
     def test_empty_groups(self):
@@ -305,7 +305,7 @@ class TestKerberosAuthentication(unittest.TestCase):
         # On vérifie que l'utilisateur a bien été créé
         # et que les données enregistrées sont correctes.
         user = tables.User.by_user_name(u'johndoeé')
-        self.failIfEqual(user, None, 'User not created')
+        self.assertNotEqual(user, None, 'User not created')
 
         # On s'assure qu'aucun groupe n'a été créé/associé
         # pour cet utilisateur.
