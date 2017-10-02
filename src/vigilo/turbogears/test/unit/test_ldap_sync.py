@@ -177,9 +177,9 @@ class TestKerberosAuthentication(unittest.TestCase):
 
         # On s'assure que les informations récupérées dans
         # l'annuaire LDAP sont conformes à celles attendues.
-        self.assertEquals(user_fullname, u"John Doe")
-        self.assertEquals(user_email, u'john.doe@example.com')
-        self.assertEquals(user_groups, [
+        self.assertEqual(user_fullname, u"John Doe")
+        self.assertEqual(user_email, u'john.doe@example.com')
+        self.assertEqual(user_groups, [
             u'vigiboard-modification',
             u'vigimap-edition',
             u'vigigraph-consultation',
