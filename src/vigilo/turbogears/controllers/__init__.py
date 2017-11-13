@@ -3,11 +3,12 @@
 # License: GNU GPL v2 <http://www.gnu.org/licenses/gpl-2.0.html>
 
 """Contrôleurs communs à plusieurs applications."""
-
+from __future__ import absolute_import
 from io import UnsupportedOperation
-from tg import tmpl_context, request, i18n, controllers
+from tg import tmpl_context, request, controllers
 from tg.render import render
-from tg.i18n import ugettext as _, ungettext, gettext_noop as N_
+from tg.i18n import ugettext as _, ungettext, gettext_noop as N_, \
+    LanguageError, get_lang, add_fallback
 from tw.api import WidgetBunch
 from pkg_resources import resource_filename
 
@@ -69,9 +70,10 @@ class BaseController(controllers.TGController):
             ('vigilo-common', None),
         )
 
-        lang = i18n.get_lang() or 'en'
+        lang = get_lang() or 'en'
         for pkg, localedir in transl:
             try:
-                i18n.add_fallback(lang, tg_config={'localedir': localedir, 'package': Package(pkg)})
-            except i18n.LanguageError:
+                add_fallback(lang, tg_config={'localedir': localedir,
+                                              'package': Package(pkg)})
+            except LanguageError:
                 pass
