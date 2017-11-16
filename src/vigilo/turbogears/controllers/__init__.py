@@ -9,7 +9,6 @@ from tg import tmpl_context, request, controllers
 from tg.render import render
 from tg.i18n import ugettext as _, ungettext, gettext_noop as N_, \
     LanguageError, get_lang, add_fallback
-from tw.api import WidgetBunch
 from pkg_resources import resource_filename
 
 from gettext import translation

@@ -5,7 +5,7 @@
 from tg import expose, tmpl_context
 from tg.i18n import lazy_ugettext as l_, ugettext as _
 from markupsafe import Markup
-from tw.forms import SubmitButton
+from tw2.forms import SubmitButton
 from tgext.crud import EasyCrudRestController
 
 from vigilo.turbogears.sprox.provider import ProviderSelector
@@ -89,8 +89,8 @@ class BaseSproxController(EasyCrudRestController, BaseController):
         # Personnalise le bouton "Submit" du formulaire (ajout de traduction).
         if not hasattr(self, '__form_options__'):
             self.__form_options__ = {}
-        self.__form_options__.setdefault('__add_fields__', {})['submit'] = \
-            SubmitButton('submit', default=l_('Submit'))
+        #self.__form_options__.setdefault('__add_fields__', {})['submit'] = \
+        #    SubmitButton('submit', default=l_('Submit'))
 
         # Personnalise le provider (et son sélecteur) afin que les valeurs
         # des listes déroulantes soient triées automatiquement.
@@ -99,7 +99,7 @@ class BaseSproxController(EasyCrudRestController, BaseController):
         self.__form_options__.setdefault('__provider_type_selector_type__', ProviderSelector)
         self.__form_options__.setdefault('__provider_type_selector__', ProviderSelector())
 
-        # Personnalise le remplisseur de tableau afin que les "noms possibles"
+        # Personnalise le remplisseur de tableaux afin que les "noms possibles"
         # (intitulés pouvant faire partie d'un nom d'attribut correspondant
         # au nom à afficher pour représenter l'objet) soient aussi utilisés
         # pour les attributs provenant de relations.

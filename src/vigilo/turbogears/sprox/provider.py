@@ -8,6 +8,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Mapper
 from warnings import warn
 
+
 class ProviderSelector(object):
     def __init__(self):
         self.provider = None
@@ -19,6 +20,7 @@ class ProviderSelector(object):
 
     def get_selector(self, entity=None, **hints):
         return self
+
 
 class DataProvider(SAORMProvider):
     def get_dropdown_options(self, entity, field_name, view_names=None):

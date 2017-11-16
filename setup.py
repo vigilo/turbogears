@@ -70,8 +70,6 @@ setup(
         "repoze.who >= 2.0",
         "TurboGears2 >= 2.3.1",
         "TurboGears2 < 2.4dev",
-        "ToscaWidgets >= 0.9.7.1",
-        "tw.forms",
         "PasteDeploy",
         "Paste",
         "decorator != 3.1.0", # Blacklist bad version
@@ -83,6 +81,8 @@ setup(
         "zope.interface >= 4.0.0",
         "FormEncode >= 1.3.1",
         "backlash",
+        "tw2.core",
+        "tw2.forms",
     ],
     namespace_packages = [
         'vigilo',

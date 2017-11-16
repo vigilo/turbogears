@@ -2,6 +2,7 @@
 # Copyright (C) 2017-2021 CS GROUP - France
 # License: GNU GPL v2 <http://www.gnu.org/licenses/gpl-2.0.html>
 
+from tw2.core import Param
 from tg.i18n import lazy_ugettext as l_, ugettext as _
 from sprox.widgets import TextField, PropertySingleSelectField, Label
 from sqlalchemy import func
@@ -13,17 +14,19 @@ from vigilo.models.tables.group import Group
 
 
 class AccessField(PropertySingleSelectField):
-    def _my_update_params(self, d, nullable=False):
-        d.options = [('r', _('Read-only')), ('w', _('Read/write'))]
-        return d
+    def prepare(self):
+        self.options = [(u'r', _('Read-only')), (u'w', _('Read/write'))]
+        if not self.value:
+            self.value = ''
+        super(PropertySingleSelectField, self).prepare()
+
 
 
 class ReadOnlyAccessField(Label):
-    def update_params(self, d):
-        super(ReadOnlyAccessField, self).update_params(d)
+    def prepare(self):
+        super(ReadOnlyAccessField, self).prepare()
         accesses = {u'r': _('Read-only'), u'w': _('Read/write')}
-        d.text = accesses[d.value['access']]
-        return d
+        self.text = accesses[self.value['access']]
 
 
 class GroupValidator(FancyValidator):
@@ -59,30 +62,33 @@ class GroupValidator(FancyValidator):
         return group
 
     def _convert_from_python(self, value, state):
-        if not isinstance(value, Group):
-            raise Invalid(self.message('invalidType', state), value, state)
-        return unicode(value.idgroup)
+        group = DBSession.query(Group).get(value)
+        if not group:
+            raise Invalid(self.message('invalidId', state), value, state)
+        return value
 
 
 class GroupField(PropertySingleSelectField):
-    params = ["supitemgroups", "mapgroups", "graphgroups"]
-    supitemgroups = False
-    mapgroups = False
-    graphgroups = False
+    supitemgroups = Param('supitemgroups', attribute=False, default=False)
+    mapgroups = Param('mapgroups', attribute=False, default=False)
+    graphgroups = Param('graphgroups', attribute=False, default=False)
 
-    def __init__(self, id=None, parent=None, children=[], **kw):
-        super(GroupField, self).__init__(id, parent, children, **kw)
+    def __init__(self, **kw):
+        super(GroupField, self).__init__(**kw)
+        self.provider = None
         self.validator = GroupValidator(
             supitemgroups=self.supitemgroups,
             mapgroups=self.mapgroups,
             graphgroups=self.graphgroups,
         )
 
-    def _my_update_params(self, d, nullable=False):
+    def prepare(self):
+        entity = self.__class__.entity
+
         options = []
 
-        if nullable:
-            options.append([None, "-----------"])
+        if self.nullable:
+            options.append(['', "-----------"])
 
         groups = DBSession.query(
                 Group
@@ -103,8 +109,7 @@ class GroupField(PropertySingleSelectField):
         if self.graphgroups and by_group['GraphGroup']:
             options.append( (l_("Graph groups"), by_group['GraphGroup']) )
 
-        if len(options) == 0:
-            return {}
-        d['options']= options
-        return d
-
+        self.options = options
+        if not self.value:
+            self.value = ''
+        super(PropertySingleSelectField, self).prepare()

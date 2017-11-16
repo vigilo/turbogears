@@ -14,11 +14,11 @@ from pkg_resources import resource_filename, working_set, get_distribution
 from paste.deploy.converters import asbool
 from logging import getLogger
 
+from tg import lurl
 from tg.configuration import AppConfig, config
 from tg.configuration.app_config import config as tg_config
 from tg.util import Bunch
 from tg.predicates import in_any_group
-from tw.core.resources import _JavascriptFileIter
 
 from vigilo.turbogears.js_codec import backslash_search
 
@@ -60,20 +60,28 @@ class VigiloAppConfig(AppConfig):
         """Crée une nouvelle configuration."""
         super(VigiloAppConfig, self).__init__()
         self.app_name = app_name
-        self.use_toscawidgets = True
-        self.use_toscawidgets2 = False
         self.is_manager = None
 
+        self.use_toscawidgets = False
+        self.use_toscawidgets2 = True
+        self.custom_tw2_config = {'script_name': lurl('/')}
+
+        # Configuration du moteur de rendu (Genshi).
         # On désactive la recherche de template basée sur les modules Python.
         # Ceci évite que TurboGears ne s'y perde lorsqu'on demande à charger
         # un template non-HTML comme "get_all.xml".
         self.use_dotted_templatenames = False
+        self.default_renderer = 'genshi'
+        self.renderers = ['genshi', 'mako'] # mako is used by some tw2 widgets
 
         # On définit cette variable à False. En réalité, le comportement
         # est le même que si elle valait toujours True, sauf que l'on
         # met en place les middlewares nous même pour pouvoir gérer les
         # thèmes (cf. <module>/config/middleware.py dans une application).
         self.serve_static = False
+
+        # Configure the base SQLALchemy Setup
+        self.use_sqlalchemy = True
 
         # Permet d'initialiser correctement la base de données.
         self.auth_backend = 'sqlalchemy'
@@ -86,19 +94,6 @@ class VigiloAppConfig(AppConfig):
         from webob.exc import WSGIHTTPException, Template
         WSGIHTTPException.html_template_obj = Template('''${body}''')
         WSGIHTTPException.body_template_obj = Template('''${detail}''')
-
-        # La méthode translate() sur un objet de type unicode n'accepte
-        # que des caractères unicode en guise de mapping et le chemin
-        # de la requête est en unicode dans les versions récentes de WebOb.
-        _JavascriptFileIter.TRANSLATION_TABLE = \
-            unicode(_JavascriptFileIter.TRANSLATION_TABLE)
-
-        self.renderers = []
-        self.default_renderer = 'genshi'
-        self.renderers.append('genshi')
-
-        #Configure the base SQLALchemy Setup
-        self.use_sqlalchemy = True
 
         # version
         self.version = get_distribution("vigilo-%s" %

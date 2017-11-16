@@ -18,8 +18,7 @@ from vigilo.models.tables.secondary_tables import SUPITEM_GROUP_TABLE, \
 
 from vigilo.turbogears.helpers import get_current_user
 from vigilo.turbogears.controllers import BaseController
-from tw.forms import validators
-from formencode import schema
+from formencode import schema, validators
 
 # pylint: disable-msg=R0201,W0232
 # - R0201: méthodes pouvant être écrites comme fonctions (imposé par TG2)
