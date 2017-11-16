@@ -89,8 +89,7 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
     # S'il s'agit du proxy Nagios et que l'hôte donné
     # correspond à l'hôte virtuel des Services de Haut Niveau,
     # alors on utilise l'application "nagios-hls" à la place.
-    hls_host = config.get('nagios_hls_host')
-    if server_type == u'nagios' and host == hls_host:
+    if server_type == u'nagios' and host == 'High-Level-Services':
         vigilo_server = DBSession.query(
                 VigiloServer.name
             ).distinct().join(
