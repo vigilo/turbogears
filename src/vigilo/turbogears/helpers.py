@@ -9,7 +9,11 @@ Bibliothèque de fonctions outils pour les applications utilisant TurboGears.
 import logging
 import urllib2
 
-import simplejson
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
 from tg import request, url
 from tg.i18n import ugettext as _
 from vigilo.models.tables import User
@@ -89,7 +93,7 @@ def get_readable_metro_value(pds):
                         url("/vigirrd/%s/%s" % (host, usage_url),
                         qualified=True))
         raise
-    usage = simplejson.load(usage_req)['lastvalue']
+    usage = json.load(usage_req)['lastvalue']
     try:
         usage = float(usage)
         if pds.max is not None:
