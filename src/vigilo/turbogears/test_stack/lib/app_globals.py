@@ -1,3 +1,6 @@
+# Copyright (C) 2017-2018 CS-SI
+# License: GNU GPL v2 <http://www.gnu.org/licenses/gpl-2.0.html>
+
 class Globals(object):
     """Container for objects available throughout the life of the application.
 

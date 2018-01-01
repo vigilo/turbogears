@@ -1,3 +1,6 @@
+# Copyright (C) 2017-2018 CS-SI
+# License: GNU GPL v2 <http://www.gnu.org/licenses/gpl-2.0.html>
+
 from vigilo.turbogears.controllers.auth import AuthController
 from vigilo.turbogears.controllers.selfmonitoring import SelfMonitoringController
 from vigilo.turbogears.controllers.custom import CustomController
