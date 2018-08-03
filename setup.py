@@ -42,7 +42,7 @@ setup(
     version='4.1.0',
     author='Vigilo Team',
     author_email='contact.vigilo@c-s.fr',
-    url='http://www.vigilo-nms.com/',
+    url='https://www.vigilo-nms.com/',
     license='http://www.gnu.org/licenses/gpl-2.0.html',
     description="Vigilo TurboGears extension library",
     long_description="This library provides the Vigilo extensions "

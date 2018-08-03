@@ -82,7 +82,7 @@ et donne une brève définition de chacun de ces termes.
     :abbr:`URL (Uniform Resource Locator)`
         Chaîne de caractères permettant d'identifier une ressource, par exemple
         une page web sur Internet.
-        Exemple : http://www.vigilo-nms.com/
+        Exemple : https://www.vigilo-nms.com/
 
     :abbr:`WSGI (Web Server Gateway Interface)`
         Une interface pour la communication entre une application et un serveur
