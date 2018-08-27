@@ -14,6 +14,19 @@ from repoze.who.plugins.sa import SQLAlchemyAuthenticatorPlugin
 from vigilo.models import tables, session
 
 class VigiloSAAuthenticatorPlugin(SQLAlchemyAuthenticatorPlugin):
+    def __init__(self, user_class, dbsession, bypass):
+        super(VigiloSAAuthenticatorPlugin, self).__init__(user_class, dbsession)
+        self.bypass = int(bypass)
+
+    def validate_password(self, password):
+        return True
+
+    def get_user(self, username):
+        res = super(VigiloSAAuthenticatorPlugin, self).get_user(username)
+        if not self.bypass:
+            return res
+        return (self if res else None)
+
     def authenticate(self, environ, identity):
         res = super(VigiloSAAuthenticatorPlugin, self).authenticate(
                 environ, identity)
@@ -28,5 +41,5 @@ class VigiloSAAuthenticatorPlugin(SQLAlchemyAuthenticatorPlugin):
             })
         return res
 
-# Authentification.
-plugin = VigiloSAAuthenticatorPlugin(tables.User, session.DBSession)
+def plugin(bypass=0):
+    return VigiloSAAuthenticatorPlugin(tables.User, session.DBSession, bypass)

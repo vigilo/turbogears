@@ -18,9 +18,16 @@ from repoze.who.interfaces import IRequestClassifier
 from repoze.who.classifiers import default_request_classifier
 
 def vigilo_classifier(environ):
-    from paste.httpheaders import PATH_INFO
-    if '/api/' in PATH_INFO(environ):
+    if '/api/' in environ.get('PATH_INFO', ''):
         return 'vigilo-api'
+
+    # Si la requête provient de 127.0.0.1, on utilise une classification
+    # spéciale qui permettra d'identifier cette connexion comme étant interne.
+    # Note : dans le cas où un reverse proxy est utilisé, l'adresse IP source
+    #        peut être incorrecte. Cette classification ne doit alors pas être
+    #        utilisée.
+    if environ.get('REMOTE_ADDR') in ('127.0.0.1', '::1'):
+        return 'internal'
 
     # Sinon, on s'en remet au classifier par défaut (qui identifie
     # le type "browser" correspondant à une requête de navigateur HTTP).
