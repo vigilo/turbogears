@@ -50,7 +50,6 @@ setup(
     install_requires=[
         "setuptools",
         "repoze.tm2 >= 1.0a4",
-        "repoze.who_testutil < 1.0.1",
         "repoze.who.plugins.sa",
         "repoze.who_friendlyform",
         "repoze.who >= 2.0",

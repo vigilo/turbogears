@@ -36,7 +36,6 @@ Requires:   python-tgext-crud >= 0.8.2
 Requires:   python-formencode >= 1.3.1
 Requires:   python-weberror >= 0.10.3
 Requires:   python-repoze-who-friendlyform
-Requires:   python-repoze-who-testutil < 1.0.1
 Requires:   mod_wsgi
 Requires:   findutils
 
@@ -68,7 +67,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -f %{name}.lang
 %defattr(644,root,root,755)
-%doc COPYING.txt
+%doc COPYING.txt LICENSE.testutil.txt
 %{python_sitelib}/vigilo
 %{python_sitelib}/*.egg-info
 %{python_sitelib}/*-nspkg.pth

@@ -3,6 +3,7 @@ include buildenv/buildout.*.cfg
 include buildout.cfg
 include Makefile
 include COPYING.txt
+include LICENSE.testutil.txt
 
 graft doc
 graft pkg

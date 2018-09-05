@@ -7,9 +7,9 @@
 import sys, logging
 from paste.response import remove_header
 from paste.deploy.converters import asbool
-from repoze.who.plugins.testutil import AuthenticationForgerPlugin
 from repoze.who.config import WhoConfig, _LEVELS
 from repoze.who.middleware import PluggableAuthenticationMiddleware
+from vigilo.turbogears.repoze.plugins.testutil import AuthenticationForgerPlugin
 
 
 class VigiloAuthMiddleware(PluggableAuthenticationMiddleware):
