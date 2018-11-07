@@ -62,14 +62,14 @@ setup(
         "PasteDeploy",
         "Paste",
         "decorator != 3.1.0", # Blacklist bad version
-        "vigilo-models",
-        "vigilo-themes-default",
         "RumAlchemy < 0.4dev",
         "rum < 0.4dev",
         "TgRum",
         "python-ldap",
         "WebHelpers >= 1.0b4",
         "WebOb < 1.0",
+        "vigilo-themes-default",
+        "vigilo-models", # Permet de contraindre SQLAlchemy
     ],
     paster_plugins=[
         'PasteScript',
