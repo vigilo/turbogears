@@ -13,8 +13,6 @@ LOGGER = get_logger(__name__)
 from vigilo.turbogears.repoze.plugins.mdldapsync import VigiloLdapSync
 from vigilo.models.session import DBSession, metadata
 from vigilo.models import tables
-from vigilo.models.tables.grouppath import GroupPath
-from vigilo.models.tables.usersupitem import UserSupItem
 
 class FakeLdapConnection(object):
     """
@@ -125,16 +123,18 @@ class TestKerberosAuthentication(unittest.TestCase):
         # Préparation de la base de données
         print("Setting up the database...")
 
-        # La vue GroupPath dépend de Group et GroupHierarchy.
-        # SQLAlchemy ne peut pas détecter correctement la dépendance.
-        # On crée le schéma en 2 fois pour contourner ce problème.
-        # Idem pour la vue UserSupItem (6 dépendances).
+        # On crée les tables, puis les vues.
         mapped_tables = metadata.tables.copy()
-        del mapped_tables[GroupPath.__tablename__]
-        del mapped_tables[UserSupItem.__tablename__]
+        views = {}
+        for tablename in mapped_tables:
+            info = mapped_tables[tablename].info or {}
+            if info.get('vigilo_view'):
+                views[tablename] = mapped_tables[tablename]
+        for view in views:
+            del mapped_tables[view]
+
         metadata.create_all(tables=mapped_tables.itervalues())
-        metadata.create_all(
-            tables=[GroupPath.__table__, UserSupItem.__table__])
+        metadata.create_all(tables=views.values())
 
         # Instanciation de la classe VigiloLdapSyncTest
         # remplaçant la classe VigiloLdapSync pour les tests.
