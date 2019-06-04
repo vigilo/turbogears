@@ -89,10 +89,9 @@ class SelfMonitoringController(BaseController):
             if c.state not in [
                 StateName.statename_to_value('OK'),
                 StateName.statename_to_value('WARNING')
-            ] or c.timestamp <= datetime.now() - timedelta(seconds=threshold):
+            ] or c.timestamp <= datetime.utcnow() - timedelta(seconds=threshold):
                 collectors_down.append(c.name)
 
         # On retourne cette seconde liste
         return collectors_down
-
 
