@@ -23,6 +23,14 @@ _ = translate(__name__)
 
 __all__ = ['VigiloLdapSync']
 
+_CERT_REQ = { "never": ldap.OPT_X_TLS_NEVER,
+              "allow": ldap.OPT_X_TLS_ALLOW,
+              "demand": ldap.OPT_X_TLS_DEMAND,
+              "try": ldap.OPT_X_TLS_TRY,
+              "hard": ldap.OPT_X_TLS_HARD,
+              "": ldap.OPT_X_TLS_ALLOW,
+            }
+
 class VigiloLdapSync(object):
     """
     Une classe qui synchronise les comptes dans la base de données Vigilo
@@ -38,6 +46,10 @@ class VigiloLdapSync(object):
         group_tree,
         user_filter,
         group_filter,
+        tls_key='',
+        tls_cert='',
+        tls_ca_cert='',
+        tls_reqcert='',
         ldap_charset='utf-8',
         binddn=None,
         bindpw='',
@@ -57,6 +69,15 @@ class VigiloLdapSync(object):
         @param ldap_base: le DN (Distinguished Name) de l'entrée
             à partir de laquelle effectuer la recherche LDAP.
         @type ldap_base: C{basestring}
+        @type tls_key: C{basestring}
+        @param tls_key: la clé du certificat TLS.
+        @type tls_cert: C{basestring}
+        @param tls_cert: le certificat TLS.
+        @type tls_ca_cert: C{basestring}
+        @param tls_ca_cert: la CA du certificat TLS.
+        @type tls_reqcert: C{basestring}
+        @param tls_reqcert: option TLS_REQUIRE_CERT (options possibles : never,
+            allow, try, demand, hard).
         @param filterstr: Filtre appliqué aux résultats de la recherche
             dans l'annuaire. Par défaut, le filtre vaut "(objectClass=*)".
         @type filterstr: C{basestring}
@@ -92,6 +113,22 @@ class VigiloLdapSync(object):
 
         if not len(self.ldap_url):
             raise ValueError("ldap_url should contain at least one URL")
+
+        if not isinstance(tls_key, basestring):
+            raise TypeError("tls_key must be a string")
+        self.tls_key = tls_key
+
+        if not isinstance(tls_cert, basestring):
+            raise TypeError("tls_cert must be a string")
+        self.tls_cert = tls_cert
+
+        if not isinstance(tls_ca_cert, basestring):
+            raise TypeError("tls_ca_cert must be a string ")
+        self.tls_ca_cert = tls_ca_cert
+
+        self.tls_reqcert = _CERT_REQ.get(tls_reqcert.lower())
+        if self.tls_reqcert is None:
+            raise TypeError("tls_reqcert must be one of: %s" % ", ".join(_CERT_REQ.keys()))
 
         if binddn is None or isinstance(binddn, basestring):
             self.binddn = binddn
@@ -284,6 +321,7 @@ class VigiloLdapSync(object):
         logger = environ.get('repoze.who.logger')
         for ldap_url in self.ldap_url:
             try:
+                new_ctxt = False
                 # Connexion à l'annuaire LDAP
                 logger and logger.debug(_('Attempting connection to "%s"'),
                                         ldap_url)
@@ -291,6 +329,27 @@ class VigiloLdapSync(object):
                 ldap_conn.set_option(self.ldap.OPT_NETWORK_TIMEOUT, self.timeout)
                 ldap_conn.set_option(self.ldap.OPT_TIMEOUT, self.timeout)
                 ldap_conn.set_option(self.ldap.OPT_TIMELIMIT, self.timeout)
+
+                if self.tls_key:
+                    ldap_conn.set_option(self.ldap.OPT_X_TLS_KEYFILE, self.tls_key)
+                    new_ctxt = True
+
+                if self.tls_cert:
+                    ldap_conn.set_option(self.ldap.OPT_X_TLS_CERTFILE, self.tls_cert)
+                    new_ctxt = True
+
+                if self.tls_ca_cert:
+                    ldap_conn.set_option(ldap.OPT_X_TLS_CACERTFILE, self.tls_ca_cert)
+                    new_ctxt = True
+
+                if self.tls_reqcert:
+                    ldap_conn.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, self.tls_reqcert)
+                    new_ctxt = True
+
+                # Si une des options TLS est positionnée alors on force la création
+                # d'un nouveau contexte pour la connexion TLS
+                if new_ctxt:
+                    ldap_conn.set_option(ldap.OPT_X_TLS_NEWCTX, 0)
 
                 # Si un utilisateur particulier a été configuré pour le bind,
                 # on l'utilise.
