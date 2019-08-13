@@ -60,12 +60,8 @@ class VigiloAuthMiddleware(PluggableAuthenticationMiddleware):
         La clé "repoze.who.remote_user_key" contiendra le nom de la clé
         de l'environnement contenant le nom du l'utilisateur pré-authentifié
         (en cas d'authentification externe).
-
-        La clé "vigilo.external_auth" indique si l'utilisateur a été
-        (pré-)authentifié à l'aide d'une source externe ou non.
         """
         environ['repoze.who.remote_user_key'] = self.actual_remote_user_key
-        environ.setdefault('vigilo.external_auth', False)
         return super(VigiloAuthMiddleware, self).__call__(environ, start_response)
 
 

@@ -197,9 +197,9 @@ class VigiloLdapSync(object):
         if self.__class__.__name__ in tokens:
             return
 
-        # On ne synchronise la base que sur l'identité de l'utilisateur
+        # On ne synchronise la base que si l'identité de l'utilisateur
         # provient d'une source d'authentification externe.
-        if environ.get('vigilo.external_auth') != True:
+        if 'external' not in tokens:
             return
 
         remote_user = identity['repoze.who.userid']

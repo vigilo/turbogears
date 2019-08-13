@@ -98,7 +98,7 @@ class ExternalIdentification(object):
         """
         Inspecte l'environnement de la requête afin de vérifier
         si l'utilisateur a déjà été authentifié précédemment ou non.
-        En cas de concordance, l'identité précédente est fait foi.
+        En cas de concordance, l'identité précédente fait foi.
 
         @param environ: Environnement WSGI de la requête HTTP.
         @type environ: C{dict}
@@ -116,5 +116,5 @@ class ExternalIdentification(object):
 
         # L'utilisateur a été pré-authentifié via une source externe.
         # On garde une trace de cette information.
-        environ['vigilo.external_auth'] = True
+        identity['tokens'] = identity.get('tokens', ()) + ('external', )
         return login
