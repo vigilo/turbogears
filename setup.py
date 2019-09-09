@@ -43,6 +43,7 @@ setup(
                      "to TurboGears 2",
     install_requires=[
         "setuptools",
+        "SQLAlchemy < 0.8.0dev", # Cf. #1963
         "repoze.tm2 >= 1.0a4",
         "repoze.what-quickstart >= 1.0",
         "repoze.what.plugins.sql",
