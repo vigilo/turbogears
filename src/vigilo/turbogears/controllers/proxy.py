@@ -10,7 +10,7 @@ affiché dans Vigilo.
 
 import urllib, urllib2, urlparse, logging
 import tg
-from tg import request, expose, config, response
+from tg import request, expose, config, response, decorators
 import tg.exceptions as http_exc
 from tg.i18n import ugettext as _
 from sqlalchemy import or_, and_
@@ -267,6 +267,33 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
     return res
 
 
+def available_hosts():
+    """
+    Retourne la liste des noms des hôtes supervisés auxquels l'utilisateur
+    a accès.
+    """
+    user = get_current_user()
+    hostgroup = SUPITEM_GROUP_TABLE.alias()
+    servicegroup = SUPITEM_GROUP_TABLE.alias()
+    hostnames = DBSession.query(
+            Host.name
+        ).distinct(
+        ).outerjoin(
+            (hostgroup, hostgroup.c.idsupitem == Host.idhost),
+            (LowLevelService, LowLevelService.idhost == Host.idhost),
+            (servicegroup, servicegroup.c.idsupitem == \
+                LowLevelService.idservice),
+        ).order_by(Host.name)
+
+    if not config.is_manager.is_met(request.environ):
+        user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
+        hostnames = hostnames.filter(or_(
+            hostgroup.c.idgroup.in_(user_groups),
+            servicegroup.c.idgroup.in_(user_groups),
+        ))
+    return [ h.name.encode('utf-8') for h in hostnames.all() ]
+
+
 # pylint: disable-msg=R0201,W0232
 # - R0201: méthodes pouvant être écrites comme fonctions (imposé par TG2)
 # - W0232: absence de __init__ dans la classe (imposé par TG2)
@@ -325,6 +352,13 @@ class ProxyController(BaseController):
             Ils seront passés en POST dans la requête proxifiée.
         @type kwargs: C{dict}
         """
+        if not args:
+            # Si aucun hôte n'a été spécifié dans l'URL, on génère
+            # une page à la volée permettant d'en sélectionner un.
+            decorators.override_template(self._default,
+                'genshi:reverse_proxy_hosts.html')
+            return {"hosts": available_hosts()}
+
         host = args[0]
         args = list(args[1:])
 
