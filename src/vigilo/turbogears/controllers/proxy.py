@@ -352,15 +352,13 @@ class ProxyController(BaseController):
             Ils seront passés en POST dans la requête proxifiée.
         @type kwargs: C{dict}
         """
+        args = list(args)
         if not args:
             # Si aucun hôte n'a été spécifié dans l'URL, on génère
             # une page à la volée permettant d'en sélectionner un.
             decorators.override_template(self._default,
                 'genshi:reverse_proxy_hosts.html')
             return {"hosts": available_hosts()}
-
-        host = args[0]
-        args = list(args[1:])
 
         # TurboGears supprime l'extension de la requête
         # car il peut effectuer des traitements différents
@@ -370,6 +368,8 @@ class ProxyController(BaseController):
         if tg.request.response_ext and args:
             args[-1] = args[-1] + tg.request.response_ext
 
+        host = args[0]
+        args = args[1:]
 
         # En-têtes qui seront envoyés au serveur distant.
         headers = {}
