@@ -24,7 +24,6 @@ Requires:   python-decorator >= 3.1.2
 Requires:   python-genshi >= 0.5.1
 Requires:   python-webflash >= 0.1-0.1.a8
 Requires:   python-toscawidgets >= 0.9.4
-Requires:   python-weberror >= 0.10.1
 Requires:   python-webhelpers >= 1.0-0.2.b7
 Requires:   python-repoze-tm2 >= 1.0-0.1.a4
 Requires:   python-kerberos python-urllib2-kerberos
@@ -34,7 +33,6 @@ Requires:   python-repoze-who >= 2.1
 Requires:   python-zope-interface >= 4.0.0
 Requires:   python-tgext-crud >= 0.8.2
 Requires:   python-formencode >= 1.3.1
-Requires:   python-weberror >= 0.10.3
 Requires:   python-repoze-who-friendlyform
 Requires:   mod_wsgi
 Requires:   findutils

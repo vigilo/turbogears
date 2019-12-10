@@ -70,13 +70,6 @@ class VigiloAppConfig(AppConfig):
         _JavascriptFileIter.TRANSLATION_TABLE = \
             unicode(_JavascriptFileIter.TRANSLATION_TABLE)
 
-        # Idem pour les messages d'erreurs internes générés via WebError.
-        from weberror import errormiddleware as errorware
-        # On remplace la fonction qui génère le template par une retournant
-        # une chaine vide. Le contrôleur d'erreurs affichera un message par
-        # défaut du type "Nous n'avons pas pu traiter votre requête".
-        errorware.error_template = lambda head_html, exception, extra: ""
-
         self.renderers = []
         self.default_renderer = 'genshi'
         self.renderers.append('genshi')
