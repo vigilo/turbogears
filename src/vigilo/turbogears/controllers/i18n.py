@@ -31,7 +31,7 @@ class I18nController(BaseController):
         # Charge et installe le fichier JS de traduction de chaque module
         translations = "babel.Translations.load("
         eps = sorted(iter_entry_points('vigilo.turbogears.i18n'),
-                     key=lambda x: x.attrs, reverse=True)
+                     key=lambda x: int(x.attrs[0]), reverse=True)
         for ep in eps:
             try:
                 directory = resource_filename(ep.module_name, '')
