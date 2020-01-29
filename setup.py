@@ -30,6 +30,8 @@ def install_i18n(i18ndir, destdir):
     return data_files
 
 tests_require = [
+    'vigilo-models',    # Force le respect des contraintes de versions
+                        # définies par vigilo-models sur SQLAlchemy.
     'WebTest',
     'BeautifulSoup',
     'lxml',
