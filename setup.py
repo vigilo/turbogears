@@ -39,7 +39,7 @@ tests_require = [
 
 setup(
     name='vigilo-turbogears',
-    version='5.0.0',
+    version='5.0.1',
     author='Vigilo Team',
     author_email='contact.vigilo@c-s.fr',
     url='https://www.vigilo-nms.com/',
