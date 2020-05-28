@@ -20,27 +20,7 @@ class FakeLdapConnection(object):
     la méthode initialize de la classe ldap
     """
     def __init__(self, *args, **kwargs):
-        self._result = [(
-            'johndoe,dmdName=users,dc=ldap,dc=example,dc=com', {
-                'memberOf': [
-                    u'cn=VIGIBOARD-Modification,dmdName=droits,'
-                        'dc=ldap,dc=example,dc=com',
-                    u'cn=VIGIMAP-Edition,dmdName=droits,'
-                        'dc=ldap,dc=example,dc=com',
-                    u'cn=VIGIGRAPH-Consultation,dmdName=droits,'
-                        'dc=ldap,dc=example,dc=com',
-                    u'cn=VIGIREPORT-Administration,dmdName=droits,'
-                        'dc=ldap,dc=example,dc=com',
-                    # On spécifie un nom contenant un caractère accentué,
-                    # encodé en utilisant l'alphabet ISO-8859-1.
-                    # Il s'agit ici d'un "é".
-                    'cn=\xE9,dmdName=droits,'
-                        'dc=ldap,dc=example,dc=com'
-                ],
-                'cn': [u'John Doe'],
-                'mail': [u'john.doe@example.com']
-            }
-        )]
+        self.set_results([])
 
     def unbind(self):
         """ Simule la méthode unbind mais ne fait rien """
@@ -54,12 +34,17 @@ class FakeLdapConnection(object):
         """Renvoie le CN de l'utilisateur connecté."""
         return "john.doe"
 
-    def set_return_value(self, result):
-        self._result = result
+    def set_results(self, results):
+        self._results_index = 0
+        self._results = results
 
     def search_s(self, *args, **kwargs):
         """Remplace la méthode search_s usuelle."""
-        return self._result
+        if self._results_index >= len(self._results):
+            raise IndexError("No more results")
+        res = self._results[self._results_index]
+        self._results_index += 1
+        return res
 
     def set_option(self, *args, **kwargs):
         """Simule la méthode set_option mais ne fait rien."""
@@ -68,16 +53,6 @@ class FakeLdapConnection(object):
 
 class FakeLdap(object):
     """ Classe simulant le comportement de la classe ldap """
-
-    SCOPE_SUBTREE = None
-    NO_LIMIT = 0
-    SERVER_DOWN = Exception
-    LDAPError = Exception
-    OPT_NETWORK_TIMEOUT = 0
-    OPT_TIMEOUT = 0
-    OPT_TIMELIMIT = 0
-    AUTH_SIMPLE = 0
-
     def __init__(self, *args, **kwargs):
         self._connection = FakeLdapConnection()
 
@@ -85,8 +60,8 @@ class FakeLdap(object):
         """ Simule la méthode initialize """
         return self._connection
 
-    def set_return_value(self, result):
-        return self._connection.set_return_value(result)
+    def set_results(self, results):
+        return self._connection.set_results(results)
 
 
 class FakeSasl(object):
@@ -117,6 +92,14 @@ class VigiloLdapSyncTest(VigiloLdapSync):
 class TestKerberosAuthentication(unittest.TestCase):
     """ Teste la classe VigiloLdapSync """
 
+    usergroups = [
+        u'vigiboard-modification',
+        u'vigimap-edition',
+        u'vigigraph-consultation',
+        u'vigireport-administration',
+        u'é'
+    ]
+
     def setUp(self):
         """ Préparation des tests """
 
@@ -141,12 +124,59 @@ class TestKerberosAuthentication(unittest.TestCase):
         print("Instanciating Kerberos authentication module...")
         self.plugin = VigiloLdapSyncTest(
             ldap_url='ldap://ldap.example.com',
-            ldap_base='',
-            ldap_charset='iso-8859-1',
+            user_base='ou=Users,dc=example,dc=com',
+            group_base='ou=Groups,dc=example,dc=com',
             binddn='binddn',
+            attr_memberof='memberOf',
         )
 
-        #
+        # Cas de base : utilisation de memberOf sur les utilisateurs.
+        results = [
+            # Fiche de l'utilisateur.
+            [
+                (
+                    b'johndoe,dmdName=users,dc=ldap,dc=example,dc=com', {
+                        b'memberOf': [
+                            b'cn=VIGIBOARD-Modification,ou=Groups,dc=example,dc=com',
+                            b'cn=VIGIMAP-Edition,ou=Groups,dc=example,dc=com',
+                            b'cn=VIGIGRAPH-Consultation,ou=Groups,dc=example,dc=com',
+                            b'cn=VIGIREPORT-Administration,ou=Groups,dc=example,dc=com',
+                            b'cn=\xC3\xA9,ou=Groups,dc=example,dc=com'
+                        ],
+                        b'cn': [b'John Doe'],
+                        b'mail': [b'john.doe@example.com']
+                    }
+                )
+            ],
+            # Récupération du CN de chacun des groupes.
+            [
+                (b'cn=VIGIBOARD-Modification,ou=Groups,dc=example,dc=com', {
+                    b'cn': [b'VIGIBOARD-Modification'],
+                }),
+            ],
+            [
+                (b'cn=VIGIMAP-Edition,ou=Groups,dc=example,dc=com', {
+                    b'cn': [b'VIGIMAP-Edition'],
+                }),
+            ],
+            [
+                (b'cn=VIGIGRAPH-Consultation,ou=Groups,dc=example,dc=com', {
+                    b'cn': [b'VIGIGRAPH-Consultation'],
+                })
+            ],
+            [
+                (b'cn=VIGIREPORT-Administration,ou=Groups,dc=example,dc=com', {
+                    b'cn': [b'VIGIREPORT-Administration'],
+                }),
+            ],
+            [
+                (b'cn=\xC3\xA9,ou=Groups,dc=example,dc=com', {
+                    b'cn': [b'\xC3\xA9'],
+                }),
+            ]
+        ]
+        self.plugin.ldap.set_results(results)
+
         self.environ = {
             'repoze.who.logger': LOGGER,
             'KRB5CCNAME': 'johndoe',
@@ -166,11 +196,10 @@ class TestKerberosAuthentication(unittest.TestCase):
         """
         Récupération des informations de l'utilisateur dans l'annuaire LDAP.
         """
-
         try:
             (user_fullname, user_email, user_groups) = \
                 self.plugin.retrieve_user_ldap_info(
-                    self.environ, 'johndoe')
+                    self.environ, u'johndoe')
         except Exception, e:
             self.fail("Exception raised while calling "
                     "'retrieve_user_ldap_info': %s." % (e.message, ))
@@ -179,34 +208,63 @@ class TestKerberosAuthentication(unittest.TestCase):
         # l'annuaire LDAP sont conformes à celles attendues.
         self.assertEqual(user_fullname, u"John Doe")
         self.assertEqual(user_email, u'john.doe@example.com')
-        self.assertEqual(user_groups, [
-            u'vigiboard-modification',
-            u'vigimap-edition',
-            u'vigigraph-consultation',
-            u'vigireport-administration',
-            u'é'
-        ])
+        self.assertEqual(user_groups, self.usergroups)
+
+        # Cas 2 : il faut utiliser l'attribut "member" des groupes.
+        self.plugin.attr_memberof = None
+        results = [
+            # Résultats pour la recherche parmi les utilisateurs.
+            [(
+                b'johndoe,dmdName=users,dc=ldap,dc=example,dc=com', {
+                    b'cn': [b'John Doe'],
+                    b'mail': [b'john.doe@example.com']
+                }
+            )],
+            # Résultats pour la recherche parmi les groupes
+            [
+                (b'cn=VIGIBOARD-Modification,ou=Groups,dc=example,dc=com', {
+                    b'cn': [b'VIGIBOARD-Modification'],
+                 }),
+                (b'cn=VIGIMAP-Edition,ou=Groups,dc=example,dc=com', {
+                    b'cn': [b'VIGIMAP-Edition'],
+                }),
+                (b'cn=VIGIGRAPH-Consultation,ou=Groups,dc=example,dc=com', {
+                    b'cn': [b'VIGIGRAPH-Consultation'],
+                }),
+                (b'cn=VIGIREPORT-Administration,ou=Groups,dc=example,dc=com', {
+                    b'cn': [b'VIGIREPORT-Administration'],
+                }),
+                (b'cn=\xC3\xA9,ou=Groups,dc=example,dc=com', {
+                    b'cn': [b'\xC3\xA9'],
+                }),
+            ],
+        ]
+        self.plugin.ldap.set_results(results)
+
+        # Les résultats doivent être identiques à ceux précédemment obtenus.
+        try:
+            (user_fullname, user_email, user_groups) = \
+                self.plugin.retrieve_user_ldap_info(
+                    self.environ, u'johndoe')
+        except Exception, e:
+            self.fail("Exception raised while calling "
+                    "'retrieve_user_ldap_info': %s." % (e.message, ))
+
+        self.assertEqual(user_fullname, u"John Doe")
+        self.assertEqual(user_email, u'john.doe@example.com')
+        self.assertEqual(user_groups, self.usergroups)
+
 
     def test_creation(self):
         """
         Création d'un utilisateur et de ses groupes à sa première connexion
         """
-
-        usergroups = [
-            u'vigiboard-modification',
-            u'vigimap-edition',
-            u'vigigraph-consultation',
-            u'vigireport-administration',
-            u'é',
-        ]
         self.plugin.add_metadata({
             'repoze.who.logger': None,
-            # La séquence "\xC3\xA9" correspond à un "é"
-            # encodé en UTF-8. On vérifie ici que le module
-            # est capable de décoder correctement ce genre
-            # de "principals" à l'aide du paramètre "http_charset".
-            'REMOTE_USER': 'johndoe\xC3\xA9@example.com',
-        }, {})
+        }, {
+            'tokens': ('external', ),
+            'repoze.who.userid': u'johndoeé',
+        })
 
         # On vérifie que l'utilisateur a bien été créé
         # et que les données enregistrées sont correctes.
@@ -215,7 +273,7 @@ class TestKerberosAuthentication(unittest.TestCase):
 
         # On s'assure que les groupes indiqués on bien été créés
         # et que l'utilisateur y appartient bien.
-        for ug in usergroups:
+        for ug in self.usergroups:
             usergroup = tables.UserGroup.by_group_name(unicode(ug))
             self.assertNotEqual(usergroup, None,
                 u'Missing usergroup (%s)' % ug)
@@ -223,23 +281,17 @@ class TestKerberosAuthentication(unittest.TestCase):
         # On s'assure qu'il n'y a pas de groupes supplémentaires
         # par rapport à ceux demandés.
         for ug in user.usergroups:
-            self.assertFalse(ug.group_name not in usergroups,
+            self.assertFalse(ug.group_name not in self.usergroups,
                 u'Unexpected usergroup (%s)' % ug.group_name)
 
     def test_update(self):
         """
         Mise à jour des groupes d'un utilisateur
         """
-
-        usergroups = [
-            u'vigiboard-modification',
-            u'vigimap-edition',
-            u'vigigraph-consultation',
-            u'vigireport-administration',
-            u'é'
-        ]
         identity = {
             'login': u'johndoeé',
+            'tokens': ('external', ),
+            'repoze.who.userid': u'johndoeé',
         }
 
         # Création de l'utilisateur ciblé.
@@ -255,10 +307,8 @@ class TestKerberosAuthentication(unittest.TestCase):
         user.usergroups.append(usergroup)
         DBSession.flush()
 
-        # On fait appel au plugin pour mettre à jour les informations.
-        environ = self.environ.copy()
-        environ['REMOTE_USER'] = 'johndoe\xC3\xA9@example.com'
-        self.plugin.add_metadata(environ, identity)
+        # On appelle le plugin pour synchroniser les informations.
+        self.plugin.add_metadata({}, identity)
 
         # On vérifie que l'utilisateur a bien été créé
         # et que les données enregistrées sont correctes.
@@ -267,7 +317,7 @@ class TestKerberosAuthentication(unittest.TestCase):
 
         # On s'assure que les groupes indiqués ont bien été créés
         # et que l'utilisateur y appartient bien.
-        for ug in usergroups:
+        for ug in self.usergroups:
             usergroup = tables.UserGroup.by_group_name(unicode(ug))
             self.assertNotEqual(usergroup, None,
                 u'Missing usergroup (%s)' % ug)
@@ -275,32 +325,27 @@ class TestKerberosAuthentication(unittest.TestCase):
         # On s'assure qu'il n'y a pas de groupes supplémentaires
         # par rapport à ceux demandés.
         for ug in user.usergroups:
-            self.assertFalse(ug.group_name not in usergroups,
+            self.assertFalse(ug.group_name not in self.usergroups,
                 u'Unexpected usergroup (%s)' % ug.group_name)
 
     def test_empty_groups(self):
         """
         Un utilisateur sans groupe doit être correctement géré (#888).
         """
-        self.plugin.ldap.set_return_value([(
-            'johndoe,dmdName=users,dc=ldap,dc=example,dc=com', {
-                'cn': [u'John Doe'],
-                'mail': [u'john.doe@example.com']
+        self.plugin.ldap.set_results([(
+            b'johndoe,dmdName=users,dc=ldap,dc=example,dc=com', {
+                b'cn': [b'John Doe'],
+                b'mail': [b'john.doe@example.com']
             }
         )])
 
         # Fait appel au plugin pour créer l'utilisateur.
-        self.plugin.add_metadata(
-            {
-                'repoze.who.logger': None,
-                # La séquence "\xC3\xA9" correspond à un "é"
-                # encodé en UTF-8. On vérifie ici que le module
-                # est capable de décoder correctement ce genre
-                # de "principals" à l'aide du paramètre "http_charset".
-                'REMOTE_USER': 'johndoe\xC3\xA9@example.com',
-            },
-            {},
-        )
+        self.plugin.add_metadata({
+            'repoze.who.logger': None,
+        }, {
+            'tokens': ('external', ),
+            'repoze.who.userid': u'johndoeé',
+        })
 
         # On vérifie que l'utilisateur a bien été créé
         # et que les données enregistrées sont correctes.

@@ -20,7 +20,7 @@ class ExternalIdentification(object):
 
     implements(IIdentifier, IAuthenticator)
 
-    def __init__(self, rememberer, strip_realm=True):
+    def __init__(self, rememberer, encoding='utf-8', strip_realm=True):
         """
         Initialise le plugin de gestion des authentifications externes.
 
@@ -29,9 +29,12 @@ class ExternalIdentification(object):
             sur un principal.Kerberos (user@REALM).
             Par défaut, le royaume est supprimé.
         @type strip_realm: bool
+        @param encoding: Indique l'encodage utilisé par l'identité reçue
+            du serveur web.
+        @type encoding: C{str}
         @param rememberer: Nom du plugin chargé de mémoriser l'identité
             de l'utilisateur une fois celui-ci authentifié.
-        @type rememberer: str
+        @type rememberer: C{str}
         """
         if isinstance(strip_realm, bool):
             strip_realm = str(strip_realm)
@@ -44,6 +47,7 @@ class ExternalIdentification(object):
             raise ValueError('A boolean value was expected for "strip_realm"')
         self.strip_realm = strip_realm
         self.rememberer = rememberer
+        self.encoding = encoding
 
     def _get_rememberer(self, environ):
         rememberer = environ['repoze.who.plugins'].get(self.rememberer)
@@ -60,6 +64,12 @@ class ExternalIdentification(object):
 
         if self.strip_realm:
             remote_user = remote_user.split('@', 1)[0]
+
+        # Conversion du login en Unicode, car c'est ce que les autres
+        # plugins de Vigilo s'attendent à recevoir.
+        if type(remote_user) != type(u''):
+            remote_user = remote_user.decode(self.encoding)
+
         return remote_user
 
     # IIdentifier

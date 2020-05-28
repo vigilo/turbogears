@@ -11,6 +11,7 @@ des variables d'environnement et utilise ces variables pour mettre
 import os
 import ldap
 import ldap.sasl as sasl
+from ldap.filter import escape_filter_chars
 
 import transaction
 from sqlalchemy.exc import SQLAlchemyError
@@ -23,6 +24,14 @@ _ = translate(__name__)
 
 __all__ = ['VigiloLdapSync']
 
+_CERT_REQ = { "never": ldap.OPT_X_TLS_NEVER,
+              "allow": ldap.OPT_X_TLS_ALLOW,
+              "demand": ldap.OPT_X_TLS_DEMAND,
+              "try": ldap.OPT_X_TLS_TRY,
+              "hard": ldap.OPT_X_TLS_HARD,
+              "": ldap.OPT_X_TLS_ALLOW,
+            }
+
 class VigiloLdapSync(object):
     """
     Une classe qui synchronise les comptes dans la base de données Vigilo
@@ -32,60 +41,137 @@ class VigiloLdapSync(object):
     ldap = ldap
     sasl = sasl
 
+    @staticmethod
+    def _as_bool(optname, optvalue):
+        if isinstance(optvalue, bool):
+            return optvalue
+
+        optvalue = optvalue.lower()
+        if optvalue in ('true', 'yes', 'on', '1'):
+            return True
+        if optvalue in ('false', 'no', 'off', '0'):
+            return False
+        raise ValueError('A boolean value was expected for "%s"' % optname)
+
     def __init__(self,
         ldap_url,
-        ldap_base,
-        filterstr='(objectClass=*)',
-        ldap_charset='utf-8',
-        http_charset='utf-8',
-        cache_name=None,
+        user_base,
+        group_base,
+        user_filter='(objectClass=*)',
+        group_filter='(objectClass=*)',
+        user_scope='subtree',
+        group_scope='subtree',
+        tls_cert='',
+        tls_key='',
+        tls_ca_cert='',
+        tls_reqcert='',
+        tls_starttls=False,
         binddn=None,
         bindpw='',
+        attr_uid='uid',
         attr_cn='cn',
         attr_mail='mail',
-        attr_member_of='memberOf',
+        attr_memberof='',
+        attr_group_cn='cn',
+        attr_group_member='member',
+        ldap_deref='never',
+        use_dn=True,
+        normalize_groups=True,
         timeout=0):
         """
         Initialise le plugin de synchronisation LDAP.
 
+        @type ldap_url: C{basestring}
         @param ldap_url: Liste d'URLs de connexion à l'annuaire LDAP,
             séparées par des espaces. Le greffon tentera de se connecter
             à chacune des URLs dans l'ordre jusqu'à aboutir.
-        @type ldap_url: C{basestring}
-        @param ldap_base: le DN (Distinguished Name) de l'entrée
-            à partir de laquelle effectuer la recherche LDAP.
-        @type ldap_base: C{basestring}
-        @param filterstr: Filtre appliqué aux résultats de la recherche
-            dans l'annuaire. Par défaut, le filtre vaut "(objectClass=*)".
-        @type filterstr: C{basestring}
-        @param ldap_charset: Encodage des caractères utilisé par l'annuaire.
-        @type ldap_charset: C{basestring}
-        @param http_charset: Encodage du C{REMOTE_USER} retourné par Apache.
-        @type http_charset: C{basestring}
-        @type cache_name: C{basestring}
+        @type user_base: C{basestring}
+        @param user_base: la base de recherche pour les utilisateurs.
+        @type group_base: C{basestring}
+        @param group_base: la base de recherche pour les groupes.
+        @type user_filter: C{basestring}
+        @param user_filter: Filtre utilisé pour rechercher les utilisateurs.
+        @type group_filter: C{basestring}
+        @param group_filter: Filtre utilisé pour rechercher les groupes.
+        @param user_scope: Spécifie la portée des recherches d'utilisateurs.
+            Les valeurs possibles sont "base", "onelevel", "subordinate"
+            et "subtree".
+        @type user_scope: C{basestring}
+        @param group_scope: Spécifie la portée des recherches de groupes.
+            Les valeurs possibles sont "base", "onelevel", "subordinate"
+            et "subtree".
+        @type group_scope: C{basestring}
+        @type tls_key: C{basestring}
+        @param tls_key: la clé du certificat TLS.
+        @type tls_cert: C{basestring}
+        @param tls_cert: le certificat TLS.
+        @type tls_ca_cert: C{basestring}
+        @param tls_ca_cert: la CA du certificat TLS.
+        @type tls_reqcert: C{basestring}
+        @param tls_reqcert: Option TLS_REQUIRE_CERT (options possibles : never,
+            allow, try, demand, hard).
+        @type tls_starttls: C{bool}
+        @param tls_starttls: Lorsque cette option est active, Vigilo exécute
+            la commande STARTTLS juste après la connexion afin de la sécuriser.
+        @type binddn: C{basestring} or C{None}
         @param binddn: DN à utiliser pour faire un bind() sur l'annuaire.
             Si omis, une tentative d'authentification Kerberos de l'utilisateur
             a lieu via le protocole GSSAPI.
-        @type binddn: C{basestring} or C{None}
-        @param bindpw: Mot de passe associé au DN donné par L{binddn}.
         @type bindpw: C{basestring}
-        @param attr_cn: Attribut contenant le nom commun (CN) de l'utilisateur.
+        @param bindpw: Mot de passe associé au DN donné par L{binddn}.
         @type attr_cn: C{basestring}
-        @param attr_mail: Attribut contenant l'email de l'utilisateur.
+        @param attr_cn: Attribut contenant le nom commun (CN) de l'utilisateur.
         @type attr_mail: C{basestring}
+        @param attr_mail: Attribut contenant l'email de l'utilisateur.
+        @type attr_member_cn: C{basestring}
+        @param attr_member_cn: Attribut des groupes contenant
+            la liste des CNs des membres du groupe.
+        @type attr_member_of: C{basestring}
         @param attr_member_of: Attribut de l'utilisateur contenant
             la liste des groupes dont il est membre.
-        @type attr_member_cn: C{basestring}
+        @type ldap_deref: C{basestring}
+        @param ldap_deref: Indique comment les références qui apparaissent
+            dans les résultats doivent être traitées.
+            Les valeurs possibles sont "always", "finding", "never"
+            et "searching".
+        @type use_dn: C{bool}
+        @param use_dn: Lorsque cette option est active, le nom distingué (DN)
+            de l'utilisateur est utilisé lors de la recherche des groupes.
+            Dans le cas contraire, le nom commun (CN) de l'utilisateur est
+            utilisé à la place.
+        @type normalize_groups: C{bool}
+        @param normalize_groups: Lorsque cette option est active, les noms
+            des groupes sont normalisés (convertis en minuscules) lorsqu'ils
+            sont importés dans Vigilo.
+        @type timeout: C{int}
         @param timeout: Indique le délai maximum pour les opérations réseau.
             Utiliser la valeur 0 pour désactiver les limites.
-        @type timeout: C{int}
         """
         super(VigiloLdapSync, self).__init__()
-        self.ldap_url = filter(None, unicode(ldap_url).split(' '))
-        self.ldap_base = unicode(ldap_base)
+        self.ldap_url = filter(None, ldap_url.split(' '))
+        self.user_base = user_base
+        self.user_filter = user_filter
+        self.group_base = group_base
+        self.group_filter = group_filter
 
         if not len(self.ldap_url):
             raise ValueError("ldap_url should contain at least one URL")
+
+        if not isinstance(tls_key, basestring):
+            raise TypeError("tls_key must be a string")
+        self.tls_key = tls_key
+
+        if not isinstance(tls_cert, basestring):
+            raise TypeError("tls_cert must be a string")
+        self.tls_cert = tls_cert
+
+        if not isinstance(tls_ca_cert, basestring):
+            raise TypeError("tls_ca_cert must be a string ")
+        self.tls_ca_cert = tls_ca_cert
+
+        self.tls_reqcert = _CERT_REQ.get(tls_reqcert.lower())
+        if self.tls_reqcert is None:
+            raise TypeError("tls_reqcert must be one of: %s" % ", ".join(_CERT_REQ.keys()))
 
         if binddn is None or isinstance(binddn, basestring):
             self.binddn = binddn
@@ -97,78 +183,106 @@ class VigiloLdapSync(object):
         else:
             raise TypeError("bindpw must be a string")
 
-        if cache_name is None or not cache_name.strip():
-            self.cache_name = None
-        elif isinstance(cache_name, basestring):
-            self.cache_name = cache_name
-        else:
-            raise TypeError("cache_name must be a string or None")
+        self.user_scope = getattr(ldap, 'SCOPE_' + user_scope.upper(), None)
+        if self.user_scope is None:
+            raise ValueError('Invalid value for "user_scope": %s')
 
-        self.filterstr = unicode(filterstr)
-        self.ldap_charset = unicode(ldap_charset)
-        self.http_charset = unicode(http_charset)
+        self.group_scope = getattr(ldap, 'SCOPE_' + group_scope.upper(), None)
+        if self.group_scope is None:
+            raise ValueError('Invalid value for "group_scope"')
+
+        self.ldap_deref = getattr(ldap, 'DEREF_' + ldap_deref.upper(), None)
+        if self.ldap_deref is None:
+            raise ValueError('Invalid value for "ldap_deref"')
+
+        self.use_dn = self._as_bool("use_dn", use_dn)
+        self.normalize_groups = self._as_bool("normalize_groups", normalize_groups)
+        self.tls_starttls = self._as_bool("tls_starttls", tls_starttls)
+
+        self.attr_uid = attr_uid
         self.attr_cn = attr_cn
         self.attr_mail = attr_mail
-        self.attr_member_of = attr_member_of
-        self.timeout = max(0, int(timeout)) or self.ldap.NO_LIMIT
+        self.attr_memberof = attr_memberof
+        self.attr_group_cn = attr_group_cn
+        self.attr_group_member = attr_group_member
+        self.timeout = max(0, int(timeout)) or ldap.NO_LIMIT
+
+    # IAuthenticator
+    def authenticate(self, environ, identity):
+        if 'login' not in identity or 'password' not in identity:
+            return None
+
+        logger = environ.get('repoze.who.logger')
+        ldap_conn = self.connect(environ)
+        try:
+            # Recherche de l'utilisateur correspondant au login saisi.
+            user = ldap_conn.search_s(
+                self.user_base,
+                self.user_scope,
+                '(&%s(%s=%s))' % (
+                    self.user_filter,
+                    escape_filter_chars(self.attr_uid, 1),
+                    escape_filter_chars(identity['login'].encode('utf-8'), 1),
+                ),
+                [],
+            )
+
+            # Aucun résultat ou alors le résultat est une référence
+            if not user or not user[0] or not user[0][0]:
+                return None
+
+            # Tentative de reconnexion en utilisant le DN trouvé
+            # et le mot de passe associé.
+            # Une exception ldap.LDAPError est levée en cas d'échec.
+            ldap_conn.simple_bind_s(user[0][0], identity['password'])
+
+            # Permet la synchronisation des groupes avec l'annuaire LDAP
+            # si le plugin est également déclaré comme "mdprovider".
+            identity['tokens'] = identity.get('tokens', ()) + ('external', )
+
+            # Succès de l'authentification.
+            return identity['login']
+        except Exception as e:
+            logger.info(_('Could not authentificate "%(login)s": %(error)s'),
+                {'login': identity['login'], 'error': str(e)})
+            return None
+        finally:
+            # Déconnexion propre de l'annuaire
+            ldap_conn.unbind()
 
     # IMetadataProvider
     def add_metadata(self, environ, identity):
         """
-        Cette méthode n'ajoute pas de méta-données à proprement parler.
-        À la place, elle crée un utilisateur dans la base de données
-        si nécessaire, correspondant au contenu de la variable CGI
-        C{REMOTE_USER} transmise par Apache.
+        Cette méthode n'ajoute pas de méta-données dans l'identité repoze.
 
-        Dans le cas d'un identifiant Kerberos ("uid@REALM"), seule
-        la partie "uid" est utilisée pour créer le compte.
+        À la place, elle crée/met à jour la fiche de l'utilisateur authentifié
+        dans la base de données, idem pour les groupes d'utilisateurs, puis
+        elle met à jour l'association entre les deux.
 
-        Pour cela, cette méthode effectue une requête à un annuaire LDAP.
-        Elle génère en outre des groupes d'utilisateurs dans Vigilo
-        correspondant aux groupes de l'utilisateur dans LDAP.
+        Ce plugin ne s'exécute que si le plugin "ExternalIdentification"
+        a détecté une identité provenant d'une authentification externe.
 
-        Ces informations sont synchronisées à chaque requête HTTP
-        ou bien une seule fois par session si un cache est utilisé
-        (pour plus d'information, voir le paramètre C{cache_name} de
-        L{VigiloLdapSync.__init__}).
-
-        @param environ: Environnement de la requête HTTP
-            en cours de traitement.
+        @param environ: Environnement WSGI de la requête.
         @type environ: C{dict}
-        @param identity: Identité de l'utilisateur qui tente
-            d'accéder à l'application.
+        @param identity: Identité de l'utilisateur authentifié.
         @type identity: C{dict}
         """
-        if 'REMOTE_USER' not in environ:
+        # Si le nom de cette classe apparait dans les tokens,
+        # la synchronisation a déjà eu lieu et il n'y a rien à faire.
+        # Ce code fonctionne uniquement si on utilise aussi auth_tkt.
+        tokens = tuple(identity.get('tokens', ()))
+        if self.__class__.__name__ in tokens:
             return
 
-        remote_user = environ['REMOTE_USER'].decode(self.http_charset)
+        # On ne synchronise la base que si l'identité de l'utilisateur
+        # provient d'une source d'authentification externe.
+        if 'external' not in tokens:
+            return
+
+        remote_user = identity['repoze.who.userid']
         logger = environ.get('repoze.who.logger')
         logger and logger.info(_('Remote user: %s'), remote_user)
-
-        # Une identité Kerberos correspond à un "principal"
-        # de la forme "uid@realm". On ne garde que l'uid.
-        if '@' in remote_user:
-            remote_user = remote_user.split('@', 1)[0]
-
-            # On corrige l'identité trouvée par repoze.who afin que
-            # les autres mdproviders puissent trouver une correspondance
-            # dans la base de données.
-            identity['repoze.who.userid'] = remote_user
-
-        remote_user = unicode(remote_user)
         user = User.by_user_name(remote_user)
-
-        if self.cache_name is not None:
-            if 'beaker.session' not in environ:
-                logger and logger.warning(
-                    _('Beaker must be present in the WSGI middleware '
-                    'stack for the cache to work'))
-            # L'identité dans le cache doit être la même que celle
-            # pour laquelle on est en train de s'authentifier.
-            elif self.cache_name in environ['beaker.session'] and \
-                environ['beaker.session'][self.cache_name] == remote_user:
-                return
 
         # On récupère les informations concernant l'utilisateur
         # pour alimenter / mettre à jour notre base de données.
@@ -228,9 +342,6 @@ class VigiloLdapSync(object):
                 # on continue tout de même car l'utilisateur a bien été
                 # reconnu.
                 transaction.abort()
-                if 'beaker.session' in environ and self.cache_name is not None:
-                    environ['beaker.session'][self.cache_name] = remote_user
-                    environ['beaker.session'].save()
                 return
 
             # Création des groupes au besoin.
@@ -265,10 +376,9 @@ class VigiloLdapSync(object):
                 'Exception during groups creation'))
             return None
 
-        if 'beaker.session' in environ and self.cache_name is not None:
-            environ['beaker.session'][self.cache_name] = remote_user
-            environ['beaker.session'].save()
-        return
+        # On tente de se souvenir du fait qu'on a déjà synchronisé
+        # cet utilisateur en mémorisant le nom de cette classe.
+        identity['tokens'] = tokens + (self.__class__.__name__, )
 
     def connect(self, environ):
         """
@@ -288,13 +398,39 @@ class VigiloLdapSync(object):
         logger = environ.get('repoze.who.logger')
         for ldap_url in self.ldap_url:
             try:
+                new_ctxt = False
                 # Connexion à l'annuaire LDAP
                 logger and logger.debug(_('Attempting connection to "%s"'),
                                         ldap_url)
                 ldap_conn = self.ldap.initialize(ldap_url)
-                ldap_conn.set_option(self.ldap.OPT_NETWORK_TIMEOUT, self.timeout)
-                ldap_conn.set_option(self.ldap.OPT_TIMEOUT, self.timeout)
-                ldap_conn.set_option(self.ldap.OPT_TIMELIMIT, self.timeout)
+                ldap_conn.set_option(ldap.OPT_NETWORK_TIMEOUT, self.timeout)
+                ldap_conn.set_option(ldap.OPT_TIMEOUT, self.timeout)
+                ldap_conn.set_option(ldap.OPT_TIMELIMIT, self.timeout)
+                ldap_conn.set_option(ldap.OPT_DEREF, self.ldap_deref)
+
+                if self.tls_key:
+                    ldap_conn.set_option(ldap.OPT_X_TLS_KEYFILE, self.tls_key)
+                    new_ctxt = True
+
+                if self.tls_cert:
+                    ldap_conn.set_option(ldap.OPT_X_TLS_CERTFILE, self.tls_cert)
+                    new_ctxt = True
+
+                if self.tls_ca_cert:
+                    ldap_conn.set_option(ldap.OPT_X_TLS_CACERTFILE, self.tls_ca_cert)
+                    new_ctxt = True
+
+                if self.tls_reqcert:
+                    ldap_conn.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, self.tls_reqcert)
+                    new_ctxt = True
+
+                # Si une des options TLS est positionnée alors on force la création
+                # d'un nouveau contexte pour la connexion TLS
+                if new_ctxt or self.tls_starttls:
+                    ldap_conn.set_option(ldap.OPT_X_TLS_NEWCTX, 0)
+
+                if self.tls_starttls:
+                    ldap_conn.start_tls_s()
 
                 # Si un utilisateur particulier a été configuré pour le bind,
                 # on l'utilise.
@@ -304,7 +440,7 @@ class VigiloLdapSync(object):
                     ldap_conn.bind_s(
                         self.binddn.encode('utf-8'),
                         self.bindpw.encode('utf-8'),
-                        self.ldap.AUTH_SIMPLE
+                        ldap.AUTH_SIMPLE
                     )
                 # Sinon on tente plutôt une authentification par Kerberos.
                 else:
@@ -314,8 +450,19 @@ class VigiloLdapSync(object):
                         ldap_conn.sasl_interactive_bind_s("", auth_tokens)
                     else:
                         ldap_conn.simple_bind()
+
+                try:
+                    logger and logger.debug(
+                        _("Bound to the LDAP server as '%s'"),
+                        ldap_conn.whoami_s()
+                    )
+                except ldap.LDAPError:
+                    # 389 Directory Server (l'annuaire LDAP RedHat)
+                    # ne supporte pas l'extension "Who am I?".
+                    pass
+
                 return ldap_conn
-            except self.ldap.LDAPError:
+            except ldap.LDAPError:
                 logger and logger.exception(
                     _("Could not connect to LDAP server '%s', "
                       "trying next server") % ldap_url)
@@ -324,7 +471,7 @@ class VigiloLdapSync(object):
         # On a épuisé toutes les URLs sans parvenir à se connecter.
         msg = _("No more LDAP servers to try")
         logger and logger.error(msg)
-        raise self.ldap.SERVER_DOWN(msg)
+        raise ldap.SERVER_DOWN(msg)
 
     def retrieve_user_ldap_info(self, environ, login):
         """
@@ -342,68 +489,100 @@ class VigiloLdapSync(object):
         @rtype: C{tuple} of C{mixed} or C{None}
         """
         logger = environ.get('repoze.who.logger')
-        user_attributes = {}
-
         ldap_conn = self.connect(environ)
         try:
-            try:
-                filterstr = self.filterstr % login
-            except TypeError as e:
-                if unicode(e) != u'not all arguments converted ' \
-                                 u'during string formatting':
-                    raise
-                filterstr = self.filterstr
+            filt = '(&%s(%s=%s))' % (
+                self.user_filter,
+                escape_filter_chars(self.attr_uid, 1),
+                escape_filter_chars(login.encode('utf-8'), 1),
+            )
 
             # Récupération des informations de l'utilisateur
+            attrlist = [
+                self.attr_cn,
+                self.attr_mail,
+            ]
+            # Si possible, on récupère les DN des groupes en même temps.
+            if self.attr_memberof:
+                attrlist.append(self.attr_memberof)
+
             user_attributes = ldap_conn.search_s(
-                self.ldap_base.encode('utf-8'),
-                self.ldap.SCOPE_SUBTREE,
-                filterstr.encode('utf-8'),
-                attrlist=[
-                    self.attr_cn,
-                    self.attr_mail,
-                    self.attr_member_of
-                ],
+                self.user_base,
+                self.user_scope,
+                filt,
+                attrlist,
             )
             if not user_attributes or not user_attributes[0]:
-                raise ValueError(_('User "%s" not found in the LDAP server'),
-                                    login)
-            user_attributes = user_attributes[0][1]
+                raise ValueError(_('User "%s" not found in the LDAP server'), login)
+
+            if self.attr_memberof:
+                # Récupération des CNs des groupes en utilisant les DNs
+                # contenus dans l'attribut memberOf de l'utilisateur.
+                group_attributes = []
+                if self.attr_memberof in user_attributes[0][1]:
+                    for group in user_attributes[0][1][self.attr_memberof]:
+                        group_attributes.extend(ldap_conn.search_s(
+                            group,
+                            # On a un DN, donc seul SCOPE_BASE a du sens ici.
+                            ldap.SCOPE_BASE,
+                            self.group_filter,
+                            attrlist=[self.attr_group_cn],
+                        ))
+            else:
+                # Récupération des CNs des groupes en recherchant via
+                # l'attribut member des groupes.
+                filt = '(&%s(%s=%s))' % (
+                    self.group_filter,
+                    escape_filter_chars(self.attr_group_member, 1),
+                    escape_filter_chars(
+                        user_attributes[0][0]
+                        if self.use_dn
+                        else login.encode('utf-8'),
+                        1
+                    ),
+                )
+                group_attributes = ldap_conn.search_s(
+                    self.group_base,
+                    self.group_scope,
+                    filt,
+                    attrlist=[self.attr_group_cn],
+                )
         finally:
             # Déconnexion de l'annuaire
             ldap_conn.unbind()
 
+        # Résultats de la requête concernant l'utilisateur.
+        user_attributes = user_attributes[0][1]
+
         # Traitement des informations récupérées :
         # - nom complet de l'utilisateur ;
-        if user_attributes.has_key(self.attr_cn):
-            user_fullname = \
-                user_attributes[self.attr_cn][0].decode(self.ldap_charset)
+        if self.attr_cn in user_attributes:
+            user_fullname = user_attributes[self.attr_cn][0].decode('utf-8')
         else:
             user_fullname = None
 
         # - email de l'utilisateur ;
-        if user_attributes.has_key(self.attr_mail):
-            user_email = user_attributes[self.attr_mail][0].decode(
-                self.ldap_charset).lower()
+        if self.attr_mail in user_attributes:
+            user_email = user_attributes[self.attr_mail][0].decode('utf-8')
         else:
             user_email = None
 
         # - groupes dont fait partie l'utilisateur.
-        if user_attributes.has_key(self.attr_member_of):
-            user_groups = []
-            for group in user_attributes[self.attr_member_of]:
-                try:
-                    group = group.decode(self.ldap_charset
-                        ).split(',')[0].split('=')[1].strip().lower()
-                except IndexError:
-                    pass
-                user_groups.append(group)
-        else:
-            user_groups = None
+        user_groups = []
+        for group_attribute in group_attributes:
+            # group_attribute[0] vaut None lorsque l'annuaire répond avec
+            # une référence (p.ex. Active Directory) :
+            #
+            # (None, ['ldap://ForestDnsZones.hst/ =ForestDnsZones,DC=hst'])
+            #
+            # cf. https://mail.python.org/pipermail/python-ldap/2005q2/001616.html
+            if group_attribute[0] is None or self.attr_group_cn not in group_attribute[1]:
+                continue
+
+            group = group_attribute[1][self.attr_group_cn][0].decode('utf-8')
+            if self.normalize_groups:
+                group = group.lower()
+            user_groups.append(group)
 
         # On retourne un tuple contenant ces trois informations :
         return (user_fullname, user_email, user_groups)
-
-    def __repr__(self):
-        """Returns a representation of this instance."""
-        return '<%s %s>' % (self.__class__.__name__, id(self))
