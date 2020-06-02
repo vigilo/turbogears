@@ -328,30 +328,30 @@ ne l'est pas. Cette solution offre le meilleur compromis possible entre la
 sécurité (il n'est pas possible d'accéder à une ressource protégée sans être
 authentifié) et les performances (une seule authentification par session).
 
-La ligne 21 indique qu'Apache doit procéder à une authentification de type
+La ligne 32 indique qu'Apache doit procéder à une authentification de type
 « kerberos » afin d'autoriser l'accès à l'application (directive ``AuthType``).
 
-La ligne 22 permet d'associer un nom à cette méthode d'authentification
+La ligne 33 permet d'associer un nom à cette méthode d'authentification
 (directive ``AuthName``). Ce nom apparaîtra dans les journaux d'événements du
 serveur.
 
-La ligne 23 spécifie le nom du service Kerberos qui sera utilisé pour procéder
+La ligne 34 spécifie le nom du service Kerberos qui sera utilisé pour procéder
 à l'authentification (directive ``KrbServiceName``). La valeur par défaut est
 « HTTP » qui correspond à la valeur recommandée.
 
-La ligne 24 indique le nom du domaine Kerberos dans lequel l'authentification a
+La ligne 35 indique le nom du domaine Kerberos dans lequel l'authentification a
 lieu (directive ``KrbAuthRealms``). Par convention, il s'agit du nom de domaine
 du parc, **en majuscules**.
 
-La ligne 25 spécifie l'emplacement du fichier contenant la clé secrète
+La ligne 36 spécifie l'emplacement du fichier contenant la clé secrète
 d'authentification de ce service (directive ``Krb5Keytab``). Ce fichier
 doit être accessible par le serveur web (et uniquement celui-ci).
 
-La directive ``KrbMethodNegotiate`` à la ligne 26 autorise la négociation de
+La directive ``KrbMethodNegotiate`` à la ligne 37 autorise la négociation de
 la méthode d'authentification entre le navigateur et le serveur web. Il est
 recommandé d'autoriser la négociation.
 
-La ligne 27 désactive l'authentification à la volée par identifiant/mot de
+La ligne 38 désactive l'authentification à la volée par identifiant/mot de
 passe (directive ``KrbMethodK5Password``). Cette directive peut être positionnée
 à « on » pour autoriser les utilisateurs à s'authentifier à la volée auprès du
 serveur web. Si l'utilisateur tente de se connecter à l'application alors qu'il
@@ -365,7 +365,7 @@ recommandé de positionner cette directive à « on » pour permettre aux
 utilisateurs ne disposant pas des outils nécessaires sur leur machine de
 pouvoir s'authentifier malgré tout.
 
-La directive ``KrbSaveCredentials`` à la ligne 28 permet de sauvegarder
+La directive ``KrbSaveCredentials`` à la ligne 39 permet de sauvegarder
 temporairement le ticket Kerberos de l'utilisateur afin de permettre à
 l'application d'interroger d'autres services en utilisant la méthode Kerberos.
 Cette option est nécessaire dans les interfaces graphiques lorsque l'accès à
@@ -373,17 +373,14 @@ Nagios se fait via une authentification Kerberos, afin de propager le ticket
 Kerberos reçu et maintenir la traçabilité des accès. Le fichier contenant le
 ticket Kerberos est supprimé automatiquement à la fin de la requête.
 
-La directive ``KrbVerifyKdc`` à la ligne 29 désactive la vérification de
+La directive ``KrbVerifyKdc`` à la ligne 40 désactive la vérification de
 l'identité du KDC du parc. Pour plus de sécurité, il est recommandé de
 positionner cette directive à la valeur « on ». L'activation de cette option
 nécessite cependant une configuration plus avancée de l'infrastructure
 Kerberos, qui dépasse le cadre de ce document.
 
-La directive ``Require`` (ligne 32) indique que l'utilisateur doit dispose
+La directive ``Require`` (ligne 41) indique que l'utilisateur doit dispose
 d'un compte valide dans la base Kerberos pour pouvoir accéder à l'application.
-
-Enfin, la directin ``Allow`` (ligne 33) indique que n'importe quel machine
-est autorisée à se connecter à l'application, quelle que soit son adresse IP.
 
 Adaptation du fichier who.ini
 -----------------------------
@@ -436,7 +433,7 @@ externe, tout en utilisant l'identité Kerberos obtenue depuis le serveur web :
 
     [plugin:externalid]
     use = vigilo.turbogears.repoze.plugins.externalid:ExternalIdentification
-    cache_name = vigilo
+    rememberer = auth_tkt
 
     [general]
     request_classifier = vigilo.turbogears.repoze.classifier:vigilo_classifier
@@ -462,7 +459,6 @@ externe, tout en utilisant l'identité Kerberos obtenue depuis le serveur web :
     plugins =
         ldapsync
         vigilo.turbogears.repoze.plugins.mduser:plugin
-        vigilo.turbogears.repoze.plugins.mdgroups:plugin
 
 Le module ``ldapsync`` (classe
 ``vigilo.turbogears.repoze.plugins.mdldapsync:VigiloLdapSync``) défini aux
@@ -480,15 +476,16 @@ Les paramètres du module ``ldapsync`` sont les suivants :
     d'un Distinguished Name. Exemple : ``ou=People,dc=ldap,dc=example,dc=com``.
 
 ``filterstr``
-    Chaine de filtrage des résultats obtenus par la recherche.
-    Exemple : ``sAMAccountName=%``.
+    Filtre LDAP à appliquer aux résultats de la recherche.
+
+    Exemple : ``(sAMAccountName=%s)``.
 
     Cette chaîne de caractères peut contenir la variable de substitution « %s »
     qui sera remplacée par l'identifiant Kerberos (principal) de l'utilisateur,
     privé du nom du domaine (par exemple : « vigilo » si le principal Kerberos
-    est « vigilo\@EXAMPLE.COM »).
+    est « vigilo\@EXAMPLE.COM »). La variable du substitution ne peut être
+    utilisée qu'une seule fois.
 
-    La variable du substitution ne peut être utilisée qu'une seule fois.
     Par défaut, le filtre utilisé est ``(objectClass=*)``.
 
 ``ldap_charset``
@@ -505,13 +502,11 @@ Les paramètres du module ``ldapsync`` sont les suivants :
 
     Par défaut, l'encodage utilisé est « utf-8 ».
 
-.. _`cache_name`:
-
 ``cache_name``
     Nom d'une clé qui sera définie dans la session de l'utilisateur afin de
-    stocker son identité [#]_. Cette clé est ensuite utilisée par la classe
-    ``vigilo.turbogears.repoze.plugins.externalid:ExternalIdentification``
-    pour authentifier automatiquement l'utilisateur lors des accès suivants.
+    stocker son identité.
+    Les interfaces de Vigilo ne fonctionneront pas correctement si une valeur
+    autre que ``vigilo`` est utilisée ici.
 
 ``binddn``
     DN (optionnel) à utiliser pour se connecter à l'annuaire LDAP (bind). Si ce
@@ -537,37 +532,48 @@ Les paramètres du module ``ldapsync`` sont les suivants :
     dont l'utilisateur est membre. La valeur par défaut est « memberOf », ce
     qui correspond au nom de cet attribut dans un schéma LDAP classique.
 
+``timeout``
+    Délai d'expiration lors des opérations sur l'annuaire LDAP, en secondes.
+    La valeur par défaut est 0, ce qui désactive le délai d'expiration.
+    Il est recommandé de définir une valeur supérieure à zéro pour éviter
+    tout risque de blocage de Vigilo lorsque l'annuaire LDAP ne répond plus.
+
 
 Le module ``externalid`` (classe
 ``vigilo.turbogears.repoze.plugins.externalid:ExternalIdentification``) défini
-aux lignes 33 à 35 est quant à lui utilisé pour mémoriser le fait que
+aux lignes 34 à 36 est quant à lui utilisé pour mémoriser le fait que
 l'utilisateur s'est authentifié à l'aide d'un mécanisme d'authentification
 externe (ici, Kerberos) afin d'authentifier automatiquement cet utilisateur
 lorsqu'il tente d'accéder à une page dont l'accès est restreint.
 
 Les paramètres du modules ``externalid`` sont les suivants :
 
-``cache_name``
-    Nom d'une clé dans la session contenant l'identité de l'utilisateur.
-    Il doit s'agir de la même valeur que pour l'option `cache_name`_
-    du module ``ldapsync`` (de la classe
-    ``vigilo.turbogears.repoze.plugins.mdldapsync:VigiloLdapSync``).
+``rememberer``
+    Nom d'une instance du module ``repoze.who.plugins.auth_tkt:make_plugin``
+    qui sera chargée de mémoriser l'identité de l'utilisateur.
+    Il s'agit d'un paramètre avancé. La valeur recommandée est ``auth_tkt``.
+
+``strip_realm``
+    Booléen qui indique si le royaume/domaine de l'utilisateur doit être
+    retiré de son identifiant ou non avant l'import dans Vigilo.
+    Si l'utilisateur ``foobar@EXAMPLE.COM`` s'authentifie auprès de Vigilo
+    et que l'option est active, alors l'utilisateur sera importé en tant
+    que ``foobar`` dans Vigilo. Sinon, il sera importé en tant que
+    ``foobar@EXAMPLE.COM`` dans Vigilo.
+    Cette option est activée par défaut.
 
 
-La ligne 46 indique au framework d'authentification d'utiliser le
+La ligne 47 indique au framework d'authentification d'utiliser le
 module d'authentification ``externalid`` défini plus haut, afin
 d'authentifier automatiquement l'utilisateur s'il s'était identifié
 au préalable auprès du serveur via Kerberos.
 
-La ligne 59 permet quant à elle d'utiliser le module ``ldapsync`` afin de
+La ligne 60 permet quant à elle d'utiliser le module ``ldapsync`` afin de
 synchroniser automatiquement la base de données Vigilo avec les informations
 issues de l'annuaire LDAP lorsque l'utilisateur s'authentifie via un
 mécanisme d'authentification externe (ici, Kerberos).
 
 .. [#] http://docs.python.org/library/codecs.html#standard-encodings
-.. [#] Pour le moment, seule la valeur ``vigilo`` est fonctionnelle.
-   Les interfaces de Vigilo supposent qu'il s'agit du nom de cette clé
-   et ne fonctionneront pas correctement si une autre valeur est utilisée ici.
 
 Configuration du navigateur web des exploitants
 -----------------------------------------------
@@ -786,13 +792,6 @@ VigiMap
 .. [#] Pour le moment, l'accès en lecture seule se comporte comme l'accès
    en lecture/écriture.
 .. [#] Cette fonctionnalité n'est pas encore implémentée.
-
-
-Glossaire - Terminologie
-------------------------
-
-Ce chapitre recense les différents termes techniques employés dans ce document
-et donne une brève définition de chacun de ces termes.
 
 
 ..  include:: glossaire.rst
