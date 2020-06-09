@@ -423,7 +423,6 @@ externe, tout en utilisant l'identité Kerberos obtenue depuis le serveur web :
     filterstr= (&(uid=%s)(objectClass=*))
     ldap_charset = cp1252
     http_charset = utf-8
-    cache_name = vigilo
     binddn = mybinduser
     bindpw = mybindpassword
     attr_cn = cn
@@ -444,11 +443,13 @@ externe, tout en utilisant l'identité Kerberos obtenue depuis le serveur web :
         friendlyform;browser
         basicauth;vigilo-api
         auth_tkt
-        externalid;browser
+        externalid
 
     [authenticators]
     plugins =
         vigilo.turbogears.repoze.plugins.sqlauth:plugin
+        auth_tkt
+        externalid
 
     [challengers]
     plugins =
@@ -502,12 +503,6 @@ Les paramètres du module ``ldapsync`` sont les suivants :
 
     Par défaut, l'encodage utilisé est « utf-8 ».
 
-``cache_name``
-    Nom d'une clé qui sera définie dans la session de l'utilisateur afin de
-    stocker son identité.
-    Les interfaces de Vigilo ne fonctionneront pas correctement si une valeur
-    autre que ``vigilo`` est utilisée ici.
-
 ``binddn``
     DN (optionnel) à utiliser pour se connecter à l'annuaire LDAP (bind). Si ce
     paramètre n'est pas renseigné, le jeton Kerberos de l'utilisateur est
@@ -541,7 +536,7 @@ Les paramètres du module ``ldapsync`` sont les suivants :
 
 Le module ``externalid`` (classe
 ``vigilo.turbogears.repoze.plugins.externalid:ExternalIdentification``) défini
-aux lignes 34 à 36 est quant à lui utilisé pour mémoriser le fait que
+aux lignes 33 à 35 est quant à lui utilisé pour mémoriser le fait que
 l'utilisateur s'est authentifié à l'aide d'un mécanisme d'authentification
 externe (ici, Kerberos) afin d'authentifier automatiquement cet utilisateur
 lorsqu'il tente d'accéder à une page dont l'accès est restreint.
@@ -563,12 +558,12 @@ Les paramètres du modules ``externalid`` sont les suivants :
     Cette option est activée par défaut.
 
 
-La ligne 47 indique au framework d'authentification d'utiliser le
+Les lignes 46 et 52 indique au framework d'authentification d'utiliser le
 module d'authentification ``externalid`` défini plus haut, afin
 d'authentifier automatiquement l'utilisateur s'il s'était identifié
-au préalable auprès du serveur via Kerberos.
+au préalable auprès du serveur web via Kerberos.
 
-La ligne 60 permet quant à elle d'utiliser le module ``ldapsync`` afin de
+La ligne 61 permet quant à elle d'utiliser le module ``ldapsync`` afin de
 synchroniser automatiquement la base de données Vigilo avec les informations
 issues de l'annuaire LDAP lorsque l'utilisateur s'authentifie via un
 mécanisme d'authentification externe (ici, Kerberos).
