@@ -356,9 +356,11 @@ class ProxyController(BaseController):
         if not args:
             # Si aucun hôte n'a été spécifié dans l'URL, on génère
             # une page à la volée permettant d'en sélectionner un.
+            opt = 'app_default_url.%s' % self.server_type
+            default_url = config.get(opt, '').lstrip('/')
             decorators.override_template(self._default,
                 'genshi:reverse_proxy_hosts.html')
-            return {"hosts": available_hosts()}
+            return {"hosts": available_hosts(), "default_url": default_url}
 
         # TurboGears supprime l'extension de la requête
         # car il peut effectuer des traitements différents
