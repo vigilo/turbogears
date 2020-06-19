@@ -8,6 +8,7 @@ Nagios/VigiRRD et renvoyer le résultat pour qu'il puisse être
 affiché dans Vigilo.
 """
 
+import re
 import urllib, urllib2, urlparse, logging
 import tg
 from tg import request, expose, config, response, decorators
@@ -266,7 +267,6 @@ def get_through_proxy(server_type, host, url, data=None, headers=None, charset=N
         raise error(unicode(e.msg))
     return res
 
-
 def available_hosts():
     """
     Retourne la liste des noms des hôtes supervisés auxquels l'utilisateur
@@ -283,7 +283,7 @@ def available_hosts():
             (LowLevelService, LowLevelService.idhost == Host.idhost),
             (servicegroup, servicegroup.c.idsupitem == \
                 LowLevelService.idservice),
-        ).order_by(Host.name)
+        )
 
     if not config.is_manager.is_met(request.environ):
         user_groups = [ug[0] for ug in user.supitemgroups() if ug[1]]
@@ -291,7 +291,12 @@ def available_hosts():
             hostgroup.c.idgroup.in_(user_groups),
             servicegroup.c.idgroup.in_(user_groups),
         ))
-    return [ h.name.encode('utf-8') for h in hostnames.all() ]
+
+    patt = re.compile('([0-9]+)')
+    def natural_sort(v):
+        return [int(p) if p.isdigit() else p.lower() for p in patt.split(v)]
+    hosts = [ h.name.encode('utf-8') for h in hostnames.all() ]
+    return sorted(hosts, key=natural_sort)
 
 
 # pylint: disable-msg=R0201,W0232
