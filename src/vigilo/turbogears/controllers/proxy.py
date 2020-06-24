@@ -273,6 +273,9 @@ def available_hosts():
     a accès.
     """
     user = get_current_user()
+    if user is None:
+        raise http_exc.HTTPForbidden()
+
     hostgroup = SUPITEM_GROUP_TABLE.alias()
     servicegroup = SUPITEM_GROUP_TABLE.alias()
     hostnames = DBSession.query(
