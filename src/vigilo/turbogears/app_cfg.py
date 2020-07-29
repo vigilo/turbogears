@@ -30,6 +30,29 @@ codecs.register(backslash_search)
 
 __all__ = ('VigiloAppConfig', )
 
+class ErrorReporter(object):
+    """
+    Trace les exceptions éventuellement levées par l'application
+    dans les journaux de la-dite application.
+    """
+    def __init__(self, application):
+        self.app = application
+        self.logger = getLogger(__name__)
+
+    def __call__(self, environ, start_response):
+        app_iter = None
+        try:
+            app_iter = self.app(environ, start_response)
+            for item in app_iter:
+                yield item
+        except:
+            self.logger.exception("Error:")
+            raise
+        finally:
+            if hasattr(app_iter, 'close'):
+                app_iter.close()
+
+
 class VigiloAppConfig(AppConfig):
     """On modifie AppConfig selon nos besoins."""
 
@@ -168,6 +191,10 @@ class VigiloAppConfig(AppConfig):
         # We use "usergroups" when referering to users to avoid confusion.
         self.sa_auth.translations = Bunch()
         self.sa_auth.translations.groups = 'usergroups'
+
+    def add_error_middleware(self, global_conf, app):
+        app = ErrorReporter(app)
+        return super(VigiloAppConfig, self).add_error_middleware(global_conf, app)
 
     def add_auth_middleware(self, app, skip_authentication):
         """
