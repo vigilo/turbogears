@@ -1,1 +1,0 @@
-turbogears.rhel6.spec

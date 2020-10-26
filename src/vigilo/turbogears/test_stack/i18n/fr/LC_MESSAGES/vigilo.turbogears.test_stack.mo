@@ -1,1 +1,0 @@
-../../../../../../../i18n/fr/LC_MESSAGES/vigilo-turbogears.mo

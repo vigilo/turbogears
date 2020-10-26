@@ -3,16 +3,23 @@
 # Copyright (C) 2006-2020 CS GROUP - France
 # License: GNU GPL v2 <http://www.gnu.org/licenses/gpl-2.0.html>
 
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    from ez_setup import use_setuptools
-    use_setuptools()
-    from setuptools import setup, find_packages
-
 import os, sys
+from setuptools import setup, find_packages
 
-sysconfdir = os.getenv("SYSCONFDIR", "/etc")
+try:
+    from babel.messages.frontend import compile_catalog as orig_compile_catalog
+except ImportError:
+    orig_compile_catalog = None
+
+cmdclass = {}
+try:
+    from vigilo.common.commands import install_data
+except ImportError:
+    pass
+else:
+    cmdclass['install_data'] = install_data
+
+os.environ.setdefault('LOCALSTATEDIR', '/var')
 
 def install_i18n(i18ndir, destdir):
     data_files = []
@@ -29,11 +36,24 @@ def install_i18n(i18ndir, destdir):
                 )
     return data_files
 
+if orig_compile_catalog:
+    class compile_catalog(orig_compile_catalog):
+        def run(self):
+            orig_compile_catalog.run(self)
+            target_dir = os.path.join('src', 'vigilo', 'turbogears',
+                                      'test_stack', 'i18n', 'fr', 'LC_MESSAGES')
+            self.mkpath(target_dir)
+            self.copy_file(
+                os.path.join(self.directory, 'fr', 'LC_MESSAGES', self.domain + '.mo'),
+                os.path.join(target_dir, 'vigilo.turbogears.test_stack.mo'),
+                preserve_mode=False)
+    cmdclass['compile_catalog'] = compile_catalog
+
+
 tests_require = [
     'vigilo-models',    # Force le respect des contraintes de versions
                         # définies par vigilo-models sur SQLAlchemy.
     'WebTest',
-    'BeautifulSoup',
     'lxml',
     'coverage',
     'gearbox',
@@ -91,12 +111,10 @@ setup(
             'main = vigilo.turbogears.test_stack.config:make_app',
         ],
     },
+    cmdclass=cmdclass,
     package_dir={'': 'src'},
     data_files= \
         install_i18n("i18n", os.path.join(sys.prefix, 'share', 'locale')) + [
-        (
-            os.path.join(sysconfdir, 'cron.daily'),
-            [os.path.join('pkg', 'vigilo-clean-turbogears-sessions.sh')]
-        ),
+        (os.path.join('@LOCALSTATEDIR@', 'cache', 'vigilo', 'sessions'), []),
     ],
 )

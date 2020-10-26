@@ -12,15 +12,11 @@ Pour les détails du fonctionnement de la bibliothèque TurboGears, se reporter
 
 Dépendances
 -----------
-Vigilo nécessite une version de Python supérieure ou égale à 2.5. Le chemin de
-l'exécutable python peut être passé en paramètre du ``make install`` de la
-façon suivante::
-
-    make install PYTHON=/usr/bin/python2.6
+Vigilo nécessite une version de Python supérieure ou égale à 2.7.
 
 La bibliothèque Vigilo-TurboGears a besoin des modules Python suivants :
 
-- setuptools (ou distribute)
+- setuptools
 - vigilo-models
 - vigilo-themes-default
 - TurboGears >= 2.3.1
@@ -34,14 +30,11 @@ La bibliothèque Vigilo-TurboGears a besoin des modules Python suivants :
 - decorator (pas la version 3.1.0)
 - FormEncode >= 1.3.0
 
-Des patches sont nécessaires pour les modules TurboGears et Pylons , ils se
-trouvent dans le dossier "patches".
-
 
 Installation
 ------------
-L'installation se fait par la commande ``make install`` (à exécuter en
-``root``).
+L'installation se fait par la commande ``python setup.py install``
+(depuis le compte ``root``).
 
 
 License
