@@ -6,20 +6,13 @@
 import os, sys
 from setuptools import setup, find_packages
 
+cmdclass = {}
 try:
     from babel.messages.frontend import compile_catalog as orig_compile_catalog
 except ImportError:
     orig_compile_catalog = None
 
-cmdclass = {}
-try:
-    from vigilo.common.commands import install_data
-except ImportError:
-    pass
-else:
-    cmdclass['install_data'] = install_data
-
-os.environ.setdefault('LOCALSTATEDIR', '/var')
+setup_requires = ['vigilo-common'] if not os.environ.get('CI') else []
 
 def install_i18n(i18ndir, destdir):
     data_files = []
@@ -69,6 +62,7 @@ setup(
     description="Vigilo TurboGears extension library",
     long_description="This library provides the Vigilo extensions "
                      "to TurboGears 2",
+    setup_requires=setup_requires,
     install_requires=[
         "setuptools",
         "repoze.tm2 >= 1.0a4",
@@ -113,8 +107,14 @@ setup(
     },
     cmdclass=cmdclass,
     package_dir={'': 'src'},
-    data_files= \
+    vigilo_build_vars={
+        'localstatedir': {
+            'default': '/var',
+            'description': "local state directory",
+        },
+    },
+    data_files=
         install_i18n("i18n", os.path.join(sys.prefix, 'share', 'locale')) + [
-        (os.path.join('@LOCALSTATEDIR@', 'cache', 'vigilo', 'sessions'), []),
+        (os.path.join('@localstatedir@', 'cache', 'vigilo', 'sessions'), []),
     ],
 )
