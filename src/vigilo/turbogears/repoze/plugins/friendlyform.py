@@ -7,170 +7,100 @@ Module d'authentification par formulaire HTML gérant correctement
 l'encodage des caractères.
 """
 
-from zope.interface import implements
 from repoze.who.interfaces import IChallenger, IIdentifier
-from repoze.who.plugins.friendlyform import FriendlyFormPlugin as FFP
-from paste.httpexceptions import HTTPFound, HTTPException
-from paste.response import remove_header, replace_header
-from paste.httpheaders import CACHE_CONTROL
+from string import Template
+from tg.configuration.auth.fastform import FastFormPlugin as FFP
+from tg.controllers.util import _build_url
+from webob.exc import HTTPFound, WSGIHTTPException
+from zope.interface import implementer
 
-class HTTPFoundGrabFragment(HTTPException):
+
+class HTTPGrabFragment(WSGIHTTPException):
     """
     Une exception qui redirige l'utilisateur vers une autre page
-    (à la manière de HTTPFound), mais mais qui permet de récupérer
+    (à la manière de HTTPFound), mais qui permet de récupérer
     le fragment saisi par l'utilisateur dans la requête originale
     avant d'effectuer la redirection.
     """
     code = 200
     title = 'Redirecting to the login page...'
+
     # Si JavaScript est activé, un script récupère le fragment
     # et redirige l'utilisateur vers le formulaire d'authentification
     # en propageant cette information.
+    #
     # NB: on ne peut pas utiliser window.location.hash à cause
     # d'un bug dans Firefox (la valeur du hash est URI-décodée
     # lors d'une lecture de l'attribut; elle ne devrait pas).
     #
-    # Si JavaScript est désactivé, lien permet à l'utilisateur d'accéder
+    # Si JavaScript est désactivé, un lien permet à l'utilisateur d'accéder
     # manuellement au formulaire. Dans ce cas, le fragment sera perdu.
-    template = '''\
+    body_template_obj = Template('''\
         <script type="text/javascript">
             var hash = window.location.href.split("#")[1] || "";
             if (hash != '') hash = '#' + hash;
-            var loc = '%(detail)s' + encodeURIComponent(hash) + hash;
+            var loc = '${detail}' + encodeURIComponent(hash) + hash;
             window.location = loc;
         </script>
 
-        <a href="%(detail)s">Click here</a> if you're not redirected
+        <a href="${detail}">Click here</a> if you're not redirected
             within 5 seconds.
-    '''
+    ''')
 
     def __init__(self, location, headers=None):
-        if headers is None:
-            headers = []
-        elif not isinstance(headers, list):
-            # Les en-têtes ont été créés à l'aide de WebOb.
-            # On supprime la taille du corps de la page car elle valait
-            # zéro (il s'agissait d'une redirection), mais ce n'est plus
-            # le cas à présent (et Paste vérifie cette valeur).
-            headers.pop('Content-Length', None)
-            # Conversion du format de WebOb vers le format de Paste.
-            headers = headers.items()
-        # Supprime la redirection.
-        remove_header(headers, 'location')
+        super(HTTPGrabFragment, self).__init__(location, headers)
+
         # Empêche la mise en cache de la page intermédiaire.
-        CACHE_CONTROL.apply(headers, no_cache=True, no_store=True)
-        super(HTTPFoundGrabFragment, self).__init__(location, headers)
+        self.cache_expires = True
 
 
+@implementer(IChallenger, IIdentifier)
 class FriendlyFormPlugin(FFP):
     """
-    Une classe dérivée de L{repoze.who.plugins.friendlyform:FriendlyFormPlugin}
-    mais qui ajoute en plus le support d'un encodage pour les valeurs du
-    formulaire.
+    Classe dérivée de L{tg.configuration.auth.fastform:FastFormPlugin} qui
+    ajoute en plus:
 
-    Cet encodage est utilisé pour décoder le contenu du formulaire
-    d'authentification. Les valeurs qui composent "l'identité" de l'utilisateur
-    dans l'environnement de la requête WSGI sont systématiquement de l'Unicode
-    (via le type natif de Python) si un encodage a été fourni en paramètre
-    à l'initialiseur de cette classe.
+    * Un message de logging lorsque l'utilisateur se déconnecte.
+    * Un mécanisme permettant de propager le fragment de la requête d'origine
+      après l'authentification.
     """
 
-    implements(IChallenger, IIdentifier)
-
-    def __init__(self, login_form_url, login_handler_path, post_login_url,
-                 logout_handler_path, post_logout_url, rememberer_name,
-                 login_counter_name=None, charset=None):
-        """
-        :param login_form_url: The URL/path where the login form is located.
-        :type login_form_url: str
-        :param login_handler_path: The URL/path where the login form is
-            submitted to (where it is processed by this plugin).
-        :type login_handler_path: str
-        :param post_login_url: The URL/path where the user should be redirected
-            to after login (even if wrong credentials were provided).
-        :type post_login_url: str
-        :param logout_handler_path: The URL/path where the user is logged out.
-        :type logout_handler_path: str
-        :param post_logout_url: The URL/path where the user should be
-            redirected to after logout.
-        :type post_logout_url: str
-        :param rememberer_name: The name of the repoze.who identifier which
-            acts as rememberer.
-        :type rememberer_name: str
-        :param login_counter_name: The name of the query string variable which
-            will represent the login counter.
-        :type login_counter_name: str
-        :param charset: Name of the charset the form values are encoded with.
-        :type charset: str
-
-        The login counter variable's name will be set to ``__logins`` if
-        ``login_counter_name`` equals None.
-        """
-        super(FriendlyFormPlugin, self).__init__(
-            login_form_url=login_form_url,
-            login_handler_path=login_handler_path,
-            post_login_url=post_login_url,
-            logout_handler_path=logout_handler_path,
-            post_logout_url=post_logout_url,
-            rememberer_name=rememberer_name,
-            login_counter_name=login_counter_name
-        )
-        self.charset = charset
-
-    # IIdentifier
-    def identify(self, environ):
-        """
-        Ajoute le support de l'encodage des valeurs du formulaire en plus
-        des fonctionnalités déjà fournies dans la classe mère.
-        """
-        res = super(FriendlyFormPlugin, self).identify(environ)
-
-        # Si la classe mère a réussi à identifier l'utilisateur,
-        # on doit décoder les valeurs avec l'encodage fourni.
-        if isinstance(res, dict) and isinstance(self.charset, basestring):
-            for key in res.keys():
-                if not isinstance(res[key], unicode):
-                    res[key] = res[key].decode(self.charset)
-
-        return res
+    def _fix_prefix(self, environ, url):
+        script_name = environ['SCRIPT_NAME'].rstrip('/')
+        if url.startswith(script_name):
+            url = url[len(script_name):]
+        return url
 
     # IChallenger
     def challenge(self, environ, status, app_headers, forget_headers):
-        if environ['PATH_INFO'] == self.logout_handler_path:
+        path_info = environ['PATH_INFO']
+
+        # Configuring the headers to be set:
+        cookies = [(h,v) for (h,v) in app_headers if h.lower() == 'set-cookie']
+        headers = forget_headers + cookies
+
+        if path_info == self.logout_handler_path:
             logger = environ.get('repoze.who.logger')
             logger and logger.info(
-                'User "%(user_login)s" logged out (from %(user_ip)s)', {
-                'user_login': \
-                    environ['repoze.who.identity']['repoze.who.userid'],
-                # vigilo.common.logging ne pourra pas déterminer l'identité de
-                # l'utilisateur car il aura déjà été déconnecté (et oublié).
-                # On fournit "user_fullname" explicitement pour écraser
-                # la valeur "???" auto-déterminée.
-                'user_fullname': \
-                    environ['repoze.who.identity']['fullname'],
-                'user_ip': environ.get('REMOTE_ADDR') or '0.0.0.0',
+                'User "%(login)s" (%(fullname)s) logged out (from %(ip)s)', {
+                'login': environ['repoze.who.identity']['repoze.who.userid'],
+                'fullname': environ['repoze.who.identity']['fullname'],
+                'ip': environ.get('REMOTE_ADDR') or '0.0.0.0',
             })
 
-        res = super(FriendlyFormPlugin, self).challenge(
-            environ, status, app_headers, forget_headers)
+            params = {}
+            if 'came_from' in environ:
+                # @HACK The plugin uses _build_url() in identify() to set environ['came_from'],
+                #       which adds the installation prefix automatically, but the application
+                #       calls redirect() which already adds it. Remove the duplicate here.
+                params.update({'came_from': self._fix_prefix(environ, environ['came_from'])})
+            destination = _build_url(environ, self.post_logout_url, params=params)
+            return HTTPFound(location=destination, headers=headers)
 
-        # Si le challenger s'apprête à nous rediriger vers le formulaire
-        # d'authentification, on affiche une page web à la place qui va
-        # récupérer l'éventuel fragment de l'URL et le propager.
-        if isinstance(res, HTTPFound):
-            # L'API de Paste a changé entre les versions.
-            if isinstance(res.location, basestring):
-                location = res.location # 1.7.4+
-            else:
-                location = res.location() # 1.7.2
+        came_from = _build_url(environ, path_info)
+        # @HACK _build_url() adds the installation prefix to the URL automatically,
+        #       but it is already present in this case. Remove the duplicate here.
+        params = {'came_from': self._fix_prefix(environ, came_from)}
 
-            # Si on s'apprête à rediriger l'utilisateur vers le formulaire
-            # d'authentification, on retourne une page intermédiaire à la
-            # place qui permet de sauvegarder le fragment de l'URL courante
-            # avant de rediriger l'utilisateur vers le formulaire.
-            # Le fragment sera ensuite propagé vers la page "post_login_url".
-            login_form_url = self._get_full_path(self.login_form_url, environ)
-            if location.partition('?')[0] == login_form_url and \
-                'repoze.who.logins' not in environ:
-                return HTTPFoundGrabFragment(location, res.headers)
-        return res
+        destination = _build_url(environ, self.login_form_url, params=params)
+        return HTTPGrabFragment(location=destination, headers=headers)
