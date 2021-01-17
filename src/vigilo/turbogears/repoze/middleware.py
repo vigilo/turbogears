@@ -9,7 +9,7 @@ from paste.response import remove_header
 from paste.deploy.converters import asbool
 from repoze.who.config import WhoConfig, _LEVELS
 from repoze.who.middleware import PluggableAuthenticationMiddleware
-from vigilo.turbogears.repoze.plugins.testutil import AuthenticationForgerPlugin
+from tg.configuration.auth.setup import _AuthenticationForgerPlugin
 
 
 class VigiloAuthMiddleware(PluggableAuthenticationMiddleware):
@@ -65,7 +65,7 @@ class VigiloAuthMiddleware(PluggableAuthenticationMiddleware):
         return super(VigiloAuthMiddleware, self).__call__(environ, start_response)
 
 
-class VigiloAuthForgerPlugin(AuthenticationForgerPlugin):
+class VigiloAuthForgerPlugin(_AuthenticationForgerPlugin):
     def challenge(self, environ, status, app_headers, forget_headers):
         """
         Retourne systématiquement une page d'erreur 401.
