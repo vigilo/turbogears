@@ -8,11 +8,15 @@ Nagios/VigiRRD et renvoyer le résultat pour qu'il puisse être
 affiché dans Vigilo.
 """
 
+import logging
 import re
-import urllib, urllib2, urlparse, logging
 import tg
-from tg import request, expose, config, response, decorators
 import tg.exceptions as http_exc
+import urllib
+import urllib2
+import urlparse
+
+from tg import request, expose, config, response, decorators
 from tg.i18n import ugettext as _
 from sqlalchemy import or_, and_
 from paste.deploy.converters import asbool
@@ -26,7 +30,7 @@ from vigilo.turbogears.helpers import get_current_user
 from vigilo.turbogears.controllers import BaseController
 
 try:
-    from urllib2_kerberos import HTTPKerberosAuthHandler
+    from urllib_kerberos import HTTPKerberosAuthHandler
 except:
     # Le proxy doit continuer à fonctionner,
     # même lorsque le support pour Kerberos
