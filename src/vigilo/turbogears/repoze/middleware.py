@@ -5,7 +5,6 @@
 """
 """
 import sys, logging
-from paste.response import remove_header
 from paste.deploy.converters import asbool
 from repoze.who.config import WhoConfig, _LEVELS
 from repoze.who.middleware import PluggableAuthenticationMiddleware
@@ -70,12 +69,10 @@ class VigiloAuthForgerPlugin(_AuthenticationForgerPlugin):
         """
         Retourne systématiquement une page d'erreur 401.
 
-        Retire également un éventuel en-tête "Content-Lenght" erroné
-        (correctif tiré de la révision r8220 de repoze.who.testutil,
-        disponible sur http://svn.repoze.org/whoplugins/whotestutil/).
+        Retire également un éventuel en-tête "Content-Lenght" erroné.
         """
-        remove_header(app_headers, 'content-length')
-        remove_header(forget_headers, 'content-length')
+        app_headers = filter(lambda h: h[0].lower() != 'content-length', app_headers)
+        forget_headers = filter(lambda h: h[0].lower() != 'content-length', forget_headers)
         return super(VigiloAuthForgerPlugin, self).challenge(
                     environ, status, app_headers, forget_headers)
 
