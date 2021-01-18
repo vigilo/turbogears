@@ -79,7 +79,6 @@ setup(
         "vigilo-models",
         "vigilo-themes-default",
         "python-ldap",
-        "WebHelpers >= 1.0b4",
         "WebOb >= 1.0",
         "tgext.crud >= 0.8.2",
         "zope.interface >= 4.0.0",
