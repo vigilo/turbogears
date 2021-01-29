@@ -1,6 +1,5 @@
 include COPYING.txt
 include README.txt
-include LICENSE.testutil.txt
 
 recursive-include i18n *.pot *.po
 
