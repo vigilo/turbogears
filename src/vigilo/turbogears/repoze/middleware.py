@@ -69,7 +69,7 @@ class VigiloAuthForgerPlugin(_AuthenticationForgerPlugin):
         """
         Retourne systématiquement une page d'erreur 401.
 
-        Retire également un éventuel en-tête "Content-Lenght" erroné.
+        Retire également un éventuel en-tête "Content-Length" erroné.
         """
         app_headers = filter(lambda h: h[0].lower() != 'content-length', app_headers)
         forget_headers = filter(lambda h: h[0].lower() != 'content-length', forget_headers)
@@ -119,17 +119,17 @@ class VigiloAuthForgerMiddleware(VigiloAuthMiddleware):
         The metadata providers won't be modified.
 
         """
-        self.actual_remote_user_key = remote_user_key
         forger = self.plugin_factory(fake_user_key=remote_user_key)
         forger = ('auth_forger', forger)
         identifiers.insert(0, forger)
         authenticators = [forger]
         challengers = [forger]
-        init = super(VigiloAuthForgerMiddleware, self).__init__
         # On laisse remote_user_key prendre sa valeur par défaut (REMOTE_USER)
         # pour éviter une interférence entre repoze.who.testutil et nos
         # propres modifications (cf. VigiloAuthMiddleware).
         #remote_user_key = 'repoze.who.testutil.userid'
+
+        init = super(VigiloAuthForgerMiddleware, self).__init__
         init(app, identifiers, authenticators, challengers, mdproviders,
              request_classifier, challenge_decider, log_stream, log_level,
              remote_user_key, classifier)
@@ -186,7 +186,9 @@ def make_middleware_with_config(app, global_conf, config_file, log_stream=None,
 
     # We must replace the middleware:
     parser = WhoConfig(global_conf['here'])
-    parser.parse(open(config_file))
+    with open(config_file) as who_ini:
+        parser.parse(who_ini)
+
     return VigiloAuthForgerMiddleware(
         app,
         parser.identifiers,
@@ -195,5 +197,6 @@ def make_middleware_with_config(app, global_conf, config_file, log_stream=None,
         parser.mdproviders,
         parser.request_classifier,
         parser.challenge_decider,
+        log_stream=sys.stdout,
         remote_user_key=parser.remote_user_key,
         )
