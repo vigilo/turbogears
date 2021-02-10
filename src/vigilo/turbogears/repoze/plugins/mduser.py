@@ -29,6 +29,8 @@ class plugin(SQLAlchemyUserMDPlugin):
                 groups.add(group.group_name)
                 for perm in group.permissions:
                     permissions.add(perm.permission_name)
+        else:
+            identity['fullname'] = None
 
         identity['groups'] = groups
         identity['permissions'] = permissions
