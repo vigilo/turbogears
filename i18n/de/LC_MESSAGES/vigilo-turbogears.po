@@ -252,3 +252,20 @@ msgstr ""
 msgid "Graph groups"
 msgstr ""
 
+#. TRANSLATORS: Format de date et heure Python/JavaScript.
+#. TRANSLATORS:
+#. http://www.dynarch.com/static/jscalendar-1.0/doc/html/reference.html#node_sec_5.3.5
+#. TRANSLATORS: http://docs.python.org/release/2.5/lib/module-time.html
+#: vigiboard/lib/dateformat.py:37
+#, python-format
+msgid "%Y-%m-%d %I:%M:%S %p"
+msgstr "%d.%m.%Y %H:%M:%S"
+
+#. TRANSLATORS: Format de date Python/JavaScript.
+#. TRANSLATORS:
+#. http://www.dynarch.com/static/jscalendar-1.0/doc/html/reference.html#node_sec_5.3.5
+#. TRANSLATORS: http://docs.python.org/release/2.5/lib/module-time.html
+#: vigiboard/lib/dateformat.py:66
+#, python-format
+msgid "%Y-%m-%d"
+msgstr "%d.%m.%Y"
