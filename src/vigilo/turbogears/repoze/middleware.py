@@ -5,10 +5,10 @@
 """
 """
 import sys, logging
-from paste.deploy.converters import asbool
 from repoze.who.config import WhoConfig, _LEVELS
 from repoze.who.middleware import PluggableAuthenticationMiddleware
 from tg.configuration.auth.setup import _AuthenticationForgerPlugin
+from tg.support.converters import asbool
 
 
 class VigiloAuthMiddleware(PluggableAuthenticationMiddleware):

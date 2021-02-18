@@ -4,9 +4,9 @@
 
 __all__ = ['make_app']
 
-def make_app(global_conf, full_stack=True, **app_conf):
+
+def make_app(global_conf, **app_conf):
     from .app_cfg import base_config
 
-    load_environment = base_config.make_load_environment()
-    make_base_app = base_config.setup_tg_wsgi_app(load_environment)
-    return make_base_app(global_conf, full_stack=True, **app_conf)
+    # Initialisation de l'application et de son environnement d'exécution.
+    return base_config.make_wsgi_app(global_conf, app_conf, wrap_app=None)

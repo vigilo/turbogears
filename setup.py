@@ -68,8 +68,8 @@ setup(
         "repoze.tm2 >= 1.0a4",
         "repoze.who.plugins.sa",
         "repoze.who >= 2.0",
-        "TurboGears2 >= 2.3.1",
-        "TurboGears2 < 2.4dev",
+        "TurboGears2 >= 2.4.3",
+        "TurboGears2 < 2.5dev",
         "PasteDeploy",
         "Paste",
         "decorator != 3.1.0", # Blacklist bad version
@@ -83,6 +83,7 @@ setup(
         "backlash",
         "tw2.core",
         "tw2.forms",
+        "beaker",
     ],
     namespace_packages = [
         'vigilo',

@@ -19,7 +19,7 @@ import urlparse
 from tg import request, expose, config, response, decorators
 from tg.i18n import ugettext as _
 from sqlalchemy import or_, and_
-from paste.deploy.converters import asbool
+from tg.support.converters import asbool
 
 from vigilo.models.session import DBSession
 from vigilo.models.tables import VigiloServer, Host, Ventilation, Application

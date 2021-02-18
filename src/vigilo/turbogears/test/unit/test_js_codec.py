@@ -6,12 +6,16 @@
 Teste l'échappement de chaînes de caractères en vue
 de leur utilisation dans du code JavaScript.
 """
+import codecs
 import unittest
 
-import vigilo.turbogears.js_codec
+from vigilo.turbogears.js_codec import backslash_search
 
-class JsCodecEncodeTest(unittest.TestCase):
+class JsCodecTest(unittest.TestCase):
     """Teste l'échappement de textes pour JavaScript."""
+
+    def setUp(self):
+        codecs.register(backslash_search)
 
     def test_encode_single_quotes(self):
         """Échappement des apostrophes."""
@@ -28,9 +32,6 @@ class JsCodecEncodeTest(unittest.TestCase):
         res = "\\o/".encode('backslash')
         self.assertEqual("\\\\o/", res)
 
-class JsCodecDecodeTest(unittest.TestCase):
-    """Teste la suppression de l'échappement pour JavaScript."""
-
     def test_decode_single_quotes(self):
         """Suppression de l'échappement sur les apostrophes."""
         res = "I\\'m, you\\'re, and so on.".decode('backslash')
@@ -45,4 +46,3 @@ class JsCodecDecodeTest(unittest.TestCase):
         """Suppression de l'échappement sur les backslashes."""
         res = "\\\\o/".decode('backslash')
         self.assertEqual("\\o/", res)
-

@@ -12,9 +12,8 @@ from paste.deploy import loadapp as deploy_loader
 from ConfigParser import SafeConfigParser
 from logging.config import fileConfig
 from tg import config
-from vigilo.turbogears.app_cfg import VigiloAppConfig
 
-__all__ = ['populate_db', 'VigiloAppConfig', 'loadapp']
+__all__ = ['populate_db', 'loadapp']
 
 def populate_db():
     """
